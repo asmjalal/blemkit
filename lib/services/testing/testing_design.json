@@ -1,0 +1,407 @@
+{
+  "id": "root",
+  "type": "Scaffold",
+  "properties": {
+    "backgroundColor": "0xFFFFFFFF",
+    "appBar": {
+      "type": "AppBar",
+      "properties": {
+        "title": "Interactive Widgets Demo",
+        "backgroundColor": "0xFF2196F3",
+        "actions": [
+          {
+            "type": "IconButton",
+            "properties": {
+              "icon": "Icons.search",
+              "onPressed": "() {}"
+            }
+          },
+          {
+            "type": "IconButton",
+            "properties": {
+              "icon": "Icons.more_vert",
+              "onPressed": "() {}"
+            }
+          }
+        ]
+      }
+    },
+    "floatingActionButton": {
+      "type": "FloatingActionButton",
+      "properties": {
+        "backgroundColor": "0xFF2196F3",
+        "onPressed": "() {}",
+        "child": {
+          "type": "Icon",
+          "properties": {
+            "icon": "Icons.add",
+            "color": "0xFFFFFFFF"
+          }
+        }
+      }
+    },
+    "drawer": {
+      "type": "Drawer",
+      "properties": {
+        "backgroundColor": "0xFFFFFFFF"
+      },
+      "children": [
+        {
+          "type": "ListView",
+          "properties": {
+            "padding": "EdgeInsets.zero"
+          },
+          "children": [
+            {
+              "type": "DrawerHeader",
+              "properties": {
+                "decoration": {
+                  "color": "0xFF2196F3"
+                },
+                "child": {
+                  "type": "Column",
+                  "properties": {
+                    "mainAxisAlignment": "MainAxisAlignment.center",
+                    "crossAxisAlignment": "CrossAxisAlignment.start"
+                  },
+                  "children": [
+                    {
+                      "type": "CircleAvatar",
+                      "properties": {
+                        "radius": 30.0,
+                        "backgroundColor": "0xFFFFFFFF",
+                        "child": {
+                          "type": "Icon",
+                          "properties": {
+                            "icon": "Icons.person",
+                            "color": "0xFF2196F3",
+                            "size": 30.0
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "Text",
+                      "properties": {
+                        "text": "User Name",
+                        "style": {
+                          "color": "0xFFFFFFFF",
+                          "fontSize": 20.0
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "ListTile",
+              "properties": {
+                "leading": {
+                  "type": "Icon",
+                  "properties": {
+                    "icon": "Icons.home",
+                    "color": "0xFF2196F3"
+                  }
+                },
+                "title": "Home"
+              }
+            },
+            {
+              "type": "ListTile",
+              "properties": {
+                "leading": {
+                  "type": "Icon",
+                  "properties": {
+                    "icon": "Icons.settings",
+                    "color": "0xFF2196F3"
+                  }
+                },
+                "title": "Settings"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "children": [
+    {
+      "type": "SingleChildScrollView",
+      "properties": {
+        "padding": "EdgeInsets.all(16.0)"
+      },
+      "children": [
+        {
+          "type": "Column",
+          "properties": {
+            "crossAxisAlignment": "CrossAxisAlignment.stretch",
+            "children": [
+              {
+                "type": "Card",
+                "properties": {
+                  "elevation": 4.0,
+                  "margin": "EdgeInsets.only(bottom: 16.0)"
+                },
+                "children": [
+                  {
+                    "type": "ListTile",
+                    "properties": {
+                      "title": "Form Controls",
+                      "subtitle": "Interactive form elements"
+                    }
+                  },
+                  {
+                    "type": "Padding",
+                    "properties": {
+                      "padding": "EdgeInsets.all(16.0)"
+                    },
+                    "children": [
+                      {
+                        "type": "Column",
+                        "properties": {
+                          "crossAxisAlignment": "CrossAxisAlignment.stretch",
+                          "children": [
+                            {
+                              "type": "TextField",
+                              "properties": {
+                                "decoration": {
+                                  "labelText": "Text Input",
+                                  "border": "OutlineInputBorder()"
+                                }
+                              }
+                            },
+                            {
+                              "type": "SizedBox",
+                              "properties": {
+                                "height": 16.0
+                              }
+                            },
+                            {
+                              "type": "Row",
+                              "properties": {
+                                "children": [
+                                  {
+                                    "type": "Checkbox",
+                                    "properties": {
+                                      "value": false
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "Checkbox"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "SizedBox",
+                              "height": 16.0
+                            },
+                            {
+                              "type": "Row",
+                              "properties": {
+                                "children": [
+                                  {
+                                    "type": "Radio",
+                                    "properties": {
+                                      "value": 1,
+                                      "groupValue": 1
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "Radio Button"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "SizedBox",
+                              "height": 16.0
+                            },
+                            {
+                              "type": "Slider",
+                              "properties": {
+                                "value": 0.5,
+                                "min": 0.0,
+                                "max": 1.0
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Card",
+                "properties": {
+                  "elevation": 4.0,
+                  "margin": "EdgeInsets.only(bottom: 16.0)"
+                },
+                "children": [
+                  {
+                    "type": "ListTile",
+                    "properties": {
+                      "title": "Buttons",
+                      "subtitle": "Different button styles"
+                    }
+                  },
+                  {
+                    "type": "Padding",
+                    "properties": {
+                      "padding": "EdgeInsets.all(16.0)"
+                    },
+                    "children": [
+                      {
+                        "type": "Column",
+                        "properties": {
+                          "crossAxisAlignment": "CrossAxisAlignment.stretch",
+                          "children": [
+                            {
+                              "type": "ElevatedButton",
+                              "properties": {
+                                "onPressed": "() {}",
+                                "child": {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "Elevated Button"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "type": "SizedBox",
+                              "height": 8.0
+                            },
+                            {
+                              "type": "TextButton",
+                              "properties": {
+                                "onPressed": "() {}",
+                                "child": {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "Text Button"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "type": "SizedBox",
+                              "height": 8.0
+                            },
+                            {
+                              "type": "OutlinedButton",
+                              "properties": {
+                                "onPressed": "() {}",
+                                "child": {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "Outlined Button"
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Card",
+                "properties": {
+                  "elevation": 4.0
+                },
+                "children": [
+                  {
+                    "type": "ListTile",
+                    "properties": {
+                      "title": "Chips and Badges",
+                      "subtitle": "Material design chips"
+                    }
+                  },
+                  {
+                    "type": "Padding",
+                    "properties": {
+                      "padding": "EdgeInsets.all(16.0)"
+                    },
+                    "children": [
+                      {
+                        "type": "Wrap",
+                        "properties": {
+                          "spacing": 8.0,
+                          "runSpacing": 8.0,
+                          "children": [
+                            {
+                              "type": "Chip",
+                              "properties": {
+                                "label": {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "Basic Chip"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "type": "Chip",
+                              "properties": {
+                                "label": {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "Deletable"
+                                  }
+                                },
+                                "deleteIcon": {
+                                  "type": "Icon",
+                                  "properties": {
+                                    "icon": "Icons.close",
+                                    "size": 18.0
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "type": "Chip",
+                              "properties": {
+                                "avatar": {
+                                  "type": "CircleAvatar",
+                                  "properties": {
+                                    "child": {
+                                      "type": "Text",
+                                      "properties": {
+                                        "text": "A"
+                                      }
+                                    }
+                                  }
+                                },
+                                "label": {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "Avatar Chip"
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

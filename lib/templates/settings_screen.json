@@ -1,0 +1,186 @@
+{
+  "type": "Scaffold",
+  "properties": {
+    "backgroundColor": 4293848570,
+    "appBar": {
+      "type": "AppBar",
+      "properties": {
+        "title": "Settings",
+        "backgroundColor": 4294967295,
+        "elevation": 0,
+        "centerTitle": false
+      },
+      "children": []
+    }
+  },
+  "children": [
+    {
+      "type": "SingleChildScrollView",
+      "properties": {},
+      "children": [
+        {
+          "type": "Column",
+          "properties": {
+            "crossAxisAlignment": "CrossAxisAlignment.start"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "properties": {
+                "margin": { "left": 16.0, "right": 16.0, "top": 16.0, "bottom": 8.0 },
+                "padding": { "left": 16.0, "right": 16.0, "top": 20.0, "bottom": 20.0 },
+                "decoration": { "color": 4294967295, "borderRadius": 16.0 }
+              },
+              "children": [
+                {
+                  "type": "Row",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 64.0, "height": 64.0,
+                        "decoration": { "color": 4292533247, "borderRadius": 32.0 }
+                      },
+                      "children": [
+                        {
+                          "type": "Center", "properties": {},
+                          "children": [
+                            { "type": "Icon", "properties": { "icon": "Icons.person", "size": 32.0, "color": 4285887743 }, "children": [] }
+                          ]
+                        }
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "width": 16.0 }, "children": [] },
+                    {
+                      "type": "Column",
+                      "properties": { "crossAxisAlignment": "CrossAxisAlignment.start" },
+                      "children": [
+                        { "type": "Text", "properties": { "text": "John Doe", "fontSize": 18.0, "fontWeight": "FontWeight.bold", "color": 4281545544 }, "children": [] },
+                        { "type": "Text", "properties": { "text": "john@example.com", "fontSize": 14.0, "color": 4288256409 }, "children": [] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": { "padding": { "left": 16.0, "top": 16.0, "bottom": 8.0 } },
+              "children": [
+                { "type": "Text", "properties": { "text": "GENERAL", "fontSize": 12.0, "fontWeight": "FontWeight.w600", "color": 4288256409 }, "children": [] }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "margin": { "left": 16.0, "right": 16.0, "bottom": 4.0 },
+                "decoration": { "color": 4294967295, "borderRadius": 16.0 }
+              },
+              "children": [
+                {
+                  "type": "Column",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "ListTile",
+                      "properties": {
+                        "title": "Notifications",
+                        "leading": { "type": "Icon", "properties": { "icon": "Icons.notifications_outlined", "color": 4285887743 }, "children": [] },
+                        "trailing": { "type": "Icon", "properties": { "icon": "Icons.chevron_right", "color": 4288256409 }, "children": [] }
+                      },
+                      "children": []
+                    },
+                    {
+                      "type": "ListTile",
+                      "properties": {
+                        "title": "Appearance",
+                        "leading": { "type": "Icon", "properties": { "icon": "Icons.palette_outlined", "color": 4285887743 }, "children": [] },
+                        "trailing": { "type": "Icon", "properties": { "icon": "Icons.chevron_right", "color": 4288256409 }, "children": [] }
+                      },
+                      "children": []
+                    },
+                    {
+                      "type": "ListTile",
+                      "properties": {
+                        "title": "Language",
+                        "leading": { "type": "Icon", "properties": { "icon": "Icons.language", "color": 4285887743 }, "children": [] },
+                        "trailing": { "type": "Icon", "properties": { "icon": "Icons.chevron_right", "color": 4288256409 }, "children": [] }
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": { "padding": { "left": 16.0, "top": 16.0, "bottom": 8.0 } },
+              "children": [
+                { "type": "Text", "properties": { "text": "ACCOUNT", "fontSize": 12.0, "fontWeight": "FontWeight.w600", "color": 4288256409 }, "children": [] }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "margin": { "left": 16.0, "right": 16.0, "bottom": 4.0 },
+                "decoration": { "color": 4294967295, "borderRadius": 16.0 }
+              },
+              "children": [
+                {
+                  "type": "Column",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "ListTile",
+                      "properties": {
+                        "title": "Edit Profile",
+                        "leading": { "type": "Icon", "properties": { "icon": "Icons.edit_outlined", "color": 4285887743 }, "children": [] },
+                        "trailing": { "type": "Icon", "properties": { "icon": "Icons.chevron_right", "color": 4288256409 }, "children": [] }
+                      },
+                      "children": []
+                    },
+                    {
+                      "type": "ListTile",
+                      "properties": {
+                        "title": "Privacy",
+                        "leading": { "type": "Icon", "properties": { "icon": "Icons.privacy_tip_outlined", "color": 4285887743 }, "children": [] },
+                        "trailing": { "type": "Icon", "properties": { "icon": "Icons.chevron_right", "color": 4288256409 }, "children": [] }
+                      },
+                      "children": []
+                    },
+                    {
+                      "type": "ListTile",
+                      "properties": {
+                        "title": "Security",
+                        "leading": { "type": "Icon", "properties": { "icon": "Icons.security", "color": 4285887743 }, "children": [] },
+                        "trailing": { "type": "Icon", "properties": { "icon": "Icons.chevron_right", "color": 4288256409 }, "children": [] }
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "margin": { "left": 16.0, "right": 16.0, "top": 16.0, "bottom": 24.0 },
+                "height": 54.0,
+                "decoration": { "color": 4294927872, "borderRadius": 12.0 }
+              },
+              "children": [
+                {
+                  "type": "Center", "properties": {},
+                  "children": [
+                    { "type": "Text", "properties": { "text": "Sign Out", "fontSize": 16.0, "fontWeight": "FontWeight.bold", "color": 4294967295 }, "children": [] }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

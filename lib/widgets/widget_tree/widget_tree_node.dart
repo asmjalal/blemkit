@@ -1,0 +1,458 @@
+import 'dart:ui';
+
+import 'package:designflutterkit/widgets/widget_tree/widget_tree_editor.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../models/widget_node.dart';
+import '../../providers/widget_tree_provider.dart';
+import '../custom_overlay_menu/custom_overlay_menu.dart';
+import '../widget_context_menu/widget_context_menu.dart';
+import '../widget_context_menu/widget_command_manager.dart';
+import '../widget_context_menu/widget_context_menu_actions.dart';
+
+
+class WidgetTreeNode extends StatefulWidget {
+  final WidgetNode node;
+  final WidgetNode? selectedNode;
+  final void Function(WidgetNode) onSelect;
+  final void Function(WidgetNode parent) onAdd;
+  final void Function(WidgetNode) onDelete;
+  final void Function(WidgetNode) onDuplicate;
+  final Map<WidgetNode, bool> expanded;
+  final String search;
+  final int depth;
+
+  const WidgetTreeNode({
+    required this.node,
+    required this.selectedNode,
+    required this.onSelect,
+    required this.onAdd,
+    required this.onDelete,
+    required this.onDuplicate,
+    required this.expanded,
+    required this.search,
+    required this.depth,
+  });
+
+  @override
+  State<WidgetTreeNode> createState() => WidgetTreeNodeState();
+}
+
+class WidgetTreeNodeState extends State<WidgetTreeNode> {
+  bool get isExpanded => widget.expanded[widget.node] ?? true;
+  WidgetNode? _draggedNode;
+
+  bool get isChildrenList => _acceptsMultipleChildren(widget.node.type);
+  bool get isChildSlot => !isChildrenList;
+
+  static final WidgetCommandManager _commandManager = WidgetCommandManager();
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = widget.selectedNode == widget.node;
+    final hasChildren = widget.node.children.isNotEmpty;
+    final matchesSearch = widget.search.isEmpty || widget.node.type.toLowerCase().contains(widget.search) || (widget.node.properties['text']?.toString().toLowerCase().contains(widget.search) ?? false);
+    if (!matchesSearch) return const SizedBox.shrink();
+
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+
+    List<Widget> childrenWidgets = [];
+    if (isChildrenList) {
+      for (int i = 0; i < widget.node.children.length; i++) {
+        // Drop target before
+        childrenWidgets.add(_DropTarget(
+          onAccept: (dragged) {
+            if (dragged != widget.node.children[i] && !_isDescendant(dragged, widget.node.children[i])) {
+              final oldParent = _findParent(provider.rootNode, dragged);
+              if (oldParent == widget.node) {
+                final oldIndex = widget.node.children.indexOf(dragged);
+                int newIndex = i;
+                if (oldIndex < newIndex) newIndex--;
+                provider.reorderNode(widget.node, oldIndex, newIndex);
+              } else {
+                provider.moveNode(dragged, widget.node, newIndex: i);
+              }
+              provider.selectNode(dragged);
+            }
+          },
+          canAccept: (dragged) => dragged != widget.node.children[i] && !_isDescendant(dragged, widget.node.children[i]),
+        ));
+        // The child node
+        childrenWidgets.add(WidgetTreeNode(
+          node: widget.node.children[i],
+          selectedNode: widget.selectedNode,
+          onSelect: widget.onSelect,
+          onAdd: widget.onAdd,
+          onDelete: widget.onDelete,
+          onDuplicate: widget.onDuplicate,
+          expanded: widget.expanded,
+          search: widget.search,
+          depth: widget.depth + 1,
+        ));
+      }
+      // Drop target at end
+      childrenWidgets.add(_DropTarget(
+        onAccept: (dragged) {
+          if (!_isDescendant(dragged, widget.node)) {
+            provider.moveNode(dragged, widget.node);
+            provider.selectNode(dragged);
+          }
+        },
+        canAccept: (dragged) => !_isDescendant(dragged, widget.node),
+      ));
+    } else if (widget.node.children.isNotEmpty) {
+      // Only one child allowed (child slot)
+      childrenWidgets.add(_DropTarget(
+        onAccept: (dragged) {
+          if (!_isDescendant(dragged, widget.node)) {
+            provider.removeNode(widget.node.children.first);
+            provider.addChild(widget.node, dragged);
+            provider.selectNode(dragged);
+          }
+        },
+        canAccept: (dragged) => !_isDescendant(dragged, widget.node),
+        child: WidgetTreeNode(
+          node: widget.node.children.first,
+          selectedNode: widget.selectedNode,
+          onSelect: widget.onSelect,
+          onAdd: widget.onAdd,
+          onDelete: widget.onDelete,
+          onDuplicate: widget.onDuplicate,
+          expanded: widget.expanded,
+          search: widget.search,
+          depth: widget.depth + 1,
+        ),
+      ));
+    } else if (isChildSlot) {
+      // Empty child slot
+      childrenWidgets.add(_DropTarget(
+        onAccept: (dragged) {
+          if (!_isDescendant(dragged, widget.node)) {
+            provider.addChild(widget.node, dragged);
+            provider.selectNode(dragged);
+          }
+        },
+        canAccept: (dragged) => !_isDescendant(dragged, widget.node),
+      ));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LongPressDraggable<WidgetNode>(
+          data: widget.node,
+          feedback: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _widgetIcon(widget.node.type),
+                  const SizedBox(width: 8),
+                  Text(_widgetLabel(widget.node)),
+                ],
+              ),
+            ),
+          ),
+          child: Listener(
+            onPointerDown: (event) {
+              if (event.kind == PointerDeviceKind.mouse && event.buttons == 2) {
+                // Prevent browser context menu
+                // (No-op: Flutter web suppresses it if onSecondaryTapDown is handled)
+              }
+            },
+            onPointerSignal: (event) {},
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              onEnter: (_) => provider.setHoveredNode(widget.node),
+              onExit: (_) => provider.setHoveredNode(null),
+              child: GestureDetector(
+                onTap: () => widget.onSelect(widget.node),
+                onSecondaryTapDown: (details) {
+                  WidgetContextMenu.show(
+                    context,
+                    details.globalPosition,
+                    widgetId: widget.node.id,
+                    onAction: (action) {
+                      final root = provider.rootNode!;
+                      switch (action) {
+                        case 'duplicate':
+                          widget.onDuplicate(widget.node);
+                          break;
+                        case 'delete':
+                          _commandManager.executeAction(
+                            DeleteWidgetAction(node: widget.node, provider: provider, root: root),
+                          );
+                          break;
+                        case 'undo':
+                          _commandManager.undo();
+                          break;
+                        case 'redo':
+                          _commandManager.redo();
+                          break;
+                        // Add more cases for wrap, remove, etc.
+                      }
+                    },
+                    canDelete: widget.node.type != 'Scaffold',
+                  );
+                },
+                child: Consumer<WidgetTreeProvider>(
+                  builder: (context, provider, _) {
+                    final isHovered = provider.hoveredNode == widget.node;
+                    final isSelected = widget.selectedNode == widget.node;
+                    return Container(
+                      margin: EdgeInsets.only(left: widget.depth * 20.0, top: 2, bottom: 2, right: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.deepPurple.withOpacity(0.08)
+                            : isHovered
+                                ? Colors.deepPurple.withOpacity(0.04)
+                                : null,
+                        border: isHovered && !isSelected
+                            ? Border.all(color: Colors.deepPurpleAccent, width: 1.5)
+                            : null,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        children: [
+                          if (isChildrenList && widget.node.children.isNotEmpty)
+                            SizedBox(
+                              width: 32,
+                              child: IconButton(
+                                icon: Icon(isExpanded ? Icons.expand_more : Icons.chevron_right, size: 18),
+                                onPressed: () {
+                                  setState(() {
+                                    widget.expanded[widget.node] = !isExpanded;
+                                  });
+                                },
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            )
+                          else
+                            const SizedBox(width: 32),
+                          _widgetIcon(widget.node.type),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _widgetLabel(widget.node),
+                              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          SizedBox(
+                            width: 28,
+                            child: IconButton(
+                              icon: const Icon(Icons.add, size: 16),
+                              onPressed: () => widget.onAdd(widget.node),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              tooltip: 'Add child widget',
+                            ),
+                          ),
+                          SizedBox(
+                            width: 28,
+                            child: IconButton(
+                              icon: const Icon(Icons.delete, size: 16),
+                              onPressed: () => widget.onDelete(widget.node),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              tooltip: 'Delete widget',
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+        // Only show children if expanded
+        if (isExpanded) ...childrenWidgets,
+      ],
+    );
+  }
+
+  bool _acceptsMultipleChildren(String type) {
+    // Widgets that can have multiple children
+    return [
+      'Row', 'Column', 'Stack', 'Wrap', 'ListView', 'GridView',
+      'SingleChildScrollView', 'Scaffold', 'AppBar', 'BottomNavigationBar',
+      'Form', 'CustomScrollView', 'ReorderableListView', 'PageView',
+      'TabBarView', 'ExpansionTile', 'Drawer', 'Card', 'Container',
+      'Center', 'Padding', 'Expanded', 'Flexible', 'SizedBox',
+      'Positioned', 'Align', 'InkWell', 'GestureDetector',
+      'ElevatedButton', 'TextButton', 'OutlinedButton', 'IconButton',
+      'FloatingActionButton', 'ListTile', 'Chip', 'CircleAvatar',
+      'Tooltip', 'AlertDialog', 'BottomSheet'
+    ].contains(type);
+  }
+
+  WidgetNode? _findParent(WidgetNode? root, WidgetNode child) {
+    if (root == null) return null;
+    if (root.children.contains(child)) return root;
+    for (final c in root.children) {
+      final found = _findParent(c, child);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
+  bool _isDescendant(WidgetNode? parent, WidgetNode child) {
+    if (parent == null) return false;
+    if (parent.children.contains(child)) return true;
+    for (final c in parent.children) {
+      if (_isDescendant(c, child)) return true;
+    }
+    return false;
+  }
+
+  Widget _widgetIcon(String type) {
+    switch (type) {
+      case 'Container':
+        return const Icon(Icons.crop_square, size: 18);
+      case 'Row':
+        return const Icon(Icons.view_column, size: 18);
+      case 'Column':
+        return const Icon(Icons.view_agenda, size: 18);
+      case 'Text':
+        return const Icon(Icons.text_fields, size: 18);
+      case 'ElevatedButton':
+      case 'TextButton':
+      case 'OutlinedButton':
+        return const Icon(Icons.smart_button, size: 18);
+      case 'TextField':
+        return const Icon(Icons.input, size: 18);
+      case 'Icon':
+        return const Icon(Icons.star, size: 18);
+      case 'Image':
+        return const Icon(Icons.image, size: 18);
+      case 'Card':
+        return const Icon(Icons.credit_card, size: 18);
+      case 'ListView':
+        return const Icon(Icons.list, size: 18);
+      case 'GridView':
+        return const Icon(Icons.grid_view, size: 18);
+      case 'Scaffold':
+        return const Icon(Icons.web_asset, size: 18);
+      case 'AppBar':
+        return const Icon(Icons.web_asset_outlined, size: 18);
+      case 'SingleChildScrollView':
+        return const Icon(Icons.rotate_left, size: 18);
+      case 'Center':
+        return const Icon(Icons.center_focus_strong, size: 18);
+      case 'Padding':
+        return const Icon(Icons.space_bar, size: 18);
+      case 'SizedBox':
+        return const Icon(Icons.crop_din, size: 18);
+      case 'Expanded':
+      case 'Flexible':
+        return const Icon(Icons.open_in_full, size: 18);
+      case 'IconButton':
+        return const Icon(Icons.radio_button_checked, size: 18);
+      case 'FloatingActionButton':
+        return const Icon(Icons.add_circle, size: 18);
+      case 'BottomNavigationBar':
+        return const Icon(Icons.roundabout_right, size: 18);
+      default:
+        return const Icon(Icons.widgets, size: 18);
+    }
+  }
+
+  String _widgetLabel(WidgetNode node) {
+    // Show more informative labels for different widget types
+    switch (node.type) {
+      case 'Text':
+        if (node.properties['text'] != null) {
+          String text = node.properties['text'].toString();
+          if (text.length > 20) text = '${text.substring(0, 20)}...';
+          return 'Text: "$text"';
+        }
+        return 'Text';
+      case 'Container':
+        List<String> props = [];
+        if (node.properties['width'] != null) props.add('w:${node.properties['width']}');
+        if (node.properties['height'] != null) props.add('h:${node.properties['height']}');
+        if (node.properties['color'] != null && node.properties['color'] != Colors.transparent.value.toString()) {
+          props.add('colored');
+        }
+        if (props.isNotEmpty && props.length <= 2) {
+          return 'Container (${props.join(', ')})';
+        } else if (props.length > 2) {
+          return 'Container (${props.length} props)';
+        }
+        return 'Container';
+      case 'Icon':
+        if (node.properties['icon'] != null) {
+          String icon = node.properties['icon'].toString();
+          if (icon.startsWith('Icons.')) icon = icon.substring(6);
+          return 'Icon: $icon';
+        }
+        return 'Icon';
+      case 'ElevatedButton':
+      case 'TextButton':
+      case 'OutlinedButton':
+        return '${node.type} (${node.children.length} child${node.children.length != 1 ? 'ren' : ''})';
+      case 'ListView':
+        String direction = node.properties['scrollDirection'] == 'horizontal' ? ' (horizontal)' : '';
+        return 'ListView$direction (${node.children.length} items)';
+      case 'GridView':
+        int crossAxisCount = node.properties['crossAxisCount'] ?? 2;
+        return 'GridView (${crossAxisCount}x${node.children.length ~/ crossAxisCount})';
+      case 'Scaffold':
+        String className = node.properties['className']?.toString() ?? '';
+        if (className.isNotEmpty) {
+          return 'Screen: $className';
+        }
+        return 'Screen';
+      case 'Column':
+      case 'Row':
+        return '${node.type} (${node.children.length} children)';
+      default:
+        if (node.children.isNotEmpty) {
+          return '${node.type} (${node.children.length} child${node.children.length != 1 ? 'ren' : ''})';
+        }
+        return node.type;
+    }
+  }
+}
+
+
+class _DropTarget extends StatelessWidget {
+  final void Function(WidgetNode) onAccept;
+  final bool Function(WidgetNode) canAccept;
+  final Widget? child;
+
+  const _DropTarget({required this.onAccept, required this.canAccept, this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<WidgetNode>(
+      onWillAccept: (data) => data != null && canAccept(data),
+      onAccept: onAccept,
+      builder: (context, candidateData, rejectedData) {
+        return Column(
+          children: [
+            if (candidateData.isNotEmpty)
+              Container(
+                height: 6,
+                color: Colors.deepPurple.withOpacity(0.2),
+              ),
+            if (child != null) child!,
+          ],
+        );
+      },
+    );
+  }
+}

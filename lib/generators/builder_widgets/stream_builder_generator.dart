@@ -1,0 +1,26 @@
+import '../base_widget_generator.dart';
+import '../../models/widget_node.dart';
+import '../widget_generator_registry.dart';
+
+class StreamBuilderGenerator extends BaseWidgetGenerator {
+  @override
+  String generateCode(WidgetNode node, {int indent = 0}) {
+    final indentStr = getIndentString(indent);
+    final childIndentStr = getChildIndentStr(indent);
+    
+    final props = <String>[];
+    props.add('stream: Stream.value(null)');
+    
+    if (node.properties['initialData'] != null) {
+      props.add('initialData: ${node.properties['initialData']}');
+    }
+    
+    final builder = node.children.isNotEmpty 
+        ? WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)
+        : 'Container()';
+    
+    props.add('builder: (context, snapshot) => $builder');
+    
+    return '${indentStr}StreamBuilder(${props.join(',\n$childIndentStr ')}\n$indentStr)';
+  }
+} 

@@ -1,0 +1,796 @@
+{
+  "type": "Scaffold",
+  "properties": {
+    "backgroundColor": 4293848570,
+    "appBar": {
+      "type": "AppBar",
+      "properties": {
+        "title": "ShopEasy",
+        "backgroundColor": 4285887743,
+        "elevation": 0,
+        "centerTitle": true,
+        "actions": [
+          {
+            "type": "IconButton",
+            "properties": {
+              "icon": {
+                "type": "Icon",
+                "properties": {
+                  "icon": "Icons.notifications_outlined",
+                  "color": 4294967295
+                }
+              },
+              "onPressed": "() {}"
+            }
+          },
+          {
+            "type": "IconButton",
+            "properties": {
+              "icon": {
+                "type": "Icon",
+                "properties": {
+                  "icon": "Icons.shopping_bag_outlined",
+                  "color": 4294967295
+                }
+              },
+              "onPressed": "() {}"
+            }
+          }
+        ]
+      },
+      "children": []
+    },
+    "bottomNavigationBar": {
+      "type": "BottomNavigationBar",
+      "properties": {
+        "selectedItemColor": 4285887743,
+        "unselectedItemColor": 4288256409,
+        "type": "fixed",
+        "items": [
+          {
+            "icon": {
+              "type": "Icon",
+              "properties": {
+                "icon": "Icons.home_outlined"
+              }
+            },
+            "label": "Home"
+          },
+          {
+            "icon": {
+              "type": "Icon",
+              "properties": {
+                "icon": "Icons.search_outlined"
+              }
+            },
+            "label": "Search"
+          },
+          {
+            "icon": {
+              "type": "Icon",
+              "properties": {
+                "icon": "Icons.shopping_cart_outlined"
+              }
+            },
+            "label": "Cart"
+          },
+          {
+            "icon": {
+              "type": "Icon",
+              "properties": {
+                "icon": "Icons.person_outline"
+              }
+            },
+            "label": "Profile"
+          }
+        ]
+      },
+      "children": []
+    }
+  },
+  "children": [
+    {
+      "type": "SingleChildScrollView",
+      "properties": {},
+      "children": [
+        {
+          "type": "Column",
+          "properties": {
+            "crossAxisAlignment": "CrossAxisAlignment.start"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "properties": {
+                "padding": {
+                  "left": 20.0,
+                  "right": 20.0,
+                  "top": 20.0,
+                  "bottom": 10.0
+                }
+              },
+              "children": [
+                {
+                  "type": "TextField",
+                  "properties": {
+                    "hintText": "Search for products...",
+                    "filled": true,
+                    "fillColor": 4294967295,
+                    "border": "OutlineInputBorder",
+                    "prefixIcon": "Icons.search",
+                    "contentPadding": {
+                      "left": 16.0,
+                      "right": 16.0,
+                      "top": 12.0,
+                      "bottom": 12.0
+                    }
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": {
+                  "left": 20.0,
+                  "top": 20.0,
+                  "bottom": 10.0
+                }
+              },
+              "children": [
+                {
+                  "type": "Text",
+                  "properties": {
+                    "text": "Categories",
+                    "fontSize": 20.0,
+                    "fontWeight": "FontWeight.bold",
+                    "color": 4281545544
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "height": 120.0,
+                "margin": {
+                  "bottom": 20.0
+                }
+              },
+              "children": [
+                {
+                  "type": "ListView",
+                  "properties": {
+                    "scrollDirection": "horizontal",
+                    "padding": {
+                      "left": 20.0,
+                      "right": 20.0
+                    }
+                  },
+                  "children": [
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 100.0,
+                        "margin": {
+                          "right": 15.0
+                        },
+                        "decoration": {
+                          "borderRadius": 16.0,
+                          "color": 4285887722
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "Column",
+                          "properties": {
+                            "mainAxisAlignment": "MainAxisAlignment.center"
+                          },
+                          "children": [
+                            {
+                              "type": "Icon",
+                              "properties": {
+                                "icon": "Icons.phone_android",
+                                "size": 32.0,
+                                "color": 4294967295
+                              },
+                              "children": []
+                            },
+                            {
+                              "type": "SizedBox",
+                              "properties": {
+                                "height": 8.0
+                              },
+                              "children": []
+                            },
+                            {
+                              "type": "Text",
+                              "properties": {
+                                "text": "Electronics",
+                                "fontSize": 12.0,
+                                "fontWeight": "FontWeight.w600",
+                                "color": 4294967295,
+                                "textAlign": "TextAlign.center"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 100.0,
+                        "margin": {
+                          "right": 15.0
+                        },
+                        "decoration": {
+                          "borderRadius": 16.0,
+                          "color": 4294902685
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "Column",
+                          "properties": {
+                            "mainAxisAlignment": "MainAxisAlignment.center"
+                          },
+                          "children": [
+                            {
+                              "type": "Icon",
+                              "properties": {
+                                "icon": "Icons.checkroom",
+                                "size": 32.0,
+                                "color": 4294967295
+                              },
+                              "children": []
+                            },
+                            {
+                              "type": "SizedBox",
+                              "properties": {
+                                "height": 8.0
+                              },
+                              "children": []
+                            },
+                            {
+                              "type": "Text",
+                              "properties": {
+                                "text": "Fashion",
+                                "fontSize": 12.0,
+                                "fontWeight": "FontWeight.w600",
+                                "color": 4294967295,
+                                "textAlign": "TextAlign.center"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 100.0,
+                        "margin": {
+                          "right": 15.0
+                        },
+                        "decoration": {
+                          "borderRadius": 16.0,
+                          "color": 4290020292
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "Column",
+                          "properties": {
+                            "mainAxisAlignment": "MainAxisAlignment.center"
+                          },
+                          "children": [
+                            {
+                              "type": "Icon",
+                              "properties": {
+                                "icon": "Icons.home_outlined",
+                                "size": 32.0,
+                                "color": 4294967295
+                              },
+                              "children": []
+                            },
+                            {
+                              "type": "SizedBox",
+                              "properties": {
+                                "height": 8.0
+                              },
+                              "children": []
+                            },
+                            {
+                              "type": "Text",
+                              "properties": {
+                                "text": "Home",
+                                "fontSize": 12.0,
+                                "fontWeight": "FontWeight.w600",
+                                "color": 4294967295,
+                                "textAlign": "TextAlign.center"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 100.0,
+                        "margin": {
+                          "right": 15.0
+                        },
+                        "decoration": {
+                          "borderRadius": 16.0,
+                          "color": 4294944550
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "Column",
+                          "properties": {
+                            "mainAxisAlignment": "MainAxisAlignment.center"
+                          },
+                          "children": [
+                            {
+                              "type": "Icon",
+                              "properties": {
+                                "icon": "Icons.sports_soccer",
+                                "size": 32.0,
+                                "color": 4294967295
+                              },
+                              "children": []
+                            },
+                            {
+                              "type": "SizedBox",
+                              "properties": {
+                                "height": 8.0
+                              },
+                              "children": []
+                            },
+                            {
+                              "type": "Text",
+                              "properties": {
+                                "text": "Sports",
+                                "fontSize": 12.0,
+                                "fontWeight": "FontWeight.w600",
+                                "color": 4294967295,
+                                "textAlign": "TextAlign.center"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": {
+                  "left": 20.0,
+                  "bottom": 10.0
+                }
+              },
+              "children": [
+                {
+                  "type": "Text",
+                  "properties": {
+                    "text": "Featured Products",
+                    "fontSize": 20.0,
+                    "fontWeight": "FontWeight.bold",
+                    "color": 4281545544
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": {
+                  "left": 20.0,
+                  "right": 20.0,
+                  "bottom": 20.0
+                },
+                "height": 400.0
+              },
+              "children": [
+                {
+                  "type": "GridView",
+                  "properties": {
+                    "crossAxisCount": 2,
+                    "mainAxisSpacing": 16.0,
+                    "crossAxisSpacing": 16.0,
+                    "childAspectRatio": 0.75,
+                    "physics": "NeverScrollableScrollPhysics"
+                  },
+                  "children": [
+                    {
+                      "type": "Card",
+                      "properties": {
+                        "elevation": 4.0,
+                        "shape": {
+                          "borderRadius": 16.0
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "Container",
+                          "properties": {
+                            "padding": 12.0,
+                            "decoration": {
+                              "borderRadius": 16.0,
+                              "color": 4294967295
+                            }
+                          },
+                          "children": [
+                            {
+                              "type": "Column",
+                              "properties": {
+                                "crossAxisAlignment": "CrossAxisAlignment.start"
+                              },
+                              "children": [
+                                {
+                                  "type": "Container",
+                                  "properties": {
+                                    "height": 100.0,
+                                    "decoration": {
+                                      "borderRadius": 12.0,
+                                      "color": 4293256677
+                                    }
+                                  },
+                                  "children": [
+                                    {
+                                      "type": "Center",
+                                      "properties": {},
+                                      "children": [
+                                        {
+                                          "type": "Icon",
+                                          "properties": {
+                                            "icon": "Icons.phone_android",
+                                            "size": 48.0,
+                                            "color": 4285887743
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "SizedBox",
+                                  "properties": {
+                                    "height": 8.0
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "iPhone 15 Pro",
+                                    "fontSize": 14.0,
+                                    "fontWeight": "FontWeight.w600",
+                                    "color": 4281545544
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "SizedBox",
+                                  "properties": {
+                                    "height": 4.0
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "$999.99",
+                                    "fontSize": 16.0,
+                                    "fontWeight": "FontWeight.bold",
+                                    "color": 4285887743
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Card",
+                      "properties": {
+                        "elevation": 4.0,
+                        "shape": {
+                          "borderRadius": 16.0
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "Container",
+                          "properties": {
+                            "padding": 12.0,
+                            "decoration": {
+                              "borderRadius": 16.0,
+                              "color": 4294967295
+                            }
+                          },
+                          "children": [
+                            {
+                              "type": "Column",
+                              "properties": {
+                                "crossAxisAlignment": "CrossAxisAlignment.start"
+                              },
+                              "children": [
+                                {
+                                  "type": "Container",
+                                  "properties": {
+                                    "height": 100.0,
+                                    "decoration": {
+                                      "borderRadius": 12.0,
+                                      "color": 4293256677
+                                    }
+                                  },
+                                  "children": [
+                                    {
+                                      "type": "Center",
+                                      "properties": {},
+                                      "children": [
+                                        {
+                                          "type": "Icon",
+                                          "properties": {
+                                            "icon": "Icons.laptop_mac",
+                                            "size": 48.0,
+                                            "color": 4285887722
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "SizedBox",
+                                  "properties": {
+                                    "height": 8.0
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "MacBook Pro",
+                                    "fontSize": 14.0,
+                                    "fontWeight": "FontWeight.w600",
+                                    "color": 4281545544
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "SizedBox",
+                                  "properties": {
+                                    "height": 4.0
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "$1,299.99",
+                                    "fontSize": 16.0,
+                                    "fontWeight": "FontWeight.bold",
+                                    "color": 4285887743
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Card",
+                      "properties": {
+                        "elevation": 4.0,
+                        "shape": {
+                          "borderRadius": 16.0
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "Container",
+                          "properties": {
+                            "padding": 12.0,
+                            "decoration": {
+                              "borderRadius": 16.0,
+                              "color": 4294967295
+                            }
+                          },
+                          "children": [
+                            {
+                              "type": "Column",
+                              "properties": {
+                                "crossAxisAlignment": "CrossAxisAlignment.start"
+                              },
+                              "children": [
+                                {
+                                  "type": "Container",
+                                  "properties": {
+                                    "height": 100.0,
+                                    "decoration": {
+                                      "borderRadius": 12.0,
+                                      "color": 4293256677
+                                    }
+                                  },
+                                  "children": [
+                                    {
+                                      "type": "Center",
+                                      "properties": {},
+                                      "children": [
+                                        {
+                                          "type": "Icon",
+                                          "properties": {
+                                            "icon": "Icons.headphones",
+                                            "size": 48.0,
+                                            "color": 4290020292
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "SizedBox",
+                                  "properties": {
+                                    "height": 8.0
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "AirPods Pro",
+                                    "fontSize": 14.0,
+                                    "fontWeight": "FontWeight.w600",
+                                    "color": 4281545544
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "SizedBox",
+                                  "properties": {
+                                    "height": 4.0
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "$249.99",
+                                    "fontSize": 16.0,
+                                    "fontWeight": "FontWeight.bold",
+                                    "color": 4285887743
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Card",
+                      "properties": {
+                        "elevation": 4.0,
+                        "shape": {
+                          "borderRadius": 16.0
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "Container",
+                          "properties": {
+                            "padding": 12.0,
+                            "decoration": {
+                              "borderRadius": 16.0,
+                              "color": 4294967295
+                            }
+                          },
+                          "children": [
+                            {
+                              "type": "Column",
+                              "properties": {
+                                "crossAxisAlignment": "CrossAxisAlignment.start"
+                              },
+                              "children": [
+                                {
+                                  "type": "Container",
+                                  "properties": {
+                                    "height": 100.0,
+                                    "decoration": {
+                                      "borderRadius": 12.0,
+                                      "color": 4293256677
+                                    }
+                                  },
+                                  "children": [
+                                    {
+                                      "type": "Center",
+                                      "properties": {},
+                                      "children": [
+                                        {
+                                          "type": "Icon",
+                                          "properties": {
+                                            "icon": "Icons.watch",
+                                            "size": 48.0,
+                                            "color": 4294902685
+                                          },
+                                          "children": []
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "SizedBox",
+                                  "properties": {
+                                    "height": 8.0
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "Apple Watch",
+                                    "fontSize": 14.0,
+                                    "fontWeight": "FontWeight.w600",
+                                    "color": 4281545544
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "SizedBox",
+                                  "properties": {
+                                    "height": 4.0
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "$399.99",
+                                    "fontSize": 16.0,
+                                    "fontWeight": "FontWeight.bold",
+                                    "color": 4285887743
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

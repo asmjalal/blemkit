@@ -1,0 +1,379 @@
+{
+    "widgets": [
+      {
+        "name": "Container",
+        "description": "A box model widget for layout, decoration, and positioning.",
+        "properties": [
+          "child",
+          "color",
+          "width",
+          "height",
+          "padding",
+          "margin",
+          "alignment",
+          "decoration",
+          "constraints",
+          "transform"
+        ]
+      },
+      {
+        "name": "Row",
+        "description": "Displays children in a horizontal array.",
+        "properties": [
+          "children",
+          "mainAxisAlignment",
+          "crossAxisAlignment",
+          "mainAxisSize"
+        ]
+      },
+      {
+        "name": "Column",
+        "description": "Displays children in a vertical array.",
+        "properties": [
+          "children",
+          "mainAxisAlignment",
+          "crossAxisAlignment",
+          "mainAxisSize"
+        ]
+      },
+      {
+        "name": "Stack",
+        "description": "Overlays children widgets on top of each other.",
+        "properties": [
+          "children",
+          "alignment",
+          "fit",
+          "clipBehavior"
+        ]
+      },
+      {
+        "name": "Expanded",
+        "description": "Expands a child of a Row, Column, or Flex.",
+        "properties": [
+          "child",
+          "flex"
+        ]
+      },
+      {
+        "name": "SizedBox",
+        "description": "A box with a fixed size.",
+        "properties": [
+          "width",
+          "height",
+          "child"
+        ]
+      },
+      {
+        "name": "Align",
+        "description": "Aligns a child within itself.",
+        "properties": [
+          "alignment",
+          "widthFactor",
+          "heightFactor",
+          "child"
+        ]
+      },
+      {
+        "name": "Padding",
+        "description": "Adds padding around a child.",
+        "properties": [
+          "padding",
+          "child"
+        ]
+      },
+      {
+        "name": "Center",
+        "description": "Centers its child within itself.",
+        "properties": [
+          "child",
+          "widthFactor",
+          "heightFactor"
+        ]
+      },
+      {
+        "name": "FutureBuilder",
+        "description": "Builds itself based on the latest snapshot of interaction with a Future.",
+        "properties": [
+          "future",
+          "builder",
+          "initialData"
+        ]
+      },
+      {
+        "name": "StreamBuilder",
+        "description": "Builds itself based on the latest snapshot of interaction with a Stream.",
+        "properties": [
+          "stream",
+          "builder",
+          "initialData"
+        ]
+      },
+      {
+        "name": "ListView",
+        "description": "Scrollable list of widgets.",
+        "properties": [
+          "children",
+          "itemBuilder",
+          "scrollDirection",
+          "controller",
+          "shrinkWrap"
+        ]
+      },
+      {
+        "name": "SingleChildScrollView",
+        "description": "Scroll view with a single child.",
+        "properties": [
+          "child",
+          "scrollDirection",
+          "padding",
+          "controller"
+        ]
+      },
+      {
+        "name": "GridView",
+        "description": "Displays items in a 2D grid.",
+        "properties": [
+          "children",
+          "gridDelegate",
+          "itemBuilder",
+          "scrollDirection"
+        ]
+      },
+      {
+        "name": "PageView",
+        "description": "Scrolls pages horizontally.",
+        "properties": [
+          "children",
+          "controller",
+          "onPageChanged",
+          "scrollDirection"
+        ]
+      },
+      {
+        "name": "TextField",
+        "description": "Text input widget.",
+        "properties": [
+          "controller",
+          "keyboardType",
+          "decoration",
+          "obscureText",
+          "maxLines",
+          "onChanged"
+        ]
+      },
+      {
+        "name": "TextFormField",
+        "description": "Form-enabled text field with validation.",
+        "properties": [
+          "controller",
+          "validator",
+          "decoration",
+          "onSaved",
+          "initialValue"
+        ]
+      },
+      {
+        "name": "Checkbox",
+        "description": "Material design checkbox.",
+        "properties": [
+          "value",
+          "onChanged",
+          "activeColor"
+        ]
+      },
+      {
+        "name": "Switch",
+        "description": "On/off switch widget.",
+        "properties": [
+          "value",
+          "onChanged",
+          "activeColor"
+        ]
+      },
+      {
+        "name": "Radio",
+        "description": "Radio button widget.",
+        "properties": [
+          "value",
+          "groupValue",
+          "onChanged"
+        ]
+      },
+      {
+        "name": "Slider",
+        "description": "A slider to select from a range of values.",
+        "properties": [
+          "value",
+          "onChanged",
+          "min",
+          "max",
+          "divisions",
+          "label"
+        ]
+      },
+      {
+        "name": "ElevatedButton",
+        "description": "Material design raised button.",
+        "properties": [
+          "onPressed",
+          "child",
+          "style"
+        ]
+      },
+      {
+        "name": "TextButton",
+        "description": "Text-only button.",
+        "properties": [
+          "onPressed",
+          "child",
+          "style"
+        ]
+      },
+      {
+        "name": "OutlinedButton",
+        "description": "Button with outline border.",
+        "properties": [
+          "onPressed",
+          "child",
+          "style"
+        ]
+      },
+      {
+        "name": "IconButton",
+        "description": "Button with an icon.",
+        "properties": [
+          "icon",
+          "onPressed",
+          "tooltip"
+        ]
+      },
+      {
+        "name": "Text",
+        "description": "Displays styled text.",
+        "properties": [
+          "data",
+          "style",
+          "textAlign",
+          "overflow",
+          "maxLines"
+        ]
+      },
+      {
+        "name": "Image",
+        "description": "Displays an image.",
+        "properties": [
+          "image",
+          "width",
+          "height",
+          "fit",
+          "alignment"
+        ]
+      },
+      {
+        "name": "Icon",
+        "description": "Material design icon.",
+        "properties": [
+          "icon",
+          "color",
+          "size"
+        ]
+      },
+      {
+        "name": "Scaffold",
+        "description": "Base layout structure with material components.",
+        "properties": [
+          "appBar",
+          "body",
+          "drawer",
+          "bottomNavigationBar",
+          "floatingActionButton"
+        ]
+      },
+      {
+        "name": "AppBar",
+        "description": "Top app bar with actions.",
+        "properties": [
+          "title",
+          "actions",
+          "backgroundColor",
+          "elevation"
+        ]
+      },
+      {
+        "name": "BottomNavigationBar",
+        "description": "Bottom tab navigation.",
+        "properties": [
+          "items",
+          "currentIndex",
+          "onTap",
+          "type"
+        ]
+      },
+      {
+        "name": "Drawer",
+        "description": "Navigation drawer from the side.",
+        "properties": [
+          "child",
+          "elevation",
+          "backgroundColor"
+        ]
+      },
+      {
+        "name": "GestureDetector",
+        "description": "Detects gestures like taps, double taps, and swipes.",
+        "properties": [
+          "child",
+          "onTap",
+          "onDoubleTap",
+          "onLongPress"
+        ]
+      },
+      {
+        "name": "Visibility",
+        "description": "Shows or hides a widget.",
+        "properties": [
+          "visible",
+          "child",
+          "replacement"
+        ]
+      },
+      {
+        "name": "Opacity",
+        "description": "Makes a child partially transparent.",
+        "properties": [
+          "opacity",
+          "child"
+        ]
+      },
+      {
+        "name": "Hero",
+        "description": "Defines a widget to be shared across routes.",
+        "properties": [
+          "tag",
+          "child",
+          "flightShuttleBuilder"
+        ]
+      },
+      {
+        "name": "AnimatedContainer",
+        "description": "Container that implicitly animates changes.",
+        "properties": [
+          "duration",
+          "curve",
+          "width",
+          "height",
+          "color",
+          "child"
+        ]
+      },
+      {
+        "name": "AnimatedOpacity",
+        "description": "Animates the opacity of a widget.",
+        "properties": [
+          "opacity",
+          "duration",
+          "child"
+        ]
+      }
+    ]
+  }

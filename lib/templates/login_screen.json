@@ -1,0 +1,259 @@
+{
+  "type": "Scaffold",
+  "properties": {
+    "backgroundColor": 4285887743
+  },
+  "children": [
+    {
+      "type": "SingleChildScrollView",
+      "properties": {},
+      "children": [
+        {
+          "type": "Column",
+          "properties": {
+            "crossAxisAlignment": "CrossAxisAlignment.stretch"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "properties": {
+                "height": 280.0,
+                "padding": { "left": 24.0, "right": 24.0, "top": 40.0, "bottom": 40.0 }
+              },
+              "children": [
+                {
+                  "type": "Column",
+                  "properties": {
+                    "mainAxisAlignment": "MainAxisAlignment.center",
+                    "crossAxisAlignment": "CrossAxisAlignment.center"
+                  },
+                  "children": [
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 80.0,
+                        "height": 80.0,
+                        "color": 4294967295,
+                        "borderRadius": 40.0
+                      },
+                      "children": [
+                        {
+                          "type": "Center",
+                          "properties": {},
+                          "children": [
+                            {
+                              "type": "Icon",
+                              "properties": {
+                                "icon": "Icons.lock_outline",
+                                "size": 40.0,
+                                "color": 4285887743
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "SizedBox",
+                      "properties": { "height": 16.0 },
+                      "children": []
+                    },
+                    {
+                      "type": "Text",
+                      "properties": {
+                        "text": "Welcome Back",
+                        "fontSize": 28.0,
+                        "fontWeight": "FontWeight.bold",
+                        "color": 4294967295
+                      },
+                      "children": []
+                    },
+                    {
+                      "type": "SizedBox",
+                      "properties": { "height": 6.0 },
+                      "children": []
+                    },
+                    {
+                      "type": "Text",
+                      "properties": {
+                        "text": "Sign in to your account",
+                        "fontSize": 16.0,
+                        "color": 4294967295
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "color": 4294967295,
+                "borderRadius": 24.0,
+                "padding": { "left": 24.0, "right": 24.0, "top": 36.0, "bottom": 24.0 }
+              },
+              "children": [
+                {
+                  "type": "Column",
+                  "properties": {
+                    "crossAxisAlignment": "CrossAxisAlignment.start"
+                  },
+                  "children": [
+                    {
+                      "type": "Text",
+                      "properties": {
+                        "text": "Email",
+                        "fontSize": 14.0,
+                        "fontWeight": "FontWeight.w600",
+                        "color": 4281545544
+                      },
+                      "children": []
+                    },
+                    {
+                      "type": "SizedBox",
+                      "properties": { "height": 8.0 },
+                      "children": []
+                    },
+                    {
+                      "type": "TextField",
+                      "properties": {
+                        "hintText": "Enter your email",
+                        "filled": true,
+                        "fillColor": 4293848570,
+                        "border": "OutlineInputBorder",
+                        "prefixIcon": "Icons.email_outlined",
+                        "contentPadding": { "left": 16.0, "right": 16.0, "top": 14.0, "bottom": 14.0 }
+                      },
+                      "children": []
+                    },
+                    {
+                      "type": "SizedBox",
+                      "properties": { "height": 20.0 },
+                      "children": []
+                    },
+                    {
+                      "type": "Text",
+                      "properties": {
+                        "text": "Password",
+                        "fontSize": 14.0,
+                        "fontWeight": "FontWeight.w600",
+                        "color": 4281545544
+                      },
+                      "children": []
+                    },
+                    {
+                      "type": "SizedBox",
+                      "properties": { "height": 8.0 },
+                      "children": []
+                    },
+                    {
+                      "type": "TextField",
+                      "properties": {
+                        "hintText": "Enter your password",
+                        "filled": true,
+                        "fillColor": 4293848570,
+                        "border": "OutlineInputBorder",
+                        "prefixIcon": "Icons.lock_outline",
+                        "contentPadding": { "left": 16.0, "right": 16.0, "top": 14.0, "bottom": 14.0 }
+                      },
+                      "children": []
+                    },
+                    {
+                      "type": "SizedBox",
+                      "properties": { "height": 12.0 },
+                      "children": []
+                    },
+                    {
+                      "type": "Row",
+                      "properties": { "mainAxisAlignment": "MainAxisAlignment.end" },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "properties": {
+                            "text": "Forgot Password?",
+                            "fontSize": 14.0,
+                            "fontWeight": "FontWeight.w600",
+                            "color": 4285887743
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "SizedBox",
+                      "properties": { "height": 28.0 },
+                      "children": []
+                    },
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "height": 54.0,
+                        "color": 4285887743,
+                        "borderRadius": 12.0
+                      },
+                      "children": [
+                        {
+                          "type": "Center",
+                          "properties": {},
+                          "children": [
+                            {
+                              "type": "Text",
+                              "properties": {
+                                "text": "Sign In",
+                                "fontSize": 18.0,
+                                "fontWeight": "FontWeight.bold",
+                                "color": 4294967295
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "SizedBox",
+                      "properties": { "height": 24.0 },
+                      "children": []
+                    },
+                    {
+                      "type": "Row",
+                      "properties": { "mainAxisAlignment": "MainAxisAlignment.center" },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "properties": {
+                            "text": "Don't have an account?",
+                            "fontSize": 14.0,
+                            "color": 4288256409
+                          },
+                          "children": []
+                        },
+                        {
+                          "type": "SizedBox",
+                          "properties": { "width": 4.0 },
+                          "children": []
+                        },
+                        {
+                          "type": "Text",
+                          "properties": {
+                            "text": "Sign Up",
+                            "fontSize": 14.0,
+                            "fontWeight": "FontWeight.bold",
+                            "color": 4285887743
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+import 'package:flutter/material.dart';
+
+class ColorUtils {
+  static Color parseColor(dynamic value, [Color defaultColor = Colors.transparent]) {
+    if (value == null) return defaultColor;
+    
+    if (value is int) {
+      return Color(value);
+    }
+    
+    if (value is String) {
+      // Handle decimal integer strings
+      final int? parsedInt = int.tryParse(value);
+      if (parsedInt != null) {
+        return Color(parsedInt);
+      }
+      
+      // Handle hex strings (0x...)
+      if (value.startsWith('0x')) {
+        try {
+          return Color(int.parse(value));
+        } catch (_) {
+          return defaultColor;
+        }
+      }
+      
+      // Handle hex strings (#...)
+      if (value.startsWith('#')) {
+        try {
+          final hex = value.replaceAll('#', '');
+          return Color(int.parse(hex.length == 6 ? 'FF$hex' : hex, radix: 16));
+        } catch (_) {
+          return defaultColor;
+        }
+      }
+      
+      // Handle predefined colors (e.g., "Colors.white")
+      switch (value) {
+        case 'Colors.white': return Colors.white;
+        case 'Colors.black': return Colors.black;
+        case 'Colors.blue': return Colors.blue;
+        case 'Colors.red': return Colors.red;
+        case 'Colors.green': return Colors.green;
+        case 'Colors.yellow': return Colors.yellow;
+        case 'Colors.purple': return Colors.purple;
+        case 'Colors.orange': return Colors.orange;
+        case 'Colors.grey': return Colors.grey;
+        case 'Colors.transparent': return Colors.transparent;
+        case 'Colors.deepPurple': return Colors.deepPurple;
+        case 'Colors.deepPurpleAccent': return Colors.deepPurpleAccent;
+        case 'Colors.black26': return Colors.black26;
+        case 'Colors.lightBlueAccent': return Colors.lightBlueAccent;
+        case 'Colors.redAccent': return Colors.redAccent;
+      }
+    }
+    
+    return defaultColor;
+  }
+}

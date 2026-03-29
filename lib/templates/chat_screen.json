@@ -1,0 +1,240 @@
+{
+  "type": "Scaffold",
+  "properties": {
+    "backgroundColor": 4293848570,
+    "appBar": {
+      "type": "AppBar",
+      "properties": {
+        "title": "Messages",
+        "backgroundColor": 4285887743,
+        "elevation": 0,
+        "centerTitle": false,
+        "actions": [
+          {
+            "type": "IconButton",
+            "properties": {
+              "icon": { "type": "Icon", "properties": { "icon": "Icons.edit_outlined", "color": 4294967295 } },
+              "onPressed": "() {}"
+            }
+          }
+        ]
+      },
+      "children": []
+    }
+  },
+  "children": [
+    {
+      "type": "SingleChildScrollView",
+      "properties": {},
+      "children": [
+        {
+          "type": "Column",
+          "properties": {},
+          "children": [
+            {
+              "type": "Container",
+              "properties": {
+                "padding": { "left": 16.0, "right": 16.0, "top": 12.0, "bottom": 12.0 },
+                "decoration": { "color": 4285887743 }
+              },
+              "children": [
+                {
+                  "type": "TextField",
+                  "properties": {
+                    "hintText": "Search conversations...",
+                    "filled": true,
+                    "fillColor": 4292533247,
+                    "border": "OutlineInputBorder",
+                    "prefixIcon": "Icons.search",
+                    "contentPadding": { "left": 16.0, "right": 16.0, "top": 10.0, "bottom": 10.0 }
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": { "left": 16.0, "right": 16.0, "top": 12.0, "bottom": 12.0 },
+                "decoration": { "color": 4294967295 },
+                "margin": { "bottom": 1.0 }
+              },
+              "children": [
+                {
+                  "type": "Row",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 52.0, "height": 52.0,
+                        "decoration": { "color": 4285887722, "borderRadius": 26.0 }
+                      },
+                      "children": [
+                        { "type": "Center", "properties": {}, "children": [
+                          { "type": "Icon", "properties": { "icon": "Icons.person", "color": 4294967295, "size": 28.0 }, "children": [] }
+                        ]}
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "width": 12.0 }, "children": [] },
+                    {
+                      "type": "Column",
+                      "properties": { "crossAxisAlignment": "CrossAxisAlignment.start" },
+                      "children": [
+                        {
+                          "type": "Row",
+                          "properties": { "mainAxisAlignment": "MainAxisAlignment.spaceBetween" },
+                          "children": [
+                            { "type": "Text", "properties": { "text": "Sarah Connor", "fontSize": 16.0, "fontWeight": "FontWeight.bold", "color": 4281545544 }, "children": [] },
+                            { "type": "Text", "properties": { "text": "2m ago", "fontSize": 12.0, "color": 4288256409 }, "children": [] }
+                          ]
+                        },
+                        { "type": "SizedBox", "properties": { "height": 4.0 }, "children": [] },
+                        { "type": "Text", "properties": { "text": "Hey! Are you free tonight?", "fontSize": 14.0, "color": 4288256409 }, "children": [] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": { "left": 16.0, "right": 16.0, "top": 12.0, "bottom": 12.0 },
+                "decoration": { "color": 4294967295 },
+                "margin": { "bottom": 1.0 }
+              },
+              "children": [
+                {
+                  "type": "Row",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 52.0, "height": 52.0,
+                        "decoration": { "color": 4290020292, "borderRadius": 26.0 }
+                      },
+                      "children": [
+                        { "type": "Center", "properties": {}, "children": [
+                          { "type": "Icon", "properties": { "icon": "Icons.person", "color": 4294967295, "size": 28.0 }, "children": [] }
+                        ]}
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "width": 12.0 }, "children": [] },
+                    {
+                      "type": "Column",
+                      "properties": { "crossAxisAlignment": "CrossAxisAlignment.start" },
+                      "children": [
+                        {
+                          "type": "Row",
+                          "properties": { "mainAxisAlignment": "MainAxisAlignment.spaceBetween" },
+                          "children": [
+                            { "type": "Text", "properties": { "text": "Design Team", "fontSize": 16.0, "fontWeight": "FontWeight.bold", "color": 4281545544 }, "children": [] },
+                            { "type": "Text", "properties": { "text": "1h ago", "fontSize": 12.0, "color": 4288256409 }, "children": [] }
+                          ]
+                        },
+                        { "type": "SizedBox", "properties": { "height": 4.0 }, "children": [] },
+                        { "type": "Text", "properties": { "text": "New designs are ready for review", "fontSize": 14.0, "color": 4288256409 }, "children": [] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": { "left": 16.0, "right": 16.0, "top": 12.0, "bottom": 12.0 },
+                "decoration": { "color": 4294967295 },
+                "margin": { "bottom": 1.0 }
+              },
+              "children": [
+                {
+                  "type": "Row",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 52.0, "height": 52.0,
+                        "decoration": { "color": 4294902685, "borderRadius": 26.0 }
+                      },
+                      "children": [
+                        { "type": "Center", "properties": {}, "children": [
+                          { "type": "Icon", "properties": { "icon": "Icons.person", "color": 4294967295, "size": 28.0 }, "children": [] }
+                        ]}
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "width": 12.0 }, "children": [] },
+                    {
+                      "type": "Column",
+                      "properties": { "crossAxisAlignment": "CrossAxisAlignment.start" },
+                      "children": [
+                        {
+                          "type": "Row",
+                          "properties": { "mainAxisAlignment": "MainAxisAlignment.spaceBetween" },
+                          "children": [
+                            { "type": "Text", "properties": { "text": "Mike Johnson", "fontSize": 16.0, "fontWeight": "FontWeight.bold", "color": 4281545544 }, "children": [] },
+                            { "type": "Text", "properties": { "text": "3h ago", "fontSize": 12.0, "color": 4288256409 }, "children": [] }
+                          ]
+                        },
+                        { "type": "SizedBox", "properties": { "height": 4.0 }, "children": [] },
+                        { "type": "Text", "properties": { "text": "The meeting is at 3pm tomorrow", "fontSize": 14.0, "color": 4288256409 }, "children": [] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": { "left": 16.0, "right": 16.0, "top": 12.0, "bottom": 12.0 },
+                "decoration": { "color": 4294967295 },
+                "margin": { "bottom": 1.0 }
+              },
+              "children": [
+                {
+                  "type": "Row",
+                  "properties": {},
+                  "children": [
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 52.0, "height": 52.0,
+                        "decoration": { "color": 4294944550, "borderRadius": 26.0 }
+                      },
+                      "children": [
+                        { "type": "Center", "properties": {}, "children": [
+                          { "type": "Icon", "properties": { "icon": "Icons.person", "color": 4294967295, "size": 28.0 }, "children": [] }
+                        ]}
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "width": 12.0 }, "children": [] },
+                    {
+                      "type": "Column",
+                      "properties": { "crossAxisAlignment": "CrossAxisAlignment.start" },
+                      "children": [
+                        {
+                          "type": "Row",
+                          "properties": { "mainAxisAlignment": "MainAxisAlignment.spaceBetween" },
+                          "children": [
+                            { "type": "Text", "properties": { "text": "Emma Wilson", "fontSize": 16.0, "fontWeight": "FontWeight.bold", "color": 4281545544 }, "children": [] },
+                            { "type": "Text", "properties": { "text": "Yesterday", "fontSize": 12.0, "color": 4288256409 }, "children": [] }
+                          ]
+                        },
+                        { "type": "SizedBox", "properties": { "height": 4.0 }, "children": [] },
+                        { "type": "Text", "properties": { "text": "Thanks for the help 😊", "fontSize": 14.0, "color": 4288256409 }, "children": [] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

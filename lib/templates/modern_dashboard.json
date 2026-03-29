@@ -1,0 +1,182 @@
+{
+  "id": "dashboard_root",
+  "type": "Scaffold",
+  "properties": {
+    "backgroundColor": "#09090B"
+  },
+  "children": [
+    {
+      "id": "dash_scroll",
+      "type": "ListView",
+      "properties": {},
+      "children": [
+        {
+          "id": "header",
+          "type": "Container",
+          "properties": {
+            "padding": "EdgeInsets.all(24)"
+          },
+          "children": [
+            {
+              "id": "head_row",
+              "type": "Row",
+              "properties": {
+                "mainAxisAlignment": "MainAxisAlignment.spaceBetween"
+              },
+              "children": [
+                {
+                  "id": "title_col",
+                  "type": "Column",
+                  "properties": {
+                    "crossAxisAlignment": "CrossAxisAlignment.start"
+                  },
+                  "children": [
+                    {
+                      "id": "title_1",
+                      "type": "Text",
+                      "properties": {"text": "Welcome back,", "fontSize": 16, "color": "#A1A1AA"},
+                      "children": []
+                    },
+                    {
+                      "id": "title_2",
+                      "type": "Text",
+                      "properties": {"text": "Dashboard Overview", "fontSize": 28, "fontWeight": "FontWeight.bold", "color": "#FAFAFA"},
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "bell_icon_container",
+                  "type": "Container",
+                  "properties": {
+                    "width": 48,
+                    "height": 48,
+                    "color": "#18181B",
+                    "borderRadius": 24
+                  },
+                  "children": [
+                    {
+                      "id": "bell_center",
+                      "type": "Center",
+                      "properties": {},
+                      "children": [
+                        {
+                          "id": "bell_icon",
+                          "type": "Icon",
+                          "properties": {"icon": "Icons.notifications", "color": "#FAFAFA"},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cards_row",
+          "type": "Row",
+          "properties": {
+            "mainAxisAlignment": "MainAxisAlignment.spaceEvenly"
+          },
+          "children": [
+            {
+              "id": "card_1",
+              "type": "Container",
+              "properties": {
+                "width": 160,
+                "color": "#18181B",
+                "padding": "EdgeInsets.all(16)",
+                "borderRadius": 16
+              },
+              "children": [
+                {
+                  "id": "c1_icon",
+                  "type": "Icon",
+                  "properties": {"icon": "Icons.attach_money", "color": "#10B981"},
+                  "children": []
+                },
+                {
+                  "id": "c1_val",
+                  "type": "Text",
+                  "properties": {"text": "$24,500", "fontSize": 24, "fontWeight": "FontWeight.bold", "color": "#FAFAFA"},
+                  "children": []
+                },
+                {
+                  "id": "c1_lbl",
+                  "type": "Text",
+                  "properties": {"text": "Total Revenue", "fontSize": 14, "color": "#A1A1AA"},
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "card_2",
+              "type": "Container",
+              "properties": {
+                "width": 160,
+                "color": "#18181B",
+                "padding": "EdgeInsets.all(16)",
+                "borderRadius": 16
+              },
+              "children": [
+                {
+                  "id": "c2_icon",
+                  "type": "Icon",
+                  "properties": {"icon": "Icons.group", "color": "#3B82F6"},
+                  "children": []
+                },
+                {
+                  "id": "c2_val",
+                  "type": "Text",
+                  "properties": {"text": "+1,240", "fontSize": 24, "fontWeight": "FontWeight.bold", "color": "#FAFAFA"},
+                  "children": []
+                },
+                {
+                  "id": "c2_lbl",
+                  "type": "Text",
+                  "properties": {"text": "Active Users", "fontSize": 14, "color": "#A1A1AA"},
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "chart_section",
+          "type": "Container",
+          "properties": {
+            "margin": "EdgeInsets.all(24)",
+            "padding": "EdgeInsets.all(24)",
+            "color": "#18181B",
+            "borderRadius": 16
+          },
+          "children": [
+            {
+              "id": "chart_title",
+              "type": "Text",
+              "properties": {"text": "Weekly Activity", "fontSize": 18, "fontWeight": "FontWeight.bold", "color": "#FAFAFA"},
+              "children": []
+            },
+            {
+              "id": "chart_bars",
+              "type": "Row",
+              "properties": {
+                "mainAxisAlignment": "MainAxisAlignment.spaceBetween",
+                "crossAxisAlignment": "CrossAxisAlignment.end"
+              },
+              "children": [
+                { "type": "Container", "properties": {"width": 30, "height": 100, "color": "#3B82F6", "borderRadius": 8}, "children": [] },
+                { "type": "Container", "properties": {"width": 30, "height": 180, "color": "#10B981", "borderRadius": 8}, "children": [] },
+                { "type": "Container", "properties": {"width": 30, "height": 140, "color": "#3B82F6", "borderRadius": 8}, "children": [] },
+                { "type": "Container", "properties": {"width": 30, "height": 220, "color": "#F59E0B", "borderRadius": 8}, "children": [] },
+                { "type": "Container", "properties": {"width": 30, "height": 160, "color": "#3B82F6", "borderRadius": 8}, "children": [] }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

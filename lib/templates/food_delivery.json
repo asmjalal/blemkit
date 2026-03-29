@@ -1,0 +1,385 @@
+{
+  "type": "Scaffold",
+  "properties": {
+    "backgroundColor": 4294967295,
+    "bottomNavigationBar": {
+      "type": "BottomNavigationBar",
+      "properties": {
+        "selectedItemColor": 4294927872,
+        "unselectedItemColor": 4288256409,
+        "type": "fixed",
+        "items": [
+          { "icon": { "type": "Icon", "properties": { "icon": "Icons.home_outlined" } }, "label": "Home" },
+          { "icon": { "type": "Icon", "properties": { "icon": "Icons.search" } }, "label": "Search" },
+          { "icon": { "type": "Icon", "properties": { "icon": "Icons.shopping_bag_outlined" } }, "label": "Orders" },
+          { "icon": { "type": "Icon", "properties": { "icon": "Icons.person_outline" } }, "label": "Profile" }
+        ]
+      },
+      "children": []
+    }
+  },
+  "children": [
+    {
+      "type": "SingleChildScrollView",
+      "properties": {},
+      "children": [
+        {
+          "type": "Column",
+          "properties": {
+            "crossAxisAlignment": "CrossAxisAlignment.start"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "properties": {
+                "padding": { "left": 20.0, "right": 20.0, "top": 20.0, "bottom": 20.0 },
+                "decoration": {
+                  "color": 4294927872,
+                  "borderRadius": 0
+                }
+              },
+              "children": [
+                {
+                  "type": "Column",
+                  "properties": {
+                    "crossAxisAlignment": "CrossAxisAlignment.start"
+                  },
+                  "children": [
+                    {
+                      "type": "Row",
+                      "properties": {
+                        "mainAxisAlignment": "MainAxisAlignment.spaceBetween"
+                      },
+                      "children": [
+                        {
+                          "type": "Column",
+                          "properties": {
+                            "crossAxisAlignment": "CrossAxisAlignment.start"
+                          },
+                          "children": [
+                            {
+                              "type": "Text",
+                              "properties": {
+                                "text": "Deliver to",
+                                "fontSize": 14.0,
+                                "color": 4294967295
+                              },
+                              "children": []
+                            },
+                            {
+                              "type": "Row",
+                              "properties": {},
+                              "children": [
+                                {
+                                  "type": "Icon",
+                                  "properties": {
+                                    "icon": "Icons.location_on",
+                                    "size": 18.0,
+                                    "color": 4294967295
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "New York, USA",
+                                    "fontSize": 16.0,
+                                    "fontWeight": "FontWeight.bold",
+                                    "color": 4294967295
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Icon",
+                          "properties": {
+                            "icon": "Icons.notifications_outlined",
+                            "color": 4294967295,
+                            "size": 28.0
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "SizedBox",
+                      "properties": { "height": 16.0 },
+                      "children": []
+                    },
+                    {
+                      "type": "TextField",
+                      "properties": {
+                        "hintText": "Search for food, restaurants...",
+                        "filled": true,
+                        "fillColor": 4294967295,
+                        "border": "OutlineInputBorder",
+                        "prefixIcon": "Icons.search",
+                        "contentPadding": { "left": 16.0, "right": 16.0, "top": 12.0, "bottom": 12.0 }
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": { "left": 20.0, "top": 20.0, "bottom": 10.0 }
+              },
+              "children": [
+                {
+                  "type": "Text",
+                  "properties": {
+                    "text": "Categories",
+                    "fontSize": 20.0,
+                    "fontWeight": "FontWeight.bold",
+                    "color": 4281545544
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "height": 110.0,
+                "margin": { "bottom": 8.0 }
+              },
+              "children": [
+                {
+                  "type": "ListView",
+                  "properties": {
+                    "scrollDirection": "horizontal",
+                    "padding": { "left": 20.0, "right": 20.0 }
+                  },
+                  "children": [
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 90.0,
+                        "margin": { "right": 12.0 },
+                        "decoration": { "color": 4294963398, "borderRadius": 16.0 }
+                      },
+                      "children": [
+                        {
+                          "type": "Column",
+                          "properties": { "mainAxisAlignment": "MainAxisAlignment.center" },
+                          "children": [
+                            { "type": "Icon", "properties": { "icon": "Icons.local_pizza", "size": 32.0, "color": 4294927872 }, "children": [] },
+                            { "type": "SizedBox", "properties": { "height": 6.0 }, "children": [] },
+                            { "type": "Text", "properties": { "text": "Pizza", "fontSize": 12.0, "fontWeight": "FontWeight.w600", "color": 4281545544, "textAlign": "TextAlign.center" }, "children": [] }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 90.0,
+                        "margin": { "right": 12.0 },
+                        "decoration": { "color": 4294963398, "borderRadius": 16.0 }
+                      },
+                      "children": [
+                        {
+                          "type": "Column",
+                          "properties": { "mainAxisAlignment": "MainAxisAlignment.center" },
+                          "children": [
+                            { "type": "Icon", "properties": { "icon": "Icons.ramen_dining", "size": 32.0, "color": 4294927872 }, "children": [] },
+                            { "type": "SizedBox", "properties": { "height": 6.0 }, "children": [] },
+                            { "type": "Text", "properties": { "text": "Noodles", "fontSize": 12.0, "fontWeight": "FontWeight.w600", "color": 4281545544, "textAlign": "TextAlign.center" }, "children": [] }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 90.0,
+                        "margin": { "right": 12.0 },
+                        "decoration": { "color": 4294963398, "borderRadius": 16.0 }
+                      },
+                      "children": [
+                        {
+                          "type": "Column",
+                          "properties": { "mainAxisAlignment": "MainAxisAlignment.center" },
+                          "children": [
+                            { "type": "Icon", "properties": { "icon": "Icons.rice_bowl", "size": 32.0, "color": 4294927872 }, "children": [] },
+                            { "type": "SizedBox", "properties": { "height": 6.0 }, "children": [] },
+                            { "type": "Text", "properties": { "text": "Burgers", "fontSize": 12.0, "fontWeight": "FontWeight.w600", "color": 4281545544, "textAlign": "TextAlign.center" }, "children": [] }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "width": 90.0,
+                        "margin": { "right": 12.0 },
+                        "decoration": { "color": 4294963398, "borderRadius": 16.0 }
+                      },
+                      "children": [
+                        {
+                          "type": "Column",
+                          "properties": { "mainAxisAlignment": "MainAxisAlignment.center" },
+                          "children": [
+                            { "type": "Icon", "properties": { "icon": "Icons.local_drink", "size": 32.0, "color": 4294927872 }, "children": [] },
+                            { "type": "SizedBox", "properties": { "height": 6.0 }, "children": [] },
+                            { "type": "Text", "properties": { "text": "Drinks", "fontSize": 12.0, "fontWeight": "FontWeight.w600", "color": 4281545544, "textAlign": "TextAlign.center" }, "children": [] }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": { "left": 20.0, "top": 12.0, "bottom": 10.0 }
+              },
+              "children": [
+                {
+                  "type": "Text",
+                  "properties": {
+                    "text": "Popular Restaurants",
+                    "fontSize": 20.0,
+                    "fontWeight": "FontWeight.bold",
+                    "color": 4281545544
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": { "left": 20.0, "right": 20.0, "bottom": 8.0 },
+                "decoration": { "color": 4294967295, "borderRadius": 16.0 },
+                "margin": { "left": 20.0, "right": 20.0, "bottom": 16.0 }
+              },
+              "children": [
+                {
+                  "type": "Column",
+                  "properties": { "crossAxisAlignment": "CrossAxisAlignment.start" },
+                  "children": [
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "height": 140.0,
+                        "decoration": { "color": 4294963398, "borderRadius": 12.0 }
+                      },
+                      "children": [
+                        {
+                          "type": "Center",
+                          "properties": {},
+                          "children": [
+                            { "type": "Icon", "properties": { "icon": "Icons.restaurant", "size": 56.0, "color": 4294927872 }, "children": [] }
+                          ]
+                        }
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "height": 10.0 }, "children": [] },
+                    {
+                      "type": "Row",
+                      "properties": { "mainAxisAlignment": "MainAxisAlignment.spaceBetween" },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "properties": { "text": "Mario's Italian Kitchen", "fontSize": 16.0, "fontWeight": "FontWeight.bold", "color": 4281545544 },
+                          "children": []
+                        },
+                        {
+                          "type": "Row",
+                          "properties": {},
+                          "children": [
+                            { "type": "Icon", "properties": { "icon": "Icons.star", "size": 16.0, "color": 4294944550 }, "children": [] },
+                            { "type": "Text", "properties": { "text": "4.8", "fontSize": 14.0, "fontWeight": "FontWeight.w600", "color": 4281545544 }, "children": [] }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Row",
+                      "properties": {},
+                      "children": [
+                        { "type": "Icon", "properties": { "icon": "Icons.access_time", "size": 14.0, "color": 4288256409 }, "children": [] },
+                        { "type": "SizedBox", "properties": { "width": 4.0 }, "children": [] },
+                        { "type": "Text", "properties": { "text": "25-30 min  •  Free delivery", "fontSize": 13.0, "color": 4288256409 }, "children": [] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": { "left": 20.0, "right": 20.0, "bottom": 24.0 },
+                "decoration": { "color": 4294967295, "borderRadius": 16.0 },
+                "margin": { "left": 20.0, "right": 20.0, "bottom": 16.0 }
+              },
+              "children": [
+                {
+                  "type": "Column",
+                  "properties": { "crossAxisAlignment": "CrossAxisAlignment.start" },
+                  "children": [
+                    {
+                      "type": "Container",
+                      "properties": {
+                        "height": 140.0,
+                        "decoration": { "color": 4292533247, "borderRadius": 12.0 }
+                      },
+                      "children": [
+                        {
+                          "type": "Center",
+                          "properties": {},
+                          "children": [
+                            { "type": "Icon", "properties": { "icon": "Icons.local_pizza", "size": 56.0, "color": 4285887743 }, "children": [] }
+                          ]
+                        }
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "height": 10.0 }, "children": [] },
+                    {
+                      "type": "Row",
+                      "properties": { "mainAxisAlignment": "MainAxisAlignment.spaceBetween" },
+                      "children": [
+                        {
+                          "type": "Text",
+                          "properties": { "text": "Pizza Palace", "fontSize": 16.0, "fontWeight": "FontWeight.bold", "color": 4281545544 },
+                          "children": []
+                        },
+                        {
+                          "type": "Row",
+                          "properties": {},
+                          "children": [
+                            { "type": "Icon", "properties": { "icon": "Icons.star", "size": 16.0, "color": 4294944550 }, "children": [] },
+                            { "type": "Text", "properties": { "text": "4.6", "fontSize": 14.0, "fontWeight": "FontWeight.w600", "color": 4281545544 }, "children": [] }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Row",
+                      "properties": {},
+                      "children": [
+                        { "type": "Icon", "properties": { "icon": "Icons.access_time", "size": 14.0, "color": 4288256409 }, "children": [] },
+                        { "type": "SizedBox", "properties": { "width": 4.0 }, "children": [] },
+                        { "type": "Text", "properties": { "text": "35-45 min  •  $2.99 delivery", "fontSize": 13.0, "color": 4288256409 }, "children": [] }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

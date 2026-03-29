@@ -1,0 +1,243 @@
+{
+  "id": "social_profile_root",
+  "type": "Scaffold",
+  "properties": {
+    "backgroundColor": "#0F172A"
+  },
+  "children": [
+    {
+      "id": "social_scroll",
+      "type": "ListView",
+      "properties": {},
+      "children": [
+        {
+          "id": "cover_stack",
+          "type": "Stack",
+          "properties": {},
+          "children": [
+            {
+              "id": "cover_image",
+              "type": "Container",
+              "properties": {
+                "height": 200,
+                "color": "#3B82F6",
+                "borderRadius": 0
+              },
+              "children": []
+            },
+            {
+              "id": "avatar_positioned",
+              "type": "Container",
+              "properties": {
+                "margin": "EdgeInsets.only(top: 150, left: 24)",
+                "height": 100,
+                "width": 100,
+                "color": "#0F172A",
+                "borderRadius": 50,
+                "padding": "EdgeInsets.all(4)"
+              },
+              "children": [
+                {
+                  "id": "avatar_inner",
+                  "type": "Container",
+                  "properties": {
+                    "color": "#6366F1",
+                    "borderRadius": 46
+                  },
+                  "children": [
+                    {
+                      "id": "avatar_icon",
+                      "type": "Icon",
+                      "properties": {
+                        "icon": "Icons.person",
+                        "size": 50,
+                        "color": "#FFFFFF"
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "profile_info",
+          "type": "Container",
+          "properties": {
+            "padding": "EdgeInsets.all(24)"
+          },
+          "children": [
+            {
+              "id": "name_text",
+              "type": "Text",
+              "properties": {
+                "text": "Alex Johnson",
+                "fontSize": 28,
+                "fontWeight": "FontWeight.bold",
+                "color": "#F8FAFC"
+              },
+              "children": []
+            },
+            {
+              "id": "handle_text",
+              "type": "Text",
+              "properties": {
+                "text": "@alexj_design",
+                "fontSize": 16,
+                "color": "#94A3B8"
+              },
+              "children": []
+            },
+            {
+              "id": "bio_text",
+              "type": "Container",
+              "properties": {
+                "margin": "EdgeInsets.only(top: 16)"
+              },
+              "children": [
+                {
+                  "id": "bio",
+                  "type": "Text",
+                  "properties": {
+                    "text": "Digital creator & Flutter enthusiast. Building beautiful UI experiences every single day. 🚀✨",
+                    "fontSize": 16,
+                    "color": "#CBD5E1"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "stats_row",
+              "type": "Row",
+              "properties": {
+                "mainAxisAlignment": "MainAxisAlignment.spaceBetween"
+              },
+              "children": [
+                {
+                  "id": "stat_1",
+                  "type": "Column",
+                  "properties": {},
+                  "children": [
+                    {
+                      "id": "s1_val",
+                      "type": "Text",
+                      "properties": {"text": "12.5K", "fontSize": 20, "fontWeight": "FontWeight.bold", "color": "#F8FAFC"},
+                      "children": []
+                    },
+                    {
+                      "id": "s1_lbl",
+                      "type": "Text",
+                      "properties": {"text": "Followers", "fontSize": 14, "color": "#64748B"},
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "stat_2",
+                  "type": "Column",
+                  "properties": {},
+                  "children": [
+                    {
+                      "id": "s2_val",
+                      "type": "Text",
+                      "properties": {"text": "842", "fontSize": 20, "fontWeight": "FontWeight.bold", "color": "#F8FAFC"},
+                      "children": []
+                    },
+                    {
+                      "id": "s2_lbl",
+                      "type": "Text",
+                      "properties": {"text": "Following", "fontSize": 14, "color": "#64748B"},
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "stat_3",
+                  "type": "Column",
+                  "properties": {},
+                  "children": [
+                    {
+                      "id": "s3_val",
+                      "type": "Text",
+                      "properties": {"text": "156", "fontSize": 20, "fontWeight": "FontWeight.bold", "color": "#F8FAFC"},
+                      "children": []
+                    },
+                    {
+                      "id": "s3_lbl",
+                      "type": "Text",
+                      "properties": {"text": "Posts", "fontSize": 14, "color": "#64748B"},
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "action_buttons",
+              "type": "Row",
+              "properties": {
+                "mainAxisAlignment": "MainAxisAlignment.spaceBetween"
+              },
+              "children": [
+                {
+                  "id": "follow_btn",
+                  "type": "Container",
+                  "properties": {
+                    "color": "#3B82F6",
+                    "width": 160,
+                    "height": 48,
+                    "borderRadius": 24,
+                    "margin": "EdgeInsets.only(top: 24)"
+                  },
+                  "children": [
+                    {
+                      "id": "fb_center",
+                      "type": "Center",
+                      "properties": {},
+                      "children": [
+                        {
+                          "id": "fb_txt",
+                          "type": "Text",
+                          "properties": {"text": "Follow", "color": "#FFFFFF", "fontSize": 16, "fontWeight": "FontWeight.bold"},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "msg_btn",
+                  "type": "Container",
+                  "properties": {
+                    "color": "#1E293B",
+                    "width": 160,
+                    "height": 48,
+                    "borderRadius": 24,
+                    "margin": "EdgeInsets.only(top: 24)"
+                  },
+                  "children": [
+                    {
+                      "id": "mb_center",
+                      "type": "Center",
+                      "properties": {},
+                      "children": [
+                        {
+                          "id": "mb_txt",
+                          "type": "Text",
+                          "properties": {"text": "Message", "color": "#F8FAFC", "fontSize": 16, "fontWeight": "FontWeight.bold"},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
