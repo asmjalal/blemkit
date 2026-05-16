@@ -7,9 +7,19 @@ class ImageBuilder extends BaseWidgetBuilder {
   Widget build(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
     return Image.network(
       node.properties['src'] ?? '',
-      width: node.properties['width']?.toDouble(),
-      height: node.properties['height']?.toDouble(),
+      width: parseDouble(node.properties['width']),
+      height: parseDouble(node.properties['height']),
       fit: parseBoxFit(node.properties['fit']),
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: parseDouble(node.properties['width']) ?? 50.0,
+          height: parseDouble(node.properties['height']) ?? 50.0,
+          color: Colors.grey[300],
+          child: const Center(
+            child: Icon(Icons.broken_image, color: Colors.grey),
+          ),
+        );
+      },
     );
   }
 } 

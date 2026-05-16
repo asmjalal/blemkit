@@ -1,17 +1,47 @@
 import '../models/widget_node.dart';
 import './widget_generator_registry.dart';
+import './theme_generator.dart';
 
 abstract class BaseWidgetGenerator {
+  static Map<String, String> idToClassName = {};
+  static Map<String, dynamic> themeProps = {};
+  static List<String> stateVariables = []; // Collects: "bool _isAccepted = false;"
+  static List<String> disposeVariables = []; // Collects: "_controller.dispose();"
+
   String generateCode(WidgetNode node, {int indent = 0});
   
   String getIndentString(int indent) => '  ' * indent;
   String getChildIndentStr(int indent) => '  ' * (indent + 1);
+
+  /// JSON often stores `"Axis.horizontal"`; avoid `Axis.Axis.horizontal` in Dart.
+  String axisExpression(dynamic raw) {
+    final s = raw?.toString().trim() ?? '';
+    if (s.isEmpty) return 'Axis.vertical';
+    if (s.startsWith('Axis.')) return s;
+    return 'Axis.$s';
+  }
+
+  String generateNavigationCode(String? targetId) {
+    final body = generateNavigationBody(targetId);
+    return '() { $body }';
+  }
+
+  String generateNavigationBody(String? targetId) {
+    if (targetId == null || !idToClassName.containsKey(targetId)) {
+      return '';
+    }
+    final className = idToClassName[targetId];
+    return 'Navigator.push(context, MaterialPageRoute(builder: (context) => const $className()));';
+  }
   
   String generateProperties(Map<String, dynamic> properties, {int indent = 0}) {
     final props = <String>[];
     final currentIndent = getIndentString(indent);
     final nestedChildIndentStr = getChildIndentStr(indent + 1);
-    properties.forEach((key, value) {
+    final Map<String, dynamic> filteredProperties = Map.from(properties)..removeWhere((key, value) => 
+      ['navigateTo', 'id', 'children', 'pageName', 'description', 'paddingLinked'].contains(key));
+    
+    filteredProperties.forEach((key, value) {
       if (value != null) {
         String formattedValue;
         if (value is Map<String, dynamic>) {
@@ -75,6 +105,9 @@ abstract class BaseWidgetGenerator {
           } else if (value.startsWith('() {') && value.endsWith('}')) {
             // Likely an anonymous function string
             formattedValue = value; // Keep as is, e.g., () {}
+          } else if (key.toLowerCase().contains('color') && (value.startsWith('0x') || int.tryParse(value) != null)) {
+            // Handle hex strings or numeric strings for colors
+            formattedValue = formatColor(value);
           } else {
             formattedValue = '\'${escapeString(value)}\''; // Quote other string literals
           }
@@ -107,16 +140,21 @@ abstract class BaseWidgetGenerator {
   String formatColor(dynamic value) {
     if (value == null) return 'Colors.transparent';
     if (value is int) {
-      return 'Color(0x${value.toRadixString(16).padLeft(8, '0').toUpperCase()})';
+      final hex = '0x${value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+      return ThemeGenerator.mapColorToToken(hex, themeProps);
     }
     if (value is String) {
       if (value.startsWith('Colors.')) return value;
-      if (value.startsWith('0x')) return 'Color($value)';
+      if (value.startsWith('0x')) {
+        return ThemeGenerator.mapColorToToken(value, themeProps);
+      }
       final intValue = int.tryParse(value);
       if (intValue != null) {
-        return 'Color(0x${intValue.toRadixString(16).padLeft(8, '0').toUpperCase()})';
+        final hex = '0x${intValue.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+        return ThemeGenerator.mapColorToToken(hex, themeProps);
       }
-      return 'Color(0x${value.toUpperCase()})';
+      final hex = '0x${value.toUpperCase()}';
+      return ThemeGenerator.mapColorToToken(hex, themeProps);
     }
     return 'Colors.transparent';
   }
@@ -130,8 +168,25 @@ abstract class BaseWidgetGenerator {
   }
 
   String escapeString(String value) {
-    // Escape single quotes and dollar signs
-    return value.replaceAll("'", "\\'").replaceAll("\$", "\\\$");
+    // Escape single quotes, dollar signs, and newlines
+    return value.replaceAll("'", "\\'").replaceAll("\$", "\\\$").replaceAll("\n", "\\n");
+  }
+
+  String parseEdgeInsets(dynamic value) {
+    if (value is Map) {
+      final left = value['left'] ?? 0;
+      final right = value['right'] ?? 0;
+      final top = value['top'] ?? 0;
+      final bottom = value['bottom'] ?? 0;
+      return 'EdgeInsets.only(left: $left, top: $top, right: $right, bottom: $bottom)';
+    } else if (value is String) {
+      if (value.startsWith('EdgeInsets.')) {
+        return value;
+      }
+      return 'EdgeInsets.all($value)';
+    } else {
+      return 'EdgeInsets.all($value)';
+    }
   }
 }
  

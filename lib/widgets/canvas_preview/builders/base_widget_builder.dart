@@ -1,14 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../models/widget_node.dart';
+import '../../../providers/widget_tree_provider.dart';
 import '../../../utils/color_utils.dart';
 
 abstract class BaseWidgetBuilder {
   Widget build(BuildContext context, WidgetNode node, WidgetNode? hoveredNode);
   
   // Helper methods for parsing properties from JSON
-  Color? parseColor(dynamic value) {
+  Color? parseColor(dynamic value, BuildContext context) {
+    if (value == null) return null;
+    final theme = Provider.of<WidgetTreeProvider>(context, listen: false).themeProperties;
+    return ColorUtils.parseColor(value, theme, Colors.transparent);
+  }
+
+  // Legacy support for builders that don't pass context yet
+  Color? parseColorLegacy(dynamic value) {
     if (value == null) return null;
     return ColorUtils.parseColor(value);
   }
@@ -66,7 +76,11 @@ abstract class BaseWidgetBuilder {
   double? parseDouble(dynamic value) {
     if (value == null) return null;
     if (value is num) return value.toDouble();
-    if (value is String) return double.tryParse(value);
+    if (value is String) {
+      if (value == 'double.infinity') return double.infinity;
+      if (value == 'double.maxFinite') return double.maxFinite;
+      return double.tryParse(value);
+    }
     return null;
   }
 
@@ -230,6 +244,22 @@ abstract class BaseWidgetBuilder {
     return null;
   }
 
+  Gradient? parseGradient(dynamic value, BuildContext context) {
+    if (value == null) return null;
+    if (value is Map<String, dynamic>) {
+      final List<dynamic> colorsList = value['colors'] as List<dynamic>? ?? [];
+      final List<Color> colors = colorsList.map((c) => parseColor(c, context) ?? Colors.transparent).toList();
+      if (colors.length < 2) return null;
+      
+      return LinearGradient(
+        colors: colors,
+        begin: parseAlignment(value['begin']) as Alignment? ?? Alignment.centerLeft,
+        end: parseAlignment(value['end']) as Alignment? ?? Alignment.centerRight,
+      );
+    }
+    return null;
+  }
+
   Axis? parseAxis(dynamic value) {
     if (value == null) return null;
     if (value is String) {
@@ -254,13 +284,15 @@ abstract class BaseWidgetBuilder {
     return null;
   }
 
-  IconData? parseIconData(dynamic value) {
+  dynamic parseIconData(dynamic value) {
     if (value == null) return null;
     if (value is String) {
       switch (value) {
         // Navigation & UI
         case 'Icons.search': return Icons.search;
         case 'Icons.search_outlined': return Icons.search_outlined;
+        case 'Icons.alternate_email': return Icons.alternate_email;
+        case 'Icons.more_horiz': return Icons.more_horiz;
         case 'Icons.more_vert': return Icons.more_vert;
         case 'Icons.add': return Icons.add;
         case 'Icons.add_circle': return Icons.add_circle;
@@ -283,6 +315,7 @@ abstract class BaseWidgetBuilder {
         case 'Icons.account_circle': return Icons.account_circle;
         // Home & Navigation tabs
         case 'Icons.home': return Icons.home;
+        case 'Icons.home_filled': return Icons.home_filled;
         case 'Icons.home_outlined': return Icons.home_outlined;
         case 'Icons.explore': return Icons.explore;
         case 'Icons.settings': return Icons.settings;
@@ -298,14 +331,21 @@ abstract class BaseWidgetBuilder {
         case 'Icons.email_outlined': return Icons.email_outlined;
         case 'Icons.phone': return Icons.phone;
         case 'Icons.call': return Icons.call;
+        case 'Icons.send': return Icons.send;
+        case 'Icons.send_outlined': return Icons.send_outlined;
+        case 'Icons.send_rounded': return Icons.send_rounded;
         // Commerce & Shopping
         case 'Icons.shopping_cart': return Icons.shopping_cart;
         case 'Icons.shopping_cart_outlined': return Icons.shopping_cart_outlined;
+        case 'Icons.shopping_bag': return Icons.shopping_bag;
         case 'Icons.shopping_bag_outlined': return Icons.shopping_bag_outlined;
         case 'Icons.attach_money': return Icons.attach_money;
         case 'Icons.credit_card': return Icons.credit_card;
         case 'Icons.local_offer': return Icons.local_offer;
         case 'Icons.storefront': return Icons.storefront;
+        case 'Icons.payments': return Icons.payments;
+        case 'Icons.account_balance': return Icons.account_balance;
+        case 'Icons.account_balance_wallet': return Icons.account_balance_wallet;
         // Devices & Tech
         case 'Icons.phone_android': return Icons.phone_android;
         case 'Icons.laptop_mac': return Icons.laptop_mac;
@@ -349,10 +389,33 @@ abstract class BaseWidgetBuilder {
         case 'Icons.delete': return Icons.delete;
         case 'Icons.delete_outline': return Icons.delete_outline;
         case 'Icons.share': return Icons.share;
+        case 'Icons.send': return Icons.send;
+        case 'Icons.send_outlined': return Icons.send_outlined;
+        case 'Icons.bookmark': return Icons.bookmark;
+        case 'Icons.bookmark_border': return Icons.bookmark_border;
+        case 'Icons.bookmark_outline': return Icons.bookmark_outline;
         case 'Icons.download': return Icons.download;
         case 'Icons.upload': return Icons.upload;
         case 'Icons.visibility': return Icons.visibility;
         case 'Icons.visibility_off': return Icons.visibility_off;
+        case 'Icons.refresh': return Icons.refresh;
+        case 'Icons.star': return Icons.star;
+        case 'Icons.star_outline': return Icons.star_outline;
+        case 'Icons.star_half': return Icons.star_half;
+        case 'Icons.filter_list': return Icons.filter_list;
+        case 'Icons.tune': return Icons.tune;
+        case 'Icons.sort': return Icons.sort;
+        case 'Icons.cloud': return Icons.cloud;
+        case 'Icons.cloud_outlined': return Icons.cloud_outlined;
+        case 'Icons.wifi': return Icons.wifi;
+        case 'Icons.bluetooth': return Icons.bluetooth;
+        case 'Icons.battery_full': return Icons.battery_full;
+        case 'Icons.lock_open': return Icons.lock_open;
+        case 'Icons.map_outlined': return Icons.map_outlined;
+        case 'Icons.directions': return Icons.directions;
+        case 'Icons.directions_bike': return Icons.directions_bike;
+        case 'Icons.directions_car': return Icons.directions_car;
+        case 'Icons.directions_walk': return Icons.directions_walk;
         case 'Icons.check': return Icons.check;
         case 'Icons.check_circle': return Icons.check_circle;
         case 'Icons.done': return Icons.done;
@@ -380,17 +443,113 @@ abstract class BaseWidgetBuilder {
         case 'Icons.light_mode': return Icons.light_mode;
         case 'Icons.wb_sunny': return Icons.wb_sunny;
         case 'Icons.auto_awesome': return Icons.auto_awesome;
+        // Font Awesome Icons
+        case 'FontAwesomeIcons.instagram': return FontAwesomeIcons.instagram;
+        case 'FontAwesomeIcons.facebook': return FontAwesomeIcons.facebook;
+        case 'FontAwesomeIcons.twitter': return FontAwesomeIcons.twitter;
+        case 'FontAwesomeIcons.tiktok': return FontAwesomeIcons.tiktok;
+        case 'FontAwesomeIcons.youtube': return FontAwesomeIcons.youtube;
+        case 'FontAwesomeIcons.linkedin': return FontAwesomeIcons.linkedin;
+        case 'FontAwesomeIcons.github': return FontAwesomeIcons.github;
+        case 'FontAwesomeIcons.apple': return FontAwesomeIcons.apple;
+        case 'FontAwesomeIcons.google': return FontAwesomeIcons.google;
+        case 'FontAwesomeIcons.heart': return FontAwesomeIcons.heart;
+        case 'FontAwesomeIcons.solidHeart': return FontAwesomeIcons.solidHeart;
+        case 'FontAwesomeIcons.comment': return FontAwesomeIcons.comment;
+        case 'FontAwesomeIcons.solidComment': return FontAwesomeIcons.solidComment;
+        case 'FontAwesomeIcons.paperPlane': return FontAwesomeIcons.paperPlane;
+        case 'FontAwesomeIcons.solidPaperPlane': return FontAwesomeIcons.solidPaperPlane;
+        case 'FontAwesomeIcons.bookmark': return FontAwesomeIcons.bookmark;
+        case 'FontAwesomeIcons.solidBookmark': return FontAwesomeIcons.solidBookmark;
+        case 'FontAwesomeIcons.magnifyingGlass': return FontAwesomeIcons.magnifyingGlass;
+        case 'FontAwesomeIcons.house': return FontAwesomeIcons.house;
+        case 'FontAwesomeIcons.bell': return FontAwesomeIcons.bell;
+        case 'FontAwesomeIcons.solidBell': return FontAwesomeIcons.solidBell;
+        case 'FontAwesomeIcons.user': return FontAwesomeIcons.user;
+        case 'FontAwesomeIcons.solidUser': return FontAwesomeIcons.solidUser;
+        case 'FontAwesomeIcons.gear': return FontAwesomeIcons.gear;
+        case 'FontAwesomeIcons.plus': return FontAwesomeIcons.plus;
+        case 'FontAwesomeIcons.xmark': return FontAwesomeIcons.xmark;
+        case 'FontAwesomeIcons.bars': return FontAwesomeIcons.bars;
+        case 'FontAwesomeIcons.ellipsisVertical': return FontAwesomeIcons.ellipsisVertical;
+        case 'FontAwesomeIcons.ellipsis': return FontAwesomeIcons.ellipsis;
       }
     }
     return Icons.widgets; // fallback icon instead of null
   }
 
-  String resolveDataBinding(WidgetNode node, String defaultValue) {
+  /// Safely extracts a display string from any property value.
+  /// Handles String, num, bool, and nested widget Map (extracts 'text' from it).
+  /// Never throws a _JsonMap cast error.
+  String safeString(dynamic value, {String fallback = ''}) {
+    if (value == null) return fallback;
+    if (value is String) return value;
+    if (value is num || value is bool) return value.toString();
+    if (value is Map<String, dynamic>) {
+      // AI returned a nested widget node — try to extract its text property
+      final text = value['properties']?['text'];
+      if (text != null) return safeString(text, fallback: fallback);
+      // Fallback: try 'label'
+      final label = value['properties']?['label'];
+      if (label != null) return safeString(label, fallback: fallback);
+      return fallback;
+    }
+    return fallback;
+  }
+
+  /// Safely builds a Widget from a property that may be a String, a Map (widget node), or a WidgetNode.
+  /// If it's a String → wraps in Text. If it's a Map → builds via factory. Null → null.
+  Widget? safeWidget(BuildContext context, dynamic value, WidgetNode? hoveredNode, {Widget? fallback}) {
+    if (value == null) return fallback;
+    if (value is WidgetNode) {
+      return _buildSafe(context, value, hoveredNode);
+    }
+    if (value is Map<String, dynamic>) {
+      try {
+        final node = WidgetNode.fromJson(value);
+        return _buildSafe(context, node, hoveredNode);
+      } catch (_) {
+        return fallback;
+      }
+    }
+    if (value is String && value.isNotEmpty) {
+      return Text(value);
+    }
+    return fallback;
+  }
+
+  Widget _buildSafe(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
+    // Lazy import via factory — avoids circular import
+    // We re-use the factory through the static method.
+    // This is safe because WidgetBuilderFactory is already initialised.
+    try {
+      // ignore: avoid_dynamic_calls
+      return WidgetBuilderFactoryRef.build(context, node, hoveredNode);
+    } catch (e) {
+      return Text('Error: $e', style: const TextStyle(color: Colors.red, fontSize: 10));
+    }
+  }
+
+  String resolveDataBinding(WidgetNode node, dynamic defaultValue) {
     final binding = node.properties['dataBinding'] as Map<String, dynamic>?;
     if (binding == null || binding['field'] == null || binding['field'].toString().isEmpty) {
-      return defaultValue;
+      return safeString(defaultValue);
     }
     // For now, return a placeholder indicating what's bound
     return '{${binding['field']}}';
+  }
+}
+
+/// Thin bridge to WidgetBuilderFactory to avoid circular imports in BaseWidgetBuilder.
+class WidgetBuilderFactoryRef {
+  static Widget Function(BuildContext, WidgetNode, WidgetNode?)? _fn;
+
+  static void register(Widget Function(BuildContext, WidgetNode, WidgetNode?) fn) {
+    _fn = fn;
+  }
+
+  static Widget build(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
+    if (_fn != null) return _fn!(context, node, hoveredNode);
+    return const SizedBox(); // fallback before registration
   }
 }

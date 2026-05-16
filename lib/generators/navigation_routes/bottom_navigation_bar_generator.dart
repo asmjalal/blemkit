@@ -8,12 +8,38 @@ class BottomNavigationBarGenerator extends BaseWidgetGenerator {
     final indentStr = getIndentString(indent);
     final childIndentStr = getChildIndentStr(indent);
     
+    // Handle navigation
+    String onTapCode = '(index) {}';
+    if (node.properties['items'] != null && node.properties['items'] is List) {
+      final items = node.properties['items'] as List;
+      final navCalls = <String>[];
+      bool hasNav = false;
+      for (int i = 0; i < items.length; i++) {
+        final item = items[i];
+        if (item is Map<String, dynamic> && item.containsKey('navigateTo')) {
+          final navBody = generateNavigationBody(item['navigateTo']);
+          if (navBody.isNotEmpty) {
+            navCalls.add('case $i: $navBody break;');
+            hasNav = true;
+          }
+        }
+      }
+      if (hasNav) {
+        onTapCode = '(index) {\n$childIndentStr  switch (index) {\n$childIndentStr    ${navCalls.join('\n$childIndentStr    ')}\n$childIndentStr  }\n$childIndentStr}';
+      }
+    }
+    
     final props = <String>[];
     props.add('currentIndex: ${node.properties['currentIndex'] ?? 0}');
-    props.add('onTap: (index) {}');
+    props.add('onTap: $onTapCode');
     
     if (node.properties['type'] != null) {
-      props.add('type: BottomNavigationBarType.${node.properties['type']}');
+      // Strip any AI-hallucinated prefix so we never get double "BottomNavigationBarType."
+      final rawType = node.properties['type'].toString()
+          .replaceAll('BottomNavigationBarType.', '');
+      if (rawType == 'fixed' || rawType == 'shifting') {
+        props.add('type: BottomNavigationBarType.$rawType');
+      }
     }
     
     if (node.properties['backgroundColor'] != null) {

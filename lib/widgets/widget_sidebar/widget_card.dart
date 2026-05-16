@@ -32,30 +32,25 @@ class WidgetCard extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          width: 80, // Added fixed width for palette consistency
-          height: 80, // Added fixed height
+          width: 70, // Added fixed width for palette consistency
+          height: 70, // Added fixed height
           decoration: BoxDecoration(
-            color: const Color(0xFF23263a),
+            color: const Color(0xFF2d3748).withOpacity(0.5),
             borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.12),
-                blurRadius: 3,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Center(child: Icon(icon, color: Colors.white, size: 26)),
-
+              Center(child: Icon(icon, color: Colors.white70, size: 21)),
+              SizedBox(height: 5,),
               Center(
                 child: Text(
                   label,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),

@@ -10,7 +10,7 @@ class RichTextBuilder extends BaseWidgetBuilder {
         text: node.properties['text'] ?? '',
         style: TextStyle(
           fontSize: parseDouble(node.properties['fontSize']) ?? 14.0,
-          color: parseColor(node.properties['textColor']),
+          color: parseColor(node.properties['textColor'], context),
           fontWeight: parseFontWeight(node.properties['fontWeight']),
           fontFamily: node.properties['fontFamily'] as String?,
         ),
@@ -20,7 +20,7 @@ class RichTextBuilder extends BaseWidgetBuilder {
               text: child['text'] as String?,
               style: TextStyle(
                 fontSize: parseDouble(child['properties']?['fontSize']) ?? 14.0,
-                color: parseColor(child['properties']?['color']),
+                color: parseColor(child['properties']?['color'], context),
                 fontWeight: parseFontWeight(child['properties']?['fontWeight']),
               ),
             );

@@ -7,12 +7,12 @@ class PositionedBuilder extends BaseWidgetBuilder {
   @override
   Widget build(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
     return Positioned(
-      left: node.properties['left']?.toDouble(),
-      top: node.properties['top']?.toDouble(),
-      right: node.properties['right']?.toDouble(),
-      bottom: node.properties['bottom']?.toDouble(),
-      width: node.properties['width']?.toDouble(),
-      height: node.properties['height']?.toDouble(),
+      left: parseDouble(node.properties['left']),
+      top: parseDouble(node.properties['top']),
+      right: parseDouble(node.properties['right']),
+      bottom: parseDouble(node.properties['bottom']),
+      width: parseDouble(node.properties['width']),
+      height: parseDouble(node.properties['height']),
       child: node.children.isNotEmpty 
           ? WidgetBuilderFactory.buildWidget(context, node.children.first, hoveredNode) 
           : const SizedBox(),

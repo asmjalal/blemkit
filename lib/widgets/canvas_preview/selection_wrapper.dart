@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
-import 'package:dotted_border/dotted_border.dart';
 import '../../providers/widget_tree_provider.dart';
 import '../../models/widget_node.dart';
 import '../widget_context_menu/widget_context_menu.dart';
+import '../widget_context_menu/widget_context_menu_actions.dart';
 
 class WidgetSelectionWrapper extends StatelessWidget {
   final WidgetNode node;
@@ -29,15 +30,18 @@ class WidgetSelectionWrapper extends StatelessWidget {
         final isSelected = provider.selectedNode?.id == node.id;
         final showBorder = isSelected || isHovered;
         final borderColor = isSelected ? Colors.deepPurple : Colors.deepPurpleAccent;
-        final dashPattern = isSelected ? [6.0, 3.0] : [3.0, 3.0]; // dashed for selected, dotted for hover
+        final borderWidth = isSelected ? 2.0 : 1.0;
 
         Widget bordered = showBorder
-            ? DottedBorder(
-                color: borderColor,
-                dashPattern: dashPattern,
-                borderType: BorderType.RRect,
-                radius: const Radius.circular(8),
-                strokeWidth: 2,
+            ? DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: borderColor,
+                    width: borderWidth,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                position: DecorationPosition.foreground,
                 child: child,
               )
             : child;
@@ -45,36 +49,91 @@ class WidgetSelectionWrapper extends StatelessWidget {
         return MouseRegion(
           onEnter: (_) => provider.setHoveredNode(node),
           onExit: (_) => provider.setHoveredNode(null),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              print('SelectionWrapper: Selecting widget ${node.type} with id ${node.id}');
-              provider.selectNode(node);
-            },
-            onSecondaryTapDown: (details) {
-              // First select the node, then show context menu
-              provider.selectNode(node);
-              WidgetContextMenu.show(
-                context,
-                details.globalPosition,
-                widgetId: node.id,
-                onAction: (action) {
-                  if (onContextMenuAction != null) {
-                    onContextMenuAction!(action);
+          child: Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerDown: (event) {
+              // Use raw pointer events so selection still works even when
+              // child widgets (InkWell, Button, Slider, etc.) win the gesture arena.
+              if (event.buttons == kPrimaryMouseButton || event.buttons == 0) {
+                final beforeId = provider.selectedNode?.id;
+                // If a deeper widget also handles this pointer down, it will likely
+                // select itself during the same dispatch. We only select this node
+                // if nothing else changed selection by the end of this event.
+                Future.microtask(() {
+                  if (provider.selectedNode?.id == beforeId) {
+                    provider.selectNode(node);
                   }
-                },
-                canDelete: true,
-                canRemove: true,
-                canWrap: true,
-                canDuplicate: true,
-                canUndo: true,
-                canRedo: true,
-              );
+                });
+              }
             },
-            child: bordered,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onSecondaryTapDown: (details) {
+                provider.selectNode(node);
+                WidgetContextMenu.show(
+                  context,
+                  details.globalPosition,
+                  widgetId: node.id,
+                  onAction: (action) {
+                    final root = provider.rootNode;
+                    if (root == null) return;
+                    
+                    if (action.startsWith('wrap_')) {
+                      final wrapperType = action.substring('wrap_'.length);
+                      provider.commandManager.executeAction(
+                        WrapWidgetAction(
+                          node: node,
+                          provider: provider,
+                          root: root,
+                          wrapperType: wrapperType,
+                        ),
+                      );
+                      return;
+                    }
+
+                    switch (action) {
+                      case 'duplicate':
+                        provider.commandManager.executeAction(
+                          DuplicateWidgetAction(node: node, provider: provider, root: root),
+                        );
+                        break;
+                      case 'delete':
+                        provider.commandManager.executeAction(
+                          DeleteWidgetAction(node: node, provider: provider, root: root),
+                        );
+                        break;
+                      case 'remove':
+                        // Also delete for now, or implement RemoveWidgetAction
+                        provider.commandManager.executeAction(
+                          DeleteWidgetAction(node: node, provider: provider, root: root),
+                        );
+                        break;
+                      case 'undo':
+                        provider.commandManager.undo();
+                        break;
+                      case 'redo':
+                        provider.commandManager.redo();
+                        break;
+                      default:
+                        if (onContextMenuAction != null) {
+                          onContextMenuAction!(action);
+                        }
+                    }
+                  },
+                  canDelete: true,
+                  canRemove: true,
+                  canWrap: true,
+                  canDuplicate: true,
+                  canUndo: true,
+                  canRedo: true,
+                );
+              },
+              child: bordered,
+            ),
           ),
         );
       },
     );
   }
 }
+

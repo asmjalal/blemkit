@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../models/widget_node.dart';
 import 'base_widget_builder.dart';
 import 'widget_builder_factory.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/widget_tree_provider.dart';
 
 class FloatingActionButtonBuilder extends BaseWidgetBuilder {
   @override
@@ -20,9 +22,20 @@ class FloatingActionButtonBuilder extends BaseWidgetBuilder {
     }
 
     return FloatingActionButton(
-      onPressed: () {}, // Default empty onPressed
-      backgroundColor: parseColor(node.properties['backgroundColor']),
-      foregroundColor: parseColor(node.properties['foregroundColor']),
+      onPressed: () {
+        final navigateTo = node.properties['navigateTo'];
+        if (navigateTo != null) {
+          final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+          try {
+            final target = provider.screens.firstWhere((s) => s.id == navigateTo);
+            provider.selectScreen(target);
+          } catch (_) {
+            // Screen might have been deleted
+          }
+        }
+      },
+      backgroundColor: parseColor(node.properties['backgroundColor'], context),
+      foregroundColor: parseColor(node.properties['foregroundColor'], context),
       elevation: parseDouble(node.properties['elevation']),
       child: childWidget, // Assign the built child widget
     );

@@ -59,6 +59,11 @@ class ScaffoldGenerator extends BaseWidgetGenerator {
         drawer = '\n$childIndentStr drawer: ${WidgetGeneratorRegistry.generateCode(child, indent: indent + 1)},';
       } else if (child.type == 'EndDrawer') {
         endDrawer = '\n$childIndentStr endDrawer: ${WidgetGeneratorRegistry.generateCode(child, indent: indent + 1)},';
+      } else if (child.type == 'BottomNavigationBar') {
+        // Fallback: AI sometimes places BottomNavigationBar in children — rescue it
+        if (bottomNavBar.isEmpty) {
+          bottomNavBar = '\n$childIndentStr bottomNavigationBar: ${WidgetGeneratorRegistry.generateCode(child, indent: indent + 1)},';
+        }
       } else {
         body = '\n$childIndentStr body: ${WidgetGeneratorRegistry.generateCode(child, indent: indent + 1)},';
       }

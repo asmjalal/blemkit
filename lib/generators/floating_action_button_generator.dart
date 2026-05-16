@@ -16,8 +16,10 @@ class FloatingActionButtonGenerator extends BaseWidgetGenerator {
       props.add(generatedProps);
     }
 
-    // Ensure onPressed is always added if not in properties
-    if (!node.properties.containsKey('onPressed')) {
+    // Ensure onPressed is handled
+    if (node.properties.containsKey('navigateTo')) {
+      props.add('onPressed: ${generateNavigationCode(node.properties['navigateTo'])}');
+    } else if (!node.properties.containsKey('onPressed')) {
       props.add('onPressed: () {}');
     }
 

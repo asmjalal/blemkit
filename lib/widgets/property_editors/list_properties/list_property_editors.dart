@@ -8,6 +8,8 @@ import '../color_picker_field.dart';
 import 'package:designflutterkit/utils/color_utils.dart';
 
 
+import '../dropdown_field.dart';
+
 List<Widget> buildListPropertyEditors(BuildContext context, WidgetNode node) {
   final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
   final properties = node.properties;
@@ -36,6 +38,14 @@ List<Widget> buildListPropertyEditors(BuildContext context, WidgetNode node) {
   return editors;
 }
 
+String _safeString(dynamic value) {
+  if (value is String) return value;
+  if (value is Map && value['properties'] is Map) {
+    return value['properties']['text']?.toString() ?? value['properties']['label']?.toString() ?? '';
+  }
+  return value?.toString() ?? '';
+}
+
 List<Widget> buildListTilePropertyEditors(BuildContext context, WidgetNode node) {
   final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
   final properties = node.properties;
@@ -45,7 +55,7 @@ List<Widget> buildListTilePropertyEditors(BuildContext context, WidgetNode node)
     buildSectionHeader('ListTile'),
     buildTextField(
       'Title',
-      properties['title'] ?? '',
+      _safeString(properties['title']),
       (value) {
         properties['title'] = value ?? '';
         provider.updateNodeProperties(node, properties);
@@ -53,7 +63,7 @@ List<Widget> buildListTilePropertyEditors(BuildContext context, WidgetNode node)
     ),
     buildTextField(
       'Subtitle',
-      properties['subtitle'] ?? '',
+      _safeString(properties['subtitle']),
       (value) {
         properties['subtitle'] = value ?? '';
         provider.updateNodeProperties(node, properties);
@@ -61,7 +71,7 @@ List<Widget> buildListTilePropertyEditors(BuildContext context, WidgetNode node)
     ),
     buildTextField(
       'Leading Icon (name)',
-      properties['leadingIcon'] ?? '',
+      _safeString(properties['leadingIcon']),
       (value) {
         properties['leadingIcon'] = value ?? '';
         provider.updateNodeProperties(node, properties);
@@ -77,7 +87,7 @@ List<Widget> buildListTilePropertyEditors(BuildContext context, WidgetNode node)
     ),
     buildTextField(
       'Trailing Icon (name)',
-      properties['trailingIcon'] ?? '',
+      _safeString(properties['trailingIcon']),
       (value) {
         properties['trailingIcon'] = value ?? '';
         provider.updateNodeProperties(node, properties);
@@ -102,6 +112,28 @@ List<Widget> buildListTilePropertyEditors(BuildContext context, WidgetNode node)
         ),
         const Text('Enabled'),
       ],
+    ),
+    const SizedBox(height: 12),
+    buildSectionHeader('Navigation'),
+    buildDropdownField(
+      'Navigate To',
+      provider.screens.any((s) => s.id == properties['navigateTo'])
+          ? provider.screens.firstWhere((s) => s.id == properties['navigateTo']).properties['pageName'] as String? ?? 'Page'
+          : 'None',
+      ['None', ...provider.screens.map((s) => s.properties['pageName'] as String? ?? 'Page')],
+      (value) {
+        if (value == 'None' || value == null) {
+          properties['navigateTo'] = null;
+        } else {
+          try {
+            final target = provider.screens.firstWhere((s) => s.properties['pageName'] == value);
+            properties['navigateTo'] = target.id;
+          } catch (e) {
+            properties['navigateTo'] = null;
+          }
+        }
+        provider.updateNodeProperties(node, properties);
+      },
     ),
   ]);
 

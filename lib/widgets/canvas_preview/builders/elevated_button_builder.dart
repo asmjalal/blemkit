@@ -10,10 +10,12 @@ class ElevatedButtonBuilder extends BaseWidgetBuilder {
     return ElevatedButton(
       onPressed: () {},
       style: ElevatedButton.styleFrom(
-        backgroundColor: parseColor(node.properties['backgroundColor']),
+        backgroundColor: parseColor(node.properties['backgroundColor'], context),
         padding: parseEdgeInsets(node.properties['padding']),
       ),
-      child: node.children.isNotEmpty ? WidgetBuilderFactory.buildWidget(context, node.children.first, hoveredNode) : const SizedBox(),
+      child: node.children.isNotEmpty 
+          ? WidgetBuilderFactory.buildWidget(context, node.children.first, hoveredNode) 
+          : Text(safeString(node.properties['text'], fallback: 'Button')),
     );
   }
 

@@ -8,8 +8,8 @@ class CheckboxBuilder extends BaseWidgetBuilder {
     return Checkbox(
       value: node.properties['value'] ?? false,
       onChanged: (bool? newValue) {},
-      activeColor: parseColor(node.properties['activeColor']),
-      checkColor: parseColor(node.properties['checkColor']),
+      activeColor: parseColor(node.properties['activeColor'], context),
+      checkColor: parseColor(node.properties['checkColor'], context),
     );
   }
 } 

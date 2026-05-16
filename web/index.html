@@ -33,6 +33,21 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBK0a_4wYDCiD44x4ZnmD72JewPY-P5Dnk",
+      authDomain: "fapbuilder-a27a8.firebaseapp.com",
+      projectId: "fapbuilder-a27a8",
+      storageBucket: "fapbuilder-a27a8.firebasestorage.app",
+      messagingSenderId: "813646770042",
+      appId: "1:813646770042:web:f501b3b1a16bcb179fb0c3",
+      measurementId: "G-MBK3TZTJJF"
+    };
+
+    initializeApp(firebaseConfig);
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

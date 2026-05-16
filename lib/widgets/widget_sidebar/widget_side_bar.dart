@@ -4,6 +4,7 @@ import 'package:designflutterkit/widgets/widget_sidebar/sidebar_tabbar.dart';
 import 'package:designflutterkit/widgets/widget_sidebar/widget_category_section.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../models/widget_node.dart';
 import '../../providers/widget_tree_provider.dart';
@@ -11,6 +12,8 @@ import '../widget_tree/widget_tree_editor.dart';
 import 'collapse_widget_tree.dart';
 import '../theme_editor_panel.dart';
 import '../data_source_panel.dart';
+import '../../screens/profile_screen.dart';
+import '../../screens/login_screen.dart';
 
 class WidgetSidebar extends StatefulWidget {
   final int selectedTab;
@@ -35,70 +38,108 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
   ];
   final Map<WidgetNode, bool> _expanded = {};
 
-  // Widget categories (copied from WidgetPalette)
-  final List<Map<String, dynamic>> categories = [
-    {
-      'name': 'Layout',
-      'widgets': [
-        {'type': 'Row', 'icon': Icons.view_column},
-        {'type': 'Column', 'icon': Icons.view_agenda},
-        {'type': 'Container', 'icon': Icons.crop_square},
-        {'type': 'ListView', 'icon': Icons.list},
-        {'type': 'GridView', 'icon': Icons.grid_on},
-        {'type': 'ExpansionTile', 'icon': Icons.expand_more},
-      ],
-    },
-    {
-      'name': 'Basic',
-      'widgets': [
-        {'type': 'Text', 'icon': Icons.text_fields},
-        {'type': 'RichText', 'icon': Icons.description},
-        {'type': 'Image', 'icon': Icons.image},
-        {'type': 'CircleImage', 'icon': Icons.account_circle},
-        {'type': 'Icon', 'icon': Icons.settings},
-        {'type': 'Button', 'icon': Icons.smart_button},
-        {'type': 'IconButton', 'icon': Icons.add_circle_outline},
-        {'type': 'ListTile', 'icon': Icons.list_alt},
-        {'type': 'SlidableListTile', 'icon': Icons.swipe},
-      ],
-    },
-    {
-      'name': 'Material',
-      'widgets': [
-        {'type': 'AppBar', 'icon': Icons.space_bar},
-        {'type': 'FAB', 'icon': Icons.add_circle},
-        {'type': 'Drawer', 'icon': Icons.menu},
-        {'type': 'EndDrawer', 'icon': Icons.menu_open},
-      ],
-    },
-    {
-      'name': 'Input',
-      'widgets': [
-        {'type': 'TextField', 'icon': Icons.edit},
-        {'type': 'DropDown', 'icon': Icons.arrow_drop_down_circle},
-        {'type': 'Checkbox', 'icon': Icons.check_box},
-        {'type': 'CheckboxListTile', 'icon': Icons.checklist},
-        {'type': 'Switch', 'icon': Icons.toggle_on},
-        {'type': 'SwitchListTile', 'icon': Icons.toggle_off},
-        {'type': 'RadioButton', 'icon': Icons.radio_button_checked},
-        {'type': 'PinCode', 'icon': Icons.password},
-        {'type': 'Slider', 'icon': Icons.tune},
-        {'type': 'RatingBar', 'icon': Icons.star},
-        {'type': 'CreditCardForm', 'icon': Icons.credit_card},
-        {'type': 'CounterButton', 'icon': Icons.exposure_plus_2},
-        {'type': 'ChoiceChips', 'icon': Icons.check_box_outline_blank},
-        {'type': 'PlacePicker', 'icon': Icons.place},
-        {'type': 'FormValidation', 'icon': Icons.verified_user},
-        {'type': 'CheckboxGroup', 'icon': Icons.checklist_rtl},
-        {'type': 'Signature', 'icon': Icons.edit_attributes},
-      ],
-    },
-  ];
+  List<Map<String, dynamic>> _getDynamicCategories(BuildContext context, {bool listen = true}) {
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: listen);
+    final themedWidgets = provider.themedWidgets;
+
+    return [
+      if (themedWidgets.isNotEmpty)
+        {
+          'name': 'Theme Widgets',
+          'widgets': themedWidgets.map((w) => {
+            'type': 'ThemedWidget:${w['id']}',
+            'label': w['name'],
+            'icon': _getIconForType(w['type']),
+            'data': w,
+          }).toList(),
+        },
+      {
+        'name': 'Layout',
+        'widgets': [
+          {'type': 'Row', 'icon': Icons.view_column},
+          {'type': 'Column', 'icon': Icons.view_agenda},
+          {'type': 'Container', 'icon': Icons.crop_square},
+          {'type': 'ListView', 'icon': Icons.list},
+          {'type': 'GridView', 'icon': Icons.grid_on},
+          {'type': 'ExpansionTile', 'icon': Icons.expand_more},
+        ],
+      },
+      {
+        'name': 'Basic',
+        'widgets': [
+          {'type': 'Text', 'icon': Icons.text_fields},
+          {'type': 'RichText', 'icon': Icons.description},
+          {'type': 'Image', 'icon': Icons.image},
+          {'type': 'CircleImage', 'icon': Icons.account_circle},
+          {'type': 'Icon', 'icon': Icons.settings},
+          {'type': 'Button', 'icon': Icons.smart_button},
+          {'type': 'IconButton', 'icon': Icons.add_circle_outline},
+          {'type': 'ListTile', 'icon': Icons.list_alt},
+          {'type': 'SlidableListTile', 'icon': Icons.swipe},
+        ],
+      },
+      {
+        'name': 'Material',
+        'widgets': [
+          {'type': 'AppBar', 'icon': Icons.space_bar},
+          {'type': 'FAB', 'icon': Icons.add_circle},
+          {'type': 'Drawer', 'icon': Icons.menu},
+          {'type': 'EndDrawer', 'icon': Icons.menu_open},
+        ],
+      },
+      {
+        'name': 'Input',
+        'widgets': [
+          {'type': 'TextField', 'icon': Icons.edit},
+          {'type': 'DropDown', 'icon': Icons.arrow_drop_down_circle},
+          {'type': 'Checkbox', 'icon': Icons.check_box},
+          {'type': 'CheckboxListTile', 'icon': Icons.checklist},
+          {'type': 'Switch', 'icon': Icons.toggle_on},
+          {'type': 'SwitchListTile', 'icon': Icons.toggle_off},
+          {'type': 'RadioButton', 'icon': Icons.radio_button_checked},
+          {'type': 'PinCode', 'icon': Icons.password},
+          {'type': 'Slider', 'icon': Icons.tune},
+          {'type': 'RatingBar', 'icon': Icons.star},
+          {'type': 'CreditCardForm', 'icon': Icons.credit_card},
+          {'type': 'CounterButton', 'icon': Icons.exposure_plus_2},
+          {'type': 'ChoiceChips', 'icon': Icons.check_box_outline_blank},
+          {'type': 'PlacePicker', 'icon': Icons.place},
+          {'type': 'FormValidation', 'icon': Icons.verified_user},
+          {'type': 'CheckboxGroup', 'icon': Icons.checklist_rtl},
+          {'type': 'Signature', 'icon': Icons.edit_attributes},
+        ],
+      },
+    ];
+  }
+
+  IconData _getIconForType(String type) {
+    switch (type) {
+      case 'Container': return Icons.crop_square;
+      case 'Card': return Icons.credit_card;
+      case 'Text': return Icons.text_fields;
+      case 'Button': return Icons.smart_button;
+      case 'TextField': return Icons.edit;
+      case 'Switch': return Icons.toggle_on;
+      case 'Checkbox': return Icons.check_box;
+      default: return Icons.widgets;
+    }
+  }
 
   void _addWidget(BuildContext context, String type, {WidgetNode? parent}) {
-    // Add to widget tree
     final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
-    final WidgetNode newNode = WidgetTreeEditor.createWidgetNodeWithDefaults(type);
+    WidgetNode newNode;
+    
+    if (type.startsWith('ThemedWidget:')) {
+      final themedId = type.split(':')[1];
+      newNode = WidgetNode(
+        type: 'ThemedWidget',
+        properties: {'themedWidgetId': themedId},
+        children: [],
+      );
+    } else {
+      newNode = WidgetTreeEditor.createWidgetNodeWithDefaults(type);
+    }
+
     if (parent != null) {
       provider.addChild(parent, newNode);
     } else if (provider.selectedNode != null) {
@@ -108,26 +149,18 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
     } else {
       provider.addChild(provider.rootNode!, newNode);
     }
+    
     // Update recently used
     setState(() {
       recentlyUsed.removeWhere((w) => w['label'] == type);
-      final icon = _findIconForType(type);
-      recentlyUsed.insert(0, {'icon': icon, 'label': type});
+      final label = type.startsWith('ThemedWidget:') ? type.split(':')[1] : type;
+      recentlyUsed.insert(0, {'icon': Icons.widgets, 'label': label});
       if (recentlyUsed.length > 8) recentlyUsed = recentlyUsed.sublist(0, 8);
     });
   }
 
-  IconData _findIconForType(String type) {
-    for (final cat in categories) {
-      for (final w in cat['widgets']) {
-        if (w['type'] == type) return w['icon'];
-      }
-    }
-    return Icons.widgets;
-  }
-
   void _showAddWidgetDialog(BuildContext context, WidgetNode parent) async {
-    final cats = categories;
+    final cats = _getDynamicCategories(context, listen: false);
     TextEditingController searchController = TextEditingController();
     ValueNotifier<String> searchValue = ValueNotifier('');
     showDialog(
@@ -197,7 +230,7 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
         dividerColor: Colors.white10,
         unselectedWidgetColor: Colors.white70,
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF6366f1),
+          primary: Color(0xFF0fadd5),
           surface: Color(0xFF23263a),
         ),
       ),
@@ -239,6 +272,7 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1e293b),
@@ -257,17 +291,184 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
               child: _buildContent(),
             ),
           ),
+          // ── Bottom user footer ──────────────────────────────────────
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF162032),
+              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: user == null
+                ? InkWell(
+                    onTap: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        (route) => false,
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.login_rounded, color: Color(0xFF0fadd5), size: 20),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Login',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Spacer(),
+                          Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.3), size: 16),
+                        ],
+                      ),
+                    ),
+                  )
+                : Row(
+                    children: [
+                      // Avatar
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                          );
+                        },
+                        child: Tooltip(
+                          message: 'View Profile',
+                          child: CircleAvatar(
+                            radius: 16,
+                            backgroundImage: user.photoURL != null
+                                ? NetworkImage(user.photoURL!)
+                                : null,
+                            backgroundColor: const Color(0xFF0fadd5),
+                            child: user.photoURL == null || user.photoURL!.isEmpty
+                                ? Text(
+                                    (user.displayName?.isNotEmpty == true
+                                            ? user.displayName![0]
+                                            : user.email?[0] ?? 'U')
+                                        .toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // Name + email
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                            );
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                user.displayName ?? 'User',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                user.email ?? '',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.4),
+                                  fontSize: 10,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Sign-out icon
+                      Tooltip(
+                        message: 'Sign Out',
+                        child: IconButton(
+                          icon: const Icon(Icons.logout_rounded,
+                              color: Colors.white38, size: 18),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () => _confirmSignOut(context),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         ],
       ),
     );
   }
 
+  Future<void> _confirmSignOut(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Sign Out',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Are you sure you want to sign out?',
+          style: TextStyle(color: Colors.white.withOpacity(0.7)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel',
+                style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await FirebaseAuth.instance.signOut();
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      }
+    }
+  }
+
   Widget _buildContent() {
     if (widget.selectedTab == 0) {
+      final dynamicCategories = _getDynamicCategories(context);
       return Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
             child: PremiumSearchBar(
               isCollapsed: false,
               onChanged: (val) => setState(() => search = val),
@@ -275,13 +476,13 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
           ),
           const SizedBox(height: 20),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
             child: RecentlyUsedSection(recentlyUsed: recentlyUsed),
           ),
           const SizedBox(height: 24),
           Expanded(
             child: WidgetCategoriesSection(
-              categories: categories,
+              categories: dynamicCategories,
               selectedCategory: selectedCategory,
               onCategorySelected: (i) => setState(() => selectedCategory = i),
               search: search,
@@ -301,55 +502,144 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
         },
       );
     } else if (widget.selectedTab == 2) {
-      return const ThemeEditorPanel();
+      return _buildPagesTab();
     } else if (widget.selectedTab == 3) {
+      return const ThemeEditorPanel();
+    } else if (widget.selectedTab == 4) {
       return const DataSourcePanel();
     }
     return const SizedBox.shrink();
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label) {
-    final bool isActive = widget.selectedTab == index;
-    return InkWell(
-      onTap: index >= 0 ? () => widget.onTabSelected(index) : null,
-      child: Container(
-        height: 48,
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-        decoration: BoxDecoration(
-          color: isActive ? const Color(0xFF171F33) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
+  Widget _buildPagesTab() {
+    final provider = Provider.of<WidgetTreeProvider>(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              width: 3,
-              height: 24,
-              decoration: BoxDecoration(
-                color: isActive ? const Color(0xFF0066FF) : Colors.transparent,
-                borderRadius: const BorderRadius.horizontal(right: Radius.circular(3)),
-              ),
+            const Text(
+              'Pages',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
             ),
-            const SizedBox(width: 21),
-            Icon(
-              icon,
-              size: 20,
-              color: isActive ? const Color(0xFFADC7FF) : const Color(0xFF424656),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                color: isActive ? const Color(0xFFADC7FF) : const Color(0xFF424656),
-                fontSize: 12,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                letterSpacing: 0.5,
-              ),
+            IconButton(
+              icon: const Icon(Icons.add, color: Color(0xFF0fadd5), size: 18),
+              onPressed: () {
+                final newPage = WidgetTreeEditor.createWidgetNodeWithDefaults('Scaffold');
+                newPage.properties['pageName'] = 'New Page ${provider.screens.length + 1}';
+                provider.addScreen(newPage);
+              },
+              tooltip: 'Add Page',
             ),
           ],
         ),
-      ),
+        const SizedBox(height: 12),
+        Expanded(
+          child: ListView.builder(
+            itemCount: provider.screens.length,
+            itemBuilder: (context, index) {
+              final screen = provider.screens[index];
+              final isSelected = provider.selectedScreen?.id == screen.id;
+              final pageName = screen.properties['pageName'] as String? ?? 'Unnamed Page';
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFF0fadd5).withOpacity(0.15) : Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(10),
+                  border: isSelected ? Border.all(color: const Color(0xFF0fadd5).withOpacity(0.3)) : null,
+                ),
+                child: ListTile(
+                  dense: true,
+                  leading: Icon(
+                    Icons.description_outlined,
+                    size: 16,
+                    color: isSelected ? const Color(0xFF0fadd5) : Colors.white38,
+                  ),
+                  title: Text(
+                    pageName,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.white70,
+                      fontSize: 12,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  onTap: () => provider.selectScreen(screen),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.copy, size: 14, color: Colors.white38),
+                        onPressed: () => provider.duplicateScreen(screen),
+                        constraints: const BoxConstraints(),
+                        padding: EdgeInsets.zero,
+                        tooltip: 'Duplicate',
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, size: 14, color: Colors.white38),
+                        onPressed: () => _showRenameDialog(context, screen),
+                        constraints: const BoxConstraints(),
+                        padding: EdgeInsets.zero,
+                        tooltip: 'Rename',
+                      ),
+                      if (provider.screens.length > 1) ...[
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, size: 14, color: Colors.redAccent),
+                          onPressed: () => provider.removeScreen(screen),
+                          constraints: const BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                          tooltip: 'Delete',
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
+
+  void _showRenameDialog(BuildContext context, WidgetNode screen) {
+    final controller = TextEditingController(text: screen.properties['pageName'] as String? ?? 'Page');
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: const Text('Rename Page', style: TextStyle(color: Colors.white, fontSize: 16)),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              hintText: 'Enter page name',
+              hintStyle: TextStyle(color: Colors.white38),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+            ),
+            TextButton(
+              onPressed: () {
+                Provider.of<WidgetTreeProvider>(context, listen: false).renameScreen(screen, controller.text);
+                Navigator.pop(context);
+              },
+              child: const Text('Rename', style: TextStyle(color: Color(0xFF0fadd5))),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }
 
 class SidebarWidgetTreeNode extends StatelessWidget {
@@ -359,6 +649,7 @@ class SidebarWidgetTreeNode extends StatelessWidget {
   final void Function(WidgetNode parent) onAdd;
   final void Function(WidgetNode) onDelete;
   final int depth;
+  final int index;
   final Map<WidgetNode, bool> expanded;
   final void Function(WidgetNode node)? onExpandToggle;
   final void Function(WidgetNode? node)? onHover;
@@ -371,6 +662,7 @@ class SidebarWidgetTreeNode extends StatelessWidget {
     required this.onAdd,
     required this.onDelete,
     required this.depth,
+    required this.index,
     required this.expanded,
     this.onExpandToggle,
     this.onHover,
@@ -396,12 +688,12 @@ class SidebarWidgetTreeNode extends StatelessWidget {
           onEnter: (_) => onHover?.call(node),
           onExit: (_) => onHover?.call(null),
           child: ReorderableDelayedDragStartListener(
-            index: depth, // Note: This index is a bit tricky in nested lists, but for the handle it's used locally
+            index: index,
             child: Container(
               margin: const EdgeInsets.only(bottom: 2),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF6366f1).withOpacity(0.15) : (isHovered ? Colors.white.withOpacity(0.05) : null),
+                color: isSelected ? const Color(0xFF0fadd5).withOpacity(0.15) : (isHovered ? Colors.white.withOpacity(0.05) : null),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Row(
@@ -414,7 +706,7 @@ class SidebarWidgetTreeNode extends StatelessWidget {
                       margin: const EdgeInsets.only(right: 15),
                       color: Colors.white.withOpacity(0.1),
                     ),
-                  Icon(_iconForType(node.type), color: isSelected ? const Color(0xFF6366f1) : Colors.white54, size: 14),
+                  Icon(_iconForType(node.type), color: isSelected ? const Color(0xFF0fadd5) : Colors.white54, size: 14),
                   const SizedBox(width: 8),
                   Expanded(
                     child: GestureDetector(
@@ -486,6 +778,7 @@ class SidebarWidgetTreeNode extends StatelessWidget {
                   onAdd: onAdd,
                   onDelete: onDelete,
                   depth: depth + 1,
+                  index: i,
                   expanded: expanded,
                   onExpandToggle: onExpandToggle,
                   onHover: onHover,

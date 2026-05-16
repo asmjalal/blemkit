@@ -11,7 +11,7 @@ class PremiumSearchBar extends StatelessWidget {
     if (isCollapsed) return const SizedBox.shrink();
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF23263a),
+        color: const Color(0xFF2d3748).withOpacity(0.5),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
@@ -26,13 +26,13 @@ class PremiumSearchBar extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Icon(Icons.search, color: Color(0xFFe2e8f0), size: 20),
+            child: Icon(Icons.search, color: Color(0xFFe2e8f0), size: 17),
           ),
           Expanded(
             child: TextField(
               decoration: const InputDecoration(
                 hintText: "Search widgets...",
-                hintStyle: TextStyle(color: Color(0xFFa0aec0)),
+                hintStyle: TextStyle(color: Color(0xFFa0aec0), fontSize: 12),
                 border: InputBorder.none,
                 isDense: true,
               ),
@@ -43,7 +43,7 @@ class PremiumSearchBar extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.tune, color: Color(0xFFa0aec0), size: 20),
             onPressed: null,
-            splashRadius: 20,
+            splashRadius: 17,
           ),
         ],
       ),

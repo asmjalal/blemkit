@@ -62,6 +62,21 @@ import 'navigation_routes/page_view_generator.dart';
 import 'navigation_routes/bottom_navigation_bar_generator.dart';
 import 'navigation_routes/tab_bar_generator.dart';
 import 'material_widgets/drawer_header_generator.dart';
+import 'spacer_generator.dart';
+import 'themed_widget_generator.dart';
+import 'vertical_divider_generator.dart';
+import 'carousel_generator.dart';
+import 'expandable_generator.dart';
+import 'wrap_generator.dart';
+import 'safe_area_generator.dart';
+import 'aspect_ratio_generator.dart';
+import 'svg_image_generator.dart';
+import 'badge_generator.dart';
+import 'avatar_generator.dart';
+import 'selectable_text_generator.dart';
+import 'constrained_box_generator.dart';
+import 'intrinsic_height_generator.dart';
+import 'intrinsic_width_generator.dart';
 import '../models/widget_node.dart';
 
 class WidgetGeneratorRegistry {
@@ -136,6 +151,21 @@ class WidgetGeneratorRegistry {
     'TabBar': TabBarGenerator(),
     'TabBarView': TabBarViewGenerator(),
     'DrawerHeader': DrawerHeaderGenerator(),
+    'Spacer': SpacerGenerator(),
+    'ThemedWidget': ThemedWidgetGenerator(),
+    'VerticalDivider': VerticalDividerGenerator(),
+    'Carousel': CarouselGenerator(),
+    'Expandable': ExpandableGenerator(),
+    'Wrap': WrapGenerator(),
+    'SafeArea': SafeAreaGenerator(),
+    'AspectRatio': AspectRatioGenerator(),
+    'SvgImage': SvgImageGenerator(),
+    'Badge': BadgeGenerator(),
+    'Avatar': AvatarGenerator(),
+    'SelectableText': SelectableTextGenerator(),
+    'ConstrainedBox': ConstrainedBoxGenerator(),
+    'IntrinsicHeight': IntrinsicHeightGenerator(),
+    'IntrinsicWidth': IntrinsicWidthGenerator(),
   };
 
   static String generateCode(WidgetNode node, {int indent = 0}) {

@@ -46,8 +46,6 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
   bool get isChildrenList => _acceptsMultipleChildren(widget.node.type);
   bool get isChildSlot => !isChildrenList;
 
-  static final WidgetCommandManager _commandManager = WidgetCommandManager();
-
   @override
   Widget build(BuildContext context) {
     final isSelected = widget.selectedNode == widget.node;
@@ -181,20 +179,34 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
                     widgetId: widget.node.id,
                     onAction: (action) {
                       final root = provider.rootNode!;
+                      
+                      if (action.startsWith('wrap_')) {
+                        final wrapperType = action.substring('wrap_'.length);
+                        provider.commandManager.executeAction(
+                          WrapWidgetAction(
+                            node: widget.node,
+                            provider: provider,
+                            root: root,
+                            wrapperType: wrapperType,
+                          ),
+                        );
+                        return;
+                      }
+
                       switch (action) {
                         case 'duplicate':
                           widget.onDuplicate(widget.node);
                           break;
                         case 'delete':
-                          _commandManager.executeAction(
+                          provider.commandManager.executeAction(
                             DeleteWidgetAction(node: widget.node, provider: provider, root: root),
                           );
                           break;
                         case 'undo':
-                          _commandManager.undo();
+                          provider.commandManager.undo();
                           break;
                         case 'redo':
-                          _commandManager.redo();
+                          provider.commandManager.redo();
                           break;
                         // Add more cases for wrap, remove, etc.
                       }

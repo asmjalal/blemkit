@@ -11,7 +11,7 @@ class SingleChildScrollViewGenerator extends BaseWidgetGenerator {
     final props = <String>[];
     
     if (node.properties['scrollDirection'] != null) {
-      props.add('scrollDirection: Axis.${node.properties['scrollDirection']}');
+      props.add('scrollDirection: ${axisExpression(node.properties['scrollDirection'])}');
     }
     
     if (node.properties['padding'] != null) {
@@ -33,7 +33,9 @@ class SingleChildScrollViewGenerator extends BaseWidgetGenerator {
     if (node.children.isNotEmpty) {
       child = '\n$childIndentStr child: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)},';
     }
-    
-    return '${indentStr}SingleChildScrollView(${props.join(', ')}$child\n$indentStr)';
+
+    final propsJoined = props.join(', ');
+    final comma = props.isNotEmpty && child.isNotEmpty ? ', ' : '';
+    return '${indentStr}SingleChildScrollView($propsJoined$comma$child\n$indentStr)';
   }
 } 

@@ -5,9 +5,14 @@ class TextFieldGenerator extends BaseWidgetGenerator {
   @override
   String generateCode(WidgetNode node, {int indent = 0}) {
     final indentStr = getIndentString(indent);
-    final childIndentStr = getChildIndentStr(indent);
+    final varName = '_controller_${node.id.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')}';
+    final initialText = node.properties['text'] ?? '';
+    
+    BaseWidgetGenerator.stateVariables.add('late final TextEditingController $varName = TextEditingController(text: \'$initialText\');');
+    BaseWidgetGenerator.disposeVariables.add('$varName.dispose();');
     
     final props = <String>[];
+    props.add('controller: $varName');
     
     if (node.properties['hintText'] != null || node.properties['labelText'] != null) {
       final decorationProps = <String>[];
@@ -20,10 +25,6 @@ class TextFieldGenerator extends BaseWidgetGenerator {
       }
       
       props.add('decoration: InputDecoration(${decorationProps.join(', ')})');
-    }
-    
-    if (node.properties['onChanged'] != null) {
-      props.add('onChanged: (value) {}');
     }
     
     if (node.properties['obscureText'] != null) {

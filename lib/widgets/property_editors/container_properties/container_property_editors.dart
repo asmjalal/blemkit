@@ -131,6 +131,113 @@ class _ContainerPaddingMarginEditorState extends State<_ContainerPaddingMarginEd
   }
 }
 
+class _BackgroundStyleEditor extends StatefulWidget {
+  final Map<String, dynamic> properties;
+  final void Function(Map<String, dynamic>) onChanged;
+
+  const _BackgroundStyleEditor({
+    Key? key,
+    required this.properties,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  State<_BackgroundStyleEditor> createState() => _BackgroundStyleEditorState();
+}
+
+class _BackgroundStyleEditorState extends State<_BackgroundStyleEditor> {
+  bool get isGradient => widget.properties['backgroundType'] == 'gradient' || widget.properties['gradient'] != null;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Background Type', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: Colors.white70)),
+            DropdownButton<String>(
+              value: isGradient ? 'gradient' : 'solid',
+              isDense: true,
+              dropdownColor: const Color(0xFF1E293B),
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+              underline: const SizedBox(),
+              items: const [
+                DropdownMenuItem(value: 'solid', child: Text('Solid')),
+                DropdownMenuItem(value: 'gradient', child: Text('Gradient')),
+              ],
+              onChanged: (val) {
+                if (val != null) {
+                  final newProps = Map<String, dynamic>.from(widget.properties);
+                  newProps['backgroundType'] = val;
+                  if (val == 'solid') {
+                    newProps.remove('gradient');
+                  } else {
+                    newProps['gradient'] = {
+                      'colors': [Colors.blue.value.toString(), Colors.pink.value.toString()],
+                      'begin': 'Alignment.centerLeft',
+                      'end': 'Alignment.centerRight',
+                    };
+                  }
+                  widget.onChanged(newProps);
+                }
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (!isGradient)
+          ColorPickerField(
+            label: 'Background Color',
+            color: ColorUtils.parseColor(widget.properties['color'], Colors.transparent),
+            onColorChanged: (color) {
+              final newProps = Map<String, dynamic>.from(widget.properties);
+              newProps['color'] = color.value.toString();
+              widget.onChanged(newProps);
+            },
+          )
+        else ...[
+          ColorPickerField(
+            label: 'Gradient Color 1',
+            color: ColorUtils.parseColor(widget.properties['gradient']?['colors']?[0], Colors.blue),
+            onColorChanged: (color) {
+              final newProps = Map<String, dynamic>.from(widget.properties);
+              final grad = Map<String, dynamic>.from(newProps['gradient'] ?? {});
+              final colors = List<dynamic>.from(grad['colors'] ?? [Colors.blue.value.toString(), Colors.pink.value.toString()]);
+              if (colors.isNotEmpty) colors[0] = color.value.toString();
+              grad['colors'] = colors;
+              newProps['gradient'] = grad;
+              widget.onChanged(newProps);
+            },
+          ),
+          const SizedBox(height: 8),
+          ColorPickerField(
+            label: 'Gradient Color 2',
+            color: () {
+              final colors = (widget.properties['gradient']?['colors'] as List?) ?? const [];
+              final dynamic colorValue = colors.length > 1 ? colors[1] : null;
+              return ColorUtils.parseColor(colorValue, Colors.pink);
+            }(),
+            onColorChanged: (color) {
+              final newProps = Map<String, dynamic>.from(widget.properties);
+              final grad = Map<String, dynamic>.from(newProps['gradient'] ?? {});
+              final colors = List<dynamic>.from(grad['colors'] ?? [Colors.blue.value.toString(), Colors.pink.value.toString()]);
+              if (colors.length > 1) {
+                colors[1] = color.value.toString();
+              } else {
+                colors.add(color.value.toString());
+              }
+              grad['colors'] = colors;
+              newProps['gradient'] = grad;
+              widget.onChanged(newProps);
+            },
+          ),
+        ]
+      ],
+    );
+  }
+}
 
 List<Widget> buildContainerPropertyEditors(BuildContext context, WidgetNode node) {
   final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
@@ -229,12 +336,10 @@ List<Widget> buildContainerPropertyEditors(BuildContext context, WidgetNode node
     ),
     const SizedBox(height: 16),
     buildSectionHeader('Style'),
-    ColorPickerField(
-      label: 'Background Color',
-      color: ColorUtils.parseColor(properties['color'], Colors.transparent),
-      onColorChanged: (color) {
-        properties['color'] = color.value.toString();
-        provider.updateNodeProperties(node, properties);
+    _BackgroundStyleEditor(
+      properties: properties,
+      onChanged: (newProps) {
+        provider.updateNodeProperties(node, newProps);
       },
     ),
     buildSectionHeader('Border'),

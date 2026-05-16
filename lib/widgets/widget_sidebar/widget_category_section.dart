@@ -29,18 +29,18 @@ class WidgetCategoriesSection extends StatelessWidget {
                   child: GestureDetector(
                     onTap: () => onCategorySelected(i),
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
+                      duration: const Duration(milliseconds: 200), //0xFF0fadd5
                       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
                       decoration: BoxDecoration(
-                        color: selectedCategory == i ? const Color(0xFF6366f1) : const Color(0xFF23263a),
+                        color: selectedCategory == i ? const Color(0xFF0fadd5) : const Color(0xFF23263a),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         categories[i]['name'],
                         style: TextStyle(
                           color: selectedCategory == i ? Colors.white : const Color(0xFFe2e8f0),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
                         ),
                       ),
                     ),

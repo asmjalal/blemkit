@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'base_widget_generator.dart';
 import '../models/widget_node.dart';
 
@@ -5,19 +7,19 @@ class ImageGenerator extends BaseWidgetGenerator {
   @override
   String generateCode(WidgetNode node, {int indent = 0}) {
     final indentStr = getIndentString(indent);
-    
-    final props = <String>[];
-    props.add('src: \'${node.properties['src'] ?? ''}\'');
-    
+    final rawUrl = node.properties['src']?.toString() ?? '';
+    final urlLiteral = jsonEncode(rawUrl);
+
+    final named = <String>[];
     if (node.properties['width'] != null) {
-      props.add('width: ${node.properties['width']}');
+      named.add('width: ${node.properties['width']}');
     }
     if (node.properties['height'] != null) {
-      props.add('height: ${node.properties['height']}');
+      named.add('height: ${node.properties['height']}');
     }
-    
-    props.add('fit: BoxFit.cover');
-    
-    return '${indentStr}Image.network(${props.join(', ')})';
+    named.add('fit: BoxFit.cover');
+
+    final namedStr = named.isEmpty ? '' : ', ${named.join(', ')}';
+    return '${indentStr}Image.network($urlLiteral$namedStr)';
   }
 } 

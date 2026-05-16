@@ -1,5 +1,6 @@
 import '../base_widget_generator.dart';
 import '../../models/widget_node.dart';
+import '../widget_generator_registry.dart';
 
 class ChipGenerator extends BaseWidgetGenerator {
   @override
@@ -42,23 +43,22 @@ class CircleAvatarGenerator extends BaseWidgetGenerator {
     final props = <String>[];
     
     if (node.properties['backgroundColor'] != null) {
-      props.add('backgroundColor: Color(${node.properties['backgroundColor']})');
+      props.add('backgroundColor: ${formatColor(node.properties['backgroundColor'])}');
     }
     
     if (node.properties['radius'] != null) {
       props.add('radius: ${node.properties['radius']}');
     }
     
-    if (node.properties['child'] != null) {
-      props.add('child: ${node.properties['child']}');
-    } else if (node.children.isNotEmpty) {
-      props.add('child: ${generateCode(node.children.first, indent: indent + 1)}');
+    if (node.children.isNotEmpty) {
+      props.add('child: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1).trimLeft()}');
     }
     
-    if (node.properties['backgroundImage'] != null) {
-      props.add('backgroundImage: NetworkImage(\'${node.properties['backgroundImage']}\')');
+    if (node.properties['backgroundImage'] != null && node.properties['backgroundImage'].toString().isNotEmpty) {
+      props.add('backgroundImage: NetworkImage(\'${escapeString(node.properties['backgroundImage'].toString())}\')');
     }
     
-    return '${indentStr}CircleAvatar(${props.join(',\n$childIndentStr ')}\n$indentStr)';
+    return '${indentStr}CircleAvatar(\n$childIndentStr ${props.join(',\n$childIndentStr ')}\n$indentStr)';
   }
-} 
+}
+ 

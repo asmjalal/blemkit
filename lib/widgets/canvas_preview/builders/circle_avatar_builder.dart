@@ -9,7 +9,7 @@ class CircleAvatarBuilder extends BaseWidgetBuilder {
   Widget build(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
     return CircleAvatar(
       radius: (node.properties['radius'] as num?)?.toDouble(),
-      backgroundColor: parseColor(node.properties['backgroundColor']),
+      backgroundColor: parseColor(node.properties['backgroundColor'], context),
       backgroundImage: node.properties['backgroundImage'] != null
           ? NetworkImage(node.properties['backgroundImage'] as String)
           : null,

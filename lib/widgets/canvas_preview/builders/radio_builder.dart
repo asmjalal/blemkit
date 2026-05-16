@@ -9,7 +9,7 @@ class RadioBuilder extends BaseWidgetBuilder {
       value: node.properties['value'] ?? '',
       groupValue: node.properties['groupValue'] ?? '',
       onChanged: (String? newValue) {},
-      activeColor: parseColor(node.properties['activeColor']),
+      activeColor: parseColor(node.properties['activeColor'], context),
     );
   }
 } 

@@ -31,12 +31,18 @@ Widget buildDropdownField(
               style: const TextStyle(color: Colors.white, fontSize: 11),
               icon: const Icon(Icons.expand_more, size: 16, color: Colors.white38),
               value: value,
-              items: items.map((item) {
-                return DropdownMenuItem(
-                  value: item,
-                  child: Text(item, overflow: TextOverflow.ellipsis),
-                );
-              }).toList(),
+              items: (() {
+                final effectiveItems = List<String>.from(items);
+                if (value != null && !effectiveItems.contains(value)) {
+                  effectiveItems.add(value);
+                }
+                return effectiveItems.map((item) {
+                  return DropdownMenuItem(
+                    value: item,
+                    child: Text(item, overflow: TextOverflow.ellipsis),
+                  );
+                }).toList();
+              })(),
               onChanged: (val) {
                 if (val != null) onChanged(val);
               },

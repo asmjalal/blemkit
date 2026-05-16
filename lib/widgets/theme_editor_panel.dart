@@ -69,7 +69,7 @@ class ThemeEditorPanel extends StatelessWidget {
             SwitchListTile(
               title: const Text('Use Material 3', style: TextStyle(color: Colors.white, fontSize: 14)),
               value: theme['useMaterial3'] ?? true,
-              activeColor: const Color(0xFF6366F1),
+              activeColor: const Color(0xFF0fadd5),
               onChanged: (value) {
                 provider.updateThemeProperties({'useMaterial3': value});
               },

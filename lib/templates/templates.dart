@@ -10,19 +10,23 @@ import 'package:flutter/services.dart';
 import '../models/widget_node.dart';
 
 class TemplateService {
-  static Future<WidgetNode> loadTemplate(String templatePath) async {
+  static Future<dynamic> loadTemplate(String templatePath) async {
     try {
       print('TemplateService: Attempting to load template from: $templatePath');
       final String jsonString = await rootBundle.loadString(templatePath);
       print('TemplateService: Successfully loaded JSON string, length: ${jsonString.length}');
       
-      final Map<String, dynamic> jsonData = json.decode(jsonString);
-      print('TemplateService: Successfully parsed JSON data, root type: ${jsonData['type']}');
+      final dynamic jsonData = json.decode(jsonString);
       
-      final widgetNode = WidgetNode.fromJson(jsonData);
-      print('TemplateService: Successfully created WidgetNode: ${widgetNode.type}');
-      
-      return widgetNode;
+      if (jsonData is List) {
+        print('TemplateService: Loading multi-screen project');
+        return jsonData.map((s) => WidgetNode.fromJson(s as Map<String, dynamic>)).toList();
+      } else {
+        print('TemplateService: Successfully parsed JSON data, root type: ${jsonData['type']}');
+        final widgetNode = WidgetNode.fromJson(jsonData);
+        print('TemplateService: Successfully created WidgetNode: ${widgetNode.type}');
+        return widgetNode;
+      }
     } catch (e, stackTrace) {
       print('Error loading template from $templatePath: $e');
       print('Stack trace: $stackTrace');
@@ -49,55 +53,92 @@ class TemplateService {
   }
 }
 
-// Template metadata - now loads from JSON files
+// Template metadata - now with categories and descriptions
+enum TemplateCategory {
+  ecommerce,
+  delivery,
+  food,
+  pharmacy,
+  todo,
+  fitness,
+  scratch,
+}
+
 class TemplateMetadata {
   final String name;
+  final String description;
   final IconData icon;
   final String jsonPath;
+  final TemplateCategory category;
+  final List<String> screenNames;
+  final String? imageUrl;
   
   const TemplateMetadata({
     required this.name,
+    required this.description,
     required this.icon,
     required this.jsonPath,
+    required this.category,
+    this.screenNames = const [],
+    this.imageUrl,
   });
 }
 
-// List of available templates
+// List of available templates grouped by category
 final List<TemplateMetadata> templates = [
+  // E-commerce
   TemplateMetadata(
-    name: 'Ecommerce Home',
+    name: 'E-commerce Store',
+    description: 'Sophisticated retail solutions with integrated inventory and checkout flows.',
     icon: Icons.shopping_cart,
     jsonPath: 'lib/templates/ecommerce_home.json',
+    category: TemplateCategory.ecommerce,
+    screenNames: ['Storefront', 'Product Details', 'Shopping Cart', 'Checkout'],
   ),
+  // Delivery
   TemplateMetadata(
-    name: 'Login Screen',
-    icon: Icons.lock_outline,
-    jsonPath: 'lib/templates/login_screen.json',
-  ),
-  TemplateMetadata(
-    name: 'Settings',
-    icon: Icons.settings_outlined,
-    jsonPath: 'lib/templates/settings_screen.json',
-  ),
-  TemplateMetadata(
-    name: 'Food Delivery',
-    icon: Icons.delivery_dining,
+    name: 'Delivery',
+    description: 'Real-time tracking and logistics management for fast-paced fulfillment.',
+    icon: Icons.local_shipping,
     jsonPath: 'lib/templates/food_delivery.json',
+    category: TemplateCategory.delivery,
+    screenNames: ['Active Orders', 'Map View', 'Order History', 'Courier Chat'],
   ),
+  // Food
   TemplateMetadata(
-    name: 'Chat Screen',
-    icon: Icons.chat_bubble_outline,
-    jsonPath: 'lib/templates/chat_screen.json',
+    name: 'Food',
+    description: 'Interactive menus and seamless ordering systems for modern dining experiences.',
+    icon: Icons.restaurant,
+    jsonPath: 'lib/templates/food_delivery.json', // Shared for now
+    category: TemplateCategory.food,
+    screenNames: ['Restaurant Menu', 'Dish Details', 'Order Tracker', 'Reviews'],
   ),
+  // Pharmacy
   TemplateMetadata(
-    name: 'Modern Dashboard',
-    icon: Icons.dashboard_customize,
-    jsonPath: 'lib/templates/modern_dashboard.json',
+    name: 'Pharmacy',
+    description: 'Compliant and secure medication management with prescription fulfillment.',
+    icon: Icons.local_pharmacy,
+    jsonPath: 'lib/templates/pharmacy_screen.json',
+    category: TemplateCategory.pharmacy,
+    screenNames: ['Medication List', 'Prescription Upload', 'Pharmacy Map', 'Profile'],
   ),
+  // Todo
   TemplateMetadata(
-    name: 'Social Profile',
-    icon: Icons.person_add_alt_1,
-    jsonPath: 'lib/templates/social_profile.json',
+    name: 'Todo',
+    description: 'Advanced productivity tools with task prioritization and team collaboration.',
+    icon: Icons.checklist_rtl,
+    jsonPath: 'lib/templates/high_fidelity_todo.json',
+    category: TemplateCategory.todo,
+    screenNames: ['Dashboard', 'Calendar View', 'New Task', 'Achievements'],
+  ),
+  // Fitness
+  TemplateMetadata(
+    name: 'FitLife Tracker',
+    description: 'Beautiful fitness dashboard with workout tracking, activity feed, and profile management.',
+    icon: Icons.fitness_center,
+    jsonPath: 'lib/templates/fitlife_tracker.json',
+    category: TemplateCategory.fitness,
+    screenNames: ['Dashboard', 'Workouts', 'Activity', 'Profile'],
   ),
 ];
 

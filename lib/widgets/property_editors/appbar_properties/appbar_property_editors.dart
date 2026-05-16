@@ -1,41 +1,61 @@
-import 'package:designflutterkit/widgets/properties_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
 import '../../../models/widget_node.dart';
-import '../text_field.dart';
 import '../section_header.dart';
 import '../color_picker_field.dart';
-import '../slider_field.dart';
+import '../numeric_property_field.dart';
 import 'package:designflutterkit/utils/color_utils.dart';
 
+Widget _buildSectionHeaderWithIcon(String title) {
+  return Padding(
+    padding: const EdgeInsets.only(top: 16, bottom: 8),
+    child: Row(
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Icon(Icons.info_outline, size: 14, color: Colors.white.withOpacity(0.3)),
+        const Spacer(),
+        const Icon(Icons.expand_more, size: 18, color: Colors.white38),
+      ],
+    ),
+  );
+}
 
 List<Widget> buildAppBarPropertyEditors(BuildContext context, WidgetNode node) {
   final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
   final properties = node.properties;
   final editors = <Widget>[];
 
-  if (node.type == 'Scaffold') {
-    editors.add(buildTextField(
-      'Class Name',
-      properties['className'] as String? ?? 'MyScreen',
-      (value) {
-        properties['className'] = value ?? 'MyScreen';
-        provider.updateNodeProperties(node, properties);
-      },
-    ));
-  }
-
   editors.addAll([
-    buildSectionHeader('App Bar'),
-    buildTextField(
-      'Title',
-      properties['title'] as String? ?? 'App Title',
-      (value) {
-        properties['title'] = (value == null) ? 'App Title' : value;
-        provider.updateNodeProperties(node, properties);
-      },
+    _buildSectionHeaderWithIcon('Visibility'),
+    Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('Conditional', style: TextStyle(color: Colors.white70, fontSize: 12)),
+          Switch(
+            value: properties['conditionalVisibility'] == true,
+            onChanged: (val) {
+              properties['conditionalVisibility'] = val;
+              provider.updateNodeProperties(node, properties);
+            },
+            activeColor: Colors.deepPurpleAccent,
+          ),
+        ],
+      ),
     ),
+    const Divider(color: Colors.white10),
+
+    _buildSectionHeaderWithIcon('Background Color'),
     ColorPickerField(
       label: 'Background Color',
       color: ColorUtils.parseColor(properties['backgroundColor'], Colors.blue),
@@ -44,123 +64,161 @@ List<Widget> buildAppBarPropertyEditors(BuildContext context, WidgetNode node) {
         provider.updateNodeProperties(node, properties);
       },
     ),
-    buildSliderField(
-      'Elevation',
-      (properties['elevation'] is num && properties['elevation'] != null) ? properties['elevation'].toDouble() : 0.0,
-      0.0,
-      24.0,
-      (value) {
-        properties['elevation'] = (value == null || value.isNaN) ? 0.0 : value;
+    const SizedBox(height: 8),
+    buildPropertyRow([
+      buildNumericPropertyField(
+        label: 'Elevation',
+        value: (properties['elevation'] ?? 0).toString(),
+        onChanged: (val) {
+          properties['elevation'] = double.tryParse(val) ?? 0.0;
+          provider.updateNodeProperties(node, properties);
+        },
+      ),
+      Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Text('Default Button', style: TextStyle(color: Colors.white70, fontSize: 11)),
+            Switch(
+              value: properties['showDefaultButton'] == true,
+              onChanged: (val) {
+                properties['showDefaultButton'] = val;
+                provider.updateNodeProperties(node, properties);
+              },
+              activeColor: Colors.deepPurpleAccent,
+            ),
+          ],
+        ),
+      ),
+    ]),
+    const Divider(color: Colors.white10),
+
+    _buildSectionHeaderWithIcon('AppBar Behavior'),
+    Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('Collapsible (SliverAppBar)', style: TextStyle(color: Colors.white70, fontSize: 12)),
+          Switch(
+            value: properties['collapsible'] == true,
+            onChanged: (val) {
+              properties['collapsible'] = val;
+              provider.updateNodeProperties(node, properties);
+            },
+            activeColor: Colors.deepPurpleAccent,
+          ),
+        ],
+      ),
+    ),
+    const Divider(color: Colors.white10),
+
+    _buildSectionHeaderWithIcon('Layout Properties'),
+    buildNumericPropertyField(
+      label: 'AppBar Height',
+      unit: properties['appBarHeightUnit'] as String? ?? 'PX',
+      value: (properties['expandedHeight'] ?? '').toString(),
+      onChanged: (val) {
+        properties['expandedHeight'] = double.tryParse(val) ?? 200.0;
+        provider.updateNodeProperties(node, properties);
+      },
+      onUnitChanged: (newUnit) {
+        properties['appBarHeightUnit'] = newUnit;
         provider.updateNodeProperties(node, properties);
       },
     ),
-    SwitchListTile(
-      title: const Text('Show Default Button'),
-      value: properties['showDefaultButton'] == true,
-      onChanged: (value) {
-        properties['showDefaultButton'] = value;
+    const SizedBox(height: 8),
+    buildNumericPropertyField(
+      label: 'Toolbar Height',
+      unit: properties['toolbarHeightUnit'] as String? ?? 'PX',
+      value: (properties['toolbarHeight'] ?? '∞').toString(),
+      onChanged: (val) {
+        if (val == '∞') {
+          properties['toolbarHeight'] = null;
+        } else {
+          properties['toolbarHeight'] = double.tryParse(val) ?? 56.0;
+        }
+        provider.updateNodeProperties(node, properties);
+      },
+      onUnitChanged: (newUnit) {
+        properties['toolbarHeightUnit'] = newUnit;
         provider.updateNodeProperties(node, properties);
       },
     ),
-    buildSectionHeader('AppBar Behavior'),
-    SwitchListTile(
-      title: const Text('Collapsible (SliverAppBar)'),
-      value: properties['collapsible'] == true,
-      onChanged: (value) {
-        properties['collapsible'] = value;
-        provider.updateNodeProperties(node, properties);
-      },
+    const SizedBox(height: 8),
+    Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('Add Bottom Section', style: TextStyle(color: Colors.white70, fontSize: 12)),
+          Switch(
+            value: properties['addBottomSection'] == true,
+            onChanged: (val) {
+              properties['addBottomSection'] = val;
+              provider.updateNodeProperties(node, properties);
+            },
+            activeColor: Colors.deepPurpleAccent,
+          ),
+        ],
+      ),
     ),
-    SwitchListTile(
-      title: const Text('Pinned'),
-      value: properties['pinned'] == true,
-      onChanged: (value) {
-        properties['pinned'] = value;
-        provider.updateNodeProperties(node, properties);
-      },
-    ),
-    SwitchListTile(
-      title: const Text('Floating'),
-      value: properties['floating'] == true,
-      onChanged: (value) {
-        properties['floating'] = value;
-        provider.updateNodeProperties(node, properties);
-      },
-    ),
-    SwitchListTile(
-      title: const Text('Snap'),
-      value: properties['snap'] == true,
-      onChanged: (value) {
-        properties['snap'] = value;
-        provider.updateNodeProperties(node, properties);
-      },
-    ),
-    buildSectionHeader('Layout Properties'),
-    buildSliderField(
-      'Expanded Height',
-      (properties['expandedHeight'] is num && properties['expandedHeight'] != null) ? properties['expandedHeight'].toDouble() : 200.0,
-      56.0,
-      400.0,
-      (value) {
-        properties['expandedHeight'] = (value == null || value.isNaN) ? 200.0 : value;
-        provider.updateNodeProperties(node, properties);
-      },
-    ),
-    buildSliderField(
-      'Collapsed Height',
-      (properties['collapsedHeight'] is num && properties['collapsedHeight'] != null) ? properties['collapsedHeight'].toDouble() : 56.0,
-      32.0,
-      200.0,
-      (value) {
-        properties['collapsedHeight'] = (value == null || value.isNaN) ? 56.0 : value;
-        provider.updateNodeProperties(node, properties);
-      },
-    ),
-    buildSliderField(
-      'Toolbar Height',
-      (properties['toolbarHeight'] is num && properties['toolbarHeight'] != null) ? properties['toolbarHeight'].toDouble() : 56.0,
-      32.0,
-      200.0,
-      (value) {
-        properties['toolbarHeight'] = (value == null || value.isNaN) ? 56.0 : value;
-        provider.updateNodeProperties(node, properties);
-      },
-    ),
-    SwitchListTile(
-      title: const Text('Add Bottom Section'),
-      value: properties['addBottomSection'] == true,
-      onChanged: (value) {
-        properties['addBottomSection'] = value;
-        provider.updateNodeProperties(node, properties);
-      },
-    ),
-    buildSectionHeader('Title Properties'),
-    SwitchListTile(
-      title: const Text('Center Title'),
-      value: properties['centerTitle'] == true,
-      onChanged: (value) {
-        properties['centerTitle'] = value;
-        provider.updateNodeProperties(node, properties);
-      },
-    ),
-    SwitchListTile(
-      title: const Text('Use Flexible Space'),
-      value: properties['useFlexibleSpace'] == true,
-      onChanged: (value) {
-        properties['useFlexibleSpace'] = value;
-        provider.updateNodeProperties(node, properties);
-      },
-    ),
-    buildSectionHeader('Background Properties'),
-    SwitchListTile(
-      title: const Text('Add Background Widget'),
-      value: properties['addBackgroundWidget'] == true,
-      onChanged: (value) {
-        properties['addBackgroundWidget'] = value;
-        provider.updateNodeProperties(node, properties);
-      },
+    const Divider(color: Colors.white10),
+
+    _buildSectionHeaderWithIcon('Title Properties'),
+    buildPropertyRow([
+      Row(
+        children: [
+          const Text('Center Title', style: TextStyle(color: Colors.white70, fontSize: 11)),
+          const Spacer(),
+          Switch(
+            value: properties['centerTitle'] == true,
+            onChanged: (val) {
+              properties['centerTitle'] = val;
+              provider.updateNodeProperties(node, properties);
+            },
+            activeColor: Colors.deepPurpleAccent,
+          ),
+        ],
+      ),
+      Row(
+        children: [
+          const Text('Flexible Space', style: TextStyle(color: Colors.white70, fontSize: 11)),
+          const Spacer(),
+          Switch(
+            value: properties['useFlexibleSpace'] == true,
+            onChanged: (val) {
+              properties['useFlexibleSpace'] = val;
+              provider.updateNodeProperties(node, properties);
+            },
+            activeColor: Colors.deepPurpleAccent,
+          ),
+        ],
+      ),
+    ]),
+    const Divider(color: Colors.white10),
+
+    _buildSectionHeaderWithIcon('Background Properties'),
+    Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('Add Background Widget', style: TextStyle(color: Colors.white70, fontSize: 12)),
+          Switch(
+            value: properties['addBackgroundWidget'] == true,
+            onChanged: (val) {
+              properties['addBackgroundWidget'] = val;
+              provider.updateNodeProperties(node, properties);
+            },
+            activeColor: Colors.deepPurpleAccent,
+          ),
+        ],
+      ),
     ),
   ]);
 
   return editors;
-} 
+}
+ 

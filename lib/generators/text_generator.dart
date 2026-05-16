@@ -80,7 +80,7 @@ class TextGenerator extends BaseWidgetGenerator {
     
     return props.isEmpty 
         ? '${indentStr}Text(\'$textContent\')'
-        : '${indentStr}Text(\n$childIndentStr\'$textContent\',\n$childIndentStr${props.join(',\n$childIndentStr')}\n$indentStr)';
+        : '${indentStr}Text(\n$childIndentStr\'$textContent\',\n$childIndentStr${props.join(',\n$childIndentStr')},\n$indentStr)';
 
   }
   

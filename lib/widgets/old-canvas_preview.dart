@@ -300,7 +300,7 @@
 //                                       const SizedBox(width: 16),
 //                                       ElevatedButton(
 //                                         style: ElevatedButton.styleFrom(
-//                                           backgroundColor: const Color(0xFF6366f1),
+//                                           backgroundColor: const Color(0xFF0fadd5),
 //                                           foregroundColor: Colors.white,
 //                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
 //                                         ),

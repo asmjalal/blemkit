@@ -1,0 +1,240 @@
+[
+  {
+    "id": "todo_home",
+    "type": "Scaffold",
+    "properties": {
+      "pageName": "Dashboard",
+      "backgroundColor": "4294507000",
+      "appBar": {
+        "type": "AppBar",
+        "properties": {
+          "backgroundColor": "4294507000",
+          "elevation": 0,
+          "centerTitle": false,
+          "title": {
+            "type": "Column",
+            "properties": { "crossAxisAlignment": "CrossAxisAlignment.start" },
+            "children": [
+              { "type": "Text", "properties": { "text": "Hello, Mohamed!", "fontSize": 14, "color": "4287931320" } },
+              { "type": "Text", "properties": { "text": "Today's Tasks", "fontSize": 24, "fontWeight": "bold", "color": "4280224059" } }
+            ]
+          },
+          "actions": [
+            { "type": "IconButton", "properties": { "icon": "Icons.account_circle", "navigateTo": "todo_profile" } }
+          ]
+        }
+      },
+      "bottomNavigationBar": {
+        "type": "BottomNavigationBar",
+        "properties": {
+          "items": [
+            { "icon": { "type": "Icon", "properties": { "icon": "Icons.home" } }, "label": "Home", "navigateTo": "todo_home" },
+            { "icon": { "type": "Icon", "properties": { "icon": "Icons.person" } }, "label": "Profile", "navigateTo": "todo_profile" }
+          ],
+          "currentIndex": 0
+        }
+      },
+      "floatingActionButton": {
+        "type": "FloatingActionButton",
+        "properties": {
+          "backgroundColor": "4284704497",
+          "navigateTo": "todo_add",
+          "child": { "type": "Icon", "properties": { "icon": "Icons.add", "color": "4294967295" } }
+        }
+      }
+    },
+    "children": [
+      {
+        "type": "Column",
+        "children": [
+          {
+            "type": "Container",
+            "properties": { "height": 40, "paddingLeft": 16, "marginBottom": 16 },
+            "children": [
+              {
+                "type": "ListView",
+                "properties": { "scrollDirection": "horizontal" },
+                "children": [
+                  { "type": "Button", "properties": { "text": "All", "width": 60, "height": 30, "fillColor": "4284704497", "borderRadius": 20 } },
+                  { "type": "SizedBox", "properties": { "width": 8 } },
+                  { "type": "Button", "properties": { "text": "Work", "width": 80, "height": 30, "fillColor": "4292928504", "borderRadius": 20 } },
+                  { "type": "SizedBox", "properties": { "width": 8 } },
+                  { "type": "Button", "properties": { "text": "Health", "width": 80, "height": 30, "fillColor": "4292928504", "borderRadius": 20 } }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "children": [
+              {
+                "type": "ListView",
+                "properties": { "padding": 16 },
+                "children": [
+                  {
+                    "type": "ListTile",
+                    "properties": {
+                      "title": "Design System Update",
+                      "subtitle": "9:00 AM - 10:30 AM",
+                      "leadingIcon": "Icons.check_circle_outline",
+                      "leadingIconColor": 4284704497,
+                      "trailingIcon": "Icons.chevron_right",
+                      "navigateTo": "todo_details"
+                    }
+                  },
+                  { "type": "SizedBox", "properties": { "height": 12 } },
+                  {
+                    "type": "ListTile",
+                    "properties": {
+                      "title": "App Architecture Review",
+                      "subtitle": "11:00 AM - 12:00 PM",
+                      "leadingIcon": "Icons.radio_button_unchecked",
+                      "leadingIconColor": 4287931320,
+                      "trailingIcon": "Icons.chevron_right",
+                      "navigateTo": "todo_details"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "todo_add",
+    "type": "Scaffold",
+    "properties": {
+      "pageName": "Add Task",
+      "appBar": {
+        "type": "AppBar",
+        "properties": {
+          "title": { "type": "Text", "properties": { "text": "New Task" } },
+          "backgroundColor": "4284704497",
+          "elevation": 0,
+          "leading": {
+            "type": "IconButton",
+            "properties": { "icon": "Icons.close", "navigateTo": "todo_home" }
+          }
+        }
+      }
+    },
+    "children": [
+      {
+        "type": "Padding",
+        "properties": { "padding": 24 },
+        "children": [
+          {
+            "type": "Column",
+            "children": [
+              { "type": "Text", "properties": { "text": "What is to be done?", "fontSize": 16, "fontWeight": "bold" } },
+              { "type": "TextField", "properties": { "hintText": "Enter task name..." } },
+              { "type": "SizedBox", "properties": { "height": 24 } },
+              { "type": "Text", "properties": { "text": "Due Date", "fontSize": 16, "fontWeight": "bold" } },
+              { "type": "TextField", "properties": { "hintText": "Pick a date", "icon": "Icons.calendar_today" } },
+              { "type": "Spacer" },
+              {
+                "type": "Button",
+                "properties": {
+                  "text": "Create Task",
+                  "width": 1000,
+                  "height": 56,
+                  "fillColor": "4284704497",
+                  "borderRadius": 16,
+                  "navigateTo": "todo_home"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "todo_details",
+    "type": "Scaffold",
+    "properties": {
+      "pageName": "Task Details",
+      "appBar": {
+        "type": "AppBar",
+        "properties": {
+          "title": { "type": "Text", "properties": { "text": "Task Details" } },
+          "backgroundColor": "4294507000",
+          "elevation": 0,
+          "leading": {
+            "type": "IconButton",
+            "properties": { "icon": "Icons.arrow_back", "navigateTo": "todo_home" }
+          }
+        }
+      }
+    },
+    "children": [
+      {
+        "type": "Padding",
+        "properties": { "padding": 20 },
+        "children": [
+            {
+                "type": "Column",
+                "children": [
+                    { "type": "Text", "properties": { "text": "Design System Update", "fontSize": 24, "fontWeight": "bold" } },
+                    { "type": "SizedBox", "properties": { "height": 8 } },
+                    { "type": "Text", "properties": { "text": "In Progress", "color": "4284704497", "fontWeight": "bold" } },
+                    { "type": "SizedBox", "properties": { "height": 32 } },
+                    { "type": "Text", "properties": { "text": "Description", "fontSize": 16, "fontWeight": "bold" } },
+                    { "type": "Text", "properties": { "text": "Update the core design system for the mobile app project. Focus on the new color palette and typography rules.", "color": "4287931320" } },
+                    { "type": "Spacer" },
+                    { "type": "Button", "properties": { "text": "Mark as Complete", "width": 1000, "height": 50, "fillColor": "4284704497", "borderRadius": 12, "navigateTo": "todo_home" } }
+                ]
+            }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "todo_profile",
+    "type": "Scaffold",
+    "properties": {
+      "pageName": "Profile",
+      "backgroundColor": "4294507000",
+      "appBar": {
+        "type": "AppBar",
+        "properties": {
+          "title": { "type": "Text", "properties": { "text": "My Profile" } },
+          "backgroundColor": "4294507000",
+          "elevation": 0,
+          "leading": {
+            "type": "IconButton",
+            "properties": { "icon": "Icons.arrow_back", "navigateTo": "todo_home" }
+          }
+        }
+      },
+      "bottomNavigationBar": {
+        "type": "BottomNavigationBar",
+        "properties": {
+          "items": [
+            { "icon": { "type": "Icon", "properties": { "icon": "Icons.home" } }, "label": "Home", "navigateTo": "todo_home" },
+            { "icon": { "type": "Icon", "properties": { "icon": "Icons.person" } }, "label": "Profile", "navigateTo": "todo_profile" }
+          ],
+          "currentIndex": 1
+        }
+      }
+    },
+    "children": [
+      {
+        "type": "Column",
+        "children": [
+          { "type": "SizedBox", "properties": { "height": 40 } },
+          { "type": "Center", "children": [ { "type": "CircleAvatar", "properties": { "radius": 60, "backgroundColor": "4284704497" } } ] },
+          { "type": "SizedBox", "properties": { "height": 16 } },
+          { "type": "Center", "children": [ { "type": "Text", "properties": { "text": "Mohamed Jalal", "fontSize": 24, "fontWeight": "bold" } } ] },
+          { "type": "Center", "children": [ { "type": "Text", "properties": { "text": "Product Designer", "color": "4287931320" } } ] },
+          { "type": "SizedBox", "properties": { "height": 48 } },
+          { "type": "ListTile", "properties": { "title": "Settings", "leadingIcon": "Icons.settings", "trailingIcon": "Icons.chevron_right" } },
+          { "type": "ListTile", "properties": { "title": "Statistics", "leadingIcon": "Icons.bar_chart", "trailingIcon": "Icons.chevron_right" } },
+          { "type": "ListTile", "properties": { "title": "Logout", "leadingIcon": "Icons.logout", "leadingIconColor": 4294931021, "navigateTo": "todo_home" } }
+        ]
+      }
+    ]
+  }
+]

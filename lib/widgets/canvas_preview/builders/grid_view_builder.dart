@@ -22,7 +22,7 @@ class GridViewBuilder extends BaseWidgetBuilder {
             : const SizedBox(),
         scrollDirection: parseAxis(node.properties['scrollDirection']) ?? Axis.vertical,
         padding: parseEdgeInsets(node.properties['padding']),
-        shrinkWrap: node.properties['shrinkWrap'] ?? false,
+        shrinkWrap: node.properties['shrinkWrap'] ?? true,
         physics: node.properties['physics'] == 'NeverScrollableScrollPhysics'
             ? const NeverScrollableScrollPhysics()
             : null,
@@ -38,7 +38,7 @@ class GridViewBuilder extends BaseWidgetBuilder {
         ),
         scrollDirection: parseAxis(node.properties['scrollDirection']) ?? Axis.vertical,
         padding: parseEdgeInsets(node.properties['padding']),
-        shrinkWrap: node.properties['shrinkWrap'] ?? false,
+        shrinkWrap: node.properties['shrinkWrap'] ?? true,
         physics: node.properties['physics'] == 'NeverScrollableScrollPhysics'
             ? const NeverScrollableScrollPhysics()
             : null,

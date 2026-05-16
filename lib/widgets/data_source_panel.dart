@@ -70,7 +70,7 @@ class DataSourcePanel extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.info_outline, color: Color(0xFF6366F1), size: 16),
+                        Icon(Icons.info_outline, color: Color(0xFF0fadd5), size: 16),
                         SizedBox(width: 8),
                         Text('Data Binding', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                       ],

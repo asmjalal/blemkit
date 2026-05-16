@@ -4,7 +4,8 @@ Widget buildNumericPropertyField({
   required String label,
   required String value,
   required ValueChanged<String> onChanged,
-  String? unit = 'PX',
+  String? unit,
+  ValueChanged<String>? onUnitChanged,
   bool isReadOnly = false,
 }) {
   return Column(
@@ -22,12 +23,27 @@ Widget buildNumericPropertyField({
           ),
           const Spacer(),
           if (unit != null)
-            Text(
-              unit,
-              style: const TextStyle(
-                color: Color(0xFF94A3B8),
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+            GestureDetector(
+              onTap: () {
+                if (onUnitChanged != null) {
+                  final newUnit = unit == 'PX' ? '%' : 'PX';
+                  onUnitChanged(newUnit);
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  unit,
+                  style: const TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
         ],

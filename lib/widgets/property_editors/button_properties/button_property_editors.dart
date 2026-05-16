@@ -267,6 +267,28 @@ List<Widget> buildButtonPropertyEditors(BuildContext context, WidgetNode node) {
         provider.updateNodeProperties(node, properties);
       },
     ),
+    const SizedBox(height: 12),
+    buildSectionHeader('Navigation'),
+    buildDropdownField(
+      'Navigate To',
+      provider.screens.any((s) => s.id == properties['navigateTo'])
+          ? provider.screens.firstWhere((s) => s.id == properties['navigateTo']).properties['pageName'] as String? ?? 'Page'
+          : 'None',
+      ['None', ...provider.screens.map((s) => s.properties['pageName'] as String? ?? 'Page')],
+      (value) {
+        if (value == 'None' || value == null) {
+          properties['navigateTo'] = null;
+        } else {
+          try {
+            final target = provider.screens.firstWhere((s) => s.properties['pageName'] == value);
+            properties['navigateTo'] = target.id;
+          } catch (e) {
+            properties['navigateTo'] = null;
+          }
+        }
+        provider.updateNodeProperties(node, properties);
+      },
+    ),
   ]);
 
   return editors;

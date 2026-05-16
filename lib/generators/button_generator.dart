@@ -14,6 +14,7 @@ class ButtonGenerator extends BaseWidgetGenerator {
       child = "Text('${node.properties['text'] ?? 'Button'}')";
     }
     
-    return '${indentStr}ElevatedButton(onPressed: () {}, child: $child)';
+    final onPressedCode = generateNavigationCode(node.properties['navigateTo']);
+    return '${indentStr}ElevatedButton(onPressed: $onPressedCode, child: $child)';
   }
 } 

@@ -9,7 +9,7 @@ class PageViewGenerator extends BaseWidgetGenerator {
     
     final props = <String>[];
     if (node.properties['scrollDirection'] != null) {
-      props.add('scrollDirection: Axis.${node.properties['scrollDirection']}');
+      props.add('scrollDirection: ${axisExpression(node.properties['scrollDirection'])}');
     }
     
     if (node.properties['controller'] != null) {

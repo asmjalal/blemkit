@@ -12,11 +12,13 @@ class ElevatedButtonGenerator extends BaseWidgetGenerator {
     if (node.properties['onPressed'] != null) {
       props.add('onPressed: () {}');
     }
-    if (node.properties['style'] != null) {
+    if (node.properties['style'] != null || node.properties['backgroundColor'] != null || node.properties['foregroundColor'] != null) {
+      final bgColor = formatColor(node.properties['backgroundColor'] ?? '0xFF2196F3');
+      final fgColor = formatColor(node.properties['foregroundColor'] ?? '0xFFFFFFFF');
       props.add('style: ElevatedButton.styleFrom(' +
-        'backgroundColor: Color(${node.properties['backgroundColor'] ?? '0xFF2196F3'}), ' +
-        'foregroundColor: Color(${node.properties['foregroundColor'] ?? '0xFFFFFFFF'}), ' +
-        'padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8)' +
+        'backgroundColor: $bgColor, ' +
+        'foregroundColor: $fgColor, ' +
+        'padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8)' +
         ')');
     }
     

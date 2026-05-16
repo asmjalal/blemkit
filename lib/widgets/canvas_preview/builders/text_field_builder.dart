@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../models/widget_node.dart';
 import 'base_widget_builder.dart';
 
@@ -11,14 +12,14 @@ class TextFieldBuilder extends BaseWidgetBuilder {
         labelText: node.properties['labelText'] as String?,
         border: _parseBorder(node.properties['border']),
         filled: node.properties['filled'] ?? false,
-        fillColor: parseColor(node.properties['fillColor']),
-        prefixIcon: _parseIcon(node.properties['prefixIcon']),
-        suffixIcon: _parseIcon(node.properties['suffixIcon']),
+        fillColor: parseColor(node.properties['fillColor'], context),
+        prefixIcon: _parseIcon(node.properties['prefixIcon'], context, hoveredNode),
+        suffixIcon: _parseIcon(node.properties['suffixIcon'], context, hoveredNode),
         contentPadding: parseEdgeInsets(node.properties['contentPadding']),
       ),
       style: TextStyle(
         fontSize: parseDouble(node.properties['fontSize']) ?? 16.0,
-        color: parseColor(node.properties['color']),
+        color: parseColor(node.properties['color'], context),
         fontWeight: parseFontWeight(node.properties['fontWeight']),
         fontFamily: node.properties['fontFamily'] as String?,
       ),
@@ -48,13 +49,21 @@ class TextFieldBuilder extends BaseWidgetBuilder {
     }
   }
 
-  Widget? _parseIcon(dynamic value) {
+  Widget? _parseIcon(dynamic value, BuildContext context, WidgetNode? hoveredNode) {
     if (value == null) return null;
-    
-    if (value is String && value.startsWith('Icons.')) {
-      return Icon(parseIconData(value));
+
+    if (value is WidgetNode || value is Map<String, dynamic>) {
+      return safeWidget(context, value, hoveredNode);
     }
-    
+
+    if (value is String) {
+      final iconData = parseIconData(value);
+      if (value.startsWith('FontAwesomeIcons.')) {
+        return FaIcon(iconData);
+      }
+      return Icon(iconData as IconData? ?? Icons.widgets);
+    }
+
     return null;
   }
 

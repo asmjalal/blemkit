@@ -15,7 +15,7 @@ class CardBuilder extends BaseWidgetBuilder {
     }
 
     return Card(
-      color: parseColor(node.properties['color']),
+      color: parseColor(node.properties['color'], context),
       elevation: (node.properties['elevation'] as num?)?.toDouble(),
       margin: parseEdgeInsets(node.properties['margin']),
       shape: shape,

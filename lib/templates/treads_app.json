@@ -1,0 +1,230 @@
+{
+  "type": "Scaffold",
+  "properties": {
+    "backgroundColor": "4294967295",
+    "appBar": {
+      "type": "AppBar",
+      "properties": {
+        "backgroundColor": "4294967295",
+        "elevation": 0,
+        "centerTitle": true,
+        "title": {
+          "type": "Row",
+          "properties": {
+            "mainAxisAlignment": "MainAxisAlignment.center"
+          },
+          "children": [
+            {
+              "type": "Icon",
+              "properties": {
+                "icon": "Icons.alternate_email",
+                "color": "4284704497",
+                "size": 28
+              }
+            },
+            {
+              "type": "SizedBox",
+              "properties": { "width": 8 }
+            },
+            {
+              "type": "Text",
+              "properties": {
+                "text": "treads.io",
+                "fontSize": 24,
+                "fontWeight": "w800",
+                "color": "4280427050"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "bottomNavigationBar": {
+      "type": "BottomNavigationBar",
+      "properties": {
+        "backgroundColor": "4294967295",
+        "selectedItemColor": "4284704497",
+        "unselectedItemColor": "4287600792",
+        "currentIndex": 0,
+        "type": "fixed",
+        "items": [
+          { 
+            "icon": { "type": "Icon", "properties": { "icon": "Icons.alternate_email" } }, 
+            "label": "Home" 
+          },
+          { 
+            "icon": { "type": "Icon", "properties": { "icon": "Icons.chat_bubble_outline" } }, 
+            "label": "Search" 
+          },
+          { 
+            "icon": { "type": "Icon", "properties": { "icon": "Icons.person_outline" } }, 
+            "label": "Profile" 
+          }
+        ]
+      }
+    },
+    "floatingActionButton": {
+      "type": "FloatingActionButton",
+      "properties": {
+        "backgroundColor": "4284704497",
+        "child": {
+          "type": "Icon",
+          "properties": {
+            "icon": "Icons.edit",
+            "color": "4294967295",
+            "size": 20
+          }
+        }
+      }
+    }
+  },
+  "children": [
+    {
+      "type": "SingleChildScrollView",
+      "properties": {},
+      "children": [
+        {
+          "type": "Column",
+          "properties": {
+            "crossAxisAlignment": "CrossAxisAlignment.start"
+          },
+          "children": [
+            {
+              "type": "Container",
+              "properties": {
+                "height": 110,
+                "paddingTop": 12,
+                "paddingBottom": 8,
+                "backgroundColor": "4294967295"
+              },
+              "children": [
+                {
+                  "type": "ListView",
+                  "properties": {
+                    "scrollDirection": "horizontal",
+                    "padding": 16.0
+                  },
+                  "children": [
+                    {
+                      "type": "Column",
+                      "children": [
+                        { "type": "CircleAvatar", "properties": { "backgroundImage": "https://i.pravatar.cc/150?u=12", "radius": 28, "backgroundColor": "4284704497" } },
+                        { "type": "SizedBox", "properties": { "height": 4 } },
+                        { "type": "Text", "properties": { "text": "Ellie Ma", "fontSize": 10, "color": "4287600792" } }
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "width": 16 } },
+                    {
+                      "type": "Column",
+                      "children": [
+                        { "type": "CircleAvatar", "properties": { "backgroundImage": "https://i.pravatar.cc/150?u=22", "radius": 28, "backgroundColor": "4289049852" } },
+                        { "type": "SizedBox", "properties": { "height": 4 } },
+                        { "type": "Text", "properties": { "text": "Ellie Ma", "fontSize": 10, "color": "4287600792" } }
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "width": 16 } },
+                    {
+                      "type": "Column",
+                      "children": [
+                        { "type": "CircleAvatar", "properties": { "backgroundImage": "https://i.pravatar.cc/150?u=33", "radius": 28, "backgroundColor": "4284704497" } },
+                        { "type": "SizedBox", "properties": { "height": 4 } },
+                        { "type": "Text", "properties": { "text": "Ellie Ma", "fontSize": 10, "color": "4287600792" } }
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "width": 16 } },
+                    {
+                      "type": "Column",
+                      "children": [
+                        { "type": "CircleAvatar", "properties": { "backgroundImage": "https://i.pravatar.cc/150?u=44", "radius": 28, "backgroundColor": "4289049852" } },
+                        { "type": "SizedBox", "properties": { "height": 4 } },
+                        { "type": "Text", "properties": { "text": "Ellie Ma", "fontSize": 10, "color": "4287600792" } }
+                      ]
+                    },
+                    { "type": "SizedBox", "properties": { "width": 16 } },
+                    {
+                      "type": "Column",
+                      "children": [
+                        { "type": "CircleAvatar", "properties": { "backgroundImage": "https://i.pravatar.cc/150?u=66", "radius": 28, "backgroundColor": "4284704497" } },
+                        { "type": "SizedBox", "properties": { "height": 4 } },
+                        { "type": "Text", "properties": { "text": "Ellie Ma", "fontSize": 10, "color": "4287600792" } }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            { "type": "Divider", "properties": { "height": 1, "color": "4293915128", "thickness": 0.5 } },
+            {
+              "type": "Container",
+              "properties": {
+                "padding": 16
+              },
+              "children": [
+                {
+                  "type": "Row",
+                  "children": [
+                    { "type": "CircleAvatar", "properties": { "backgroundImage": "https://i.pravatar.cc/150?u=55", "radius": 18 } },
+                    { "type": "SizedBox", "properties": { "width": 12 } },
+                    {
+                      "type": "Column",
+                      "properties": { "crossAxisAlignment": "CrossAxisAlignment.start" },
+                      "children": [
+                        { "type": "Text", "properties": { "text": "My Name", "fontWeight": "bold", "fontSize": 14 } },
+                        { "type": "Text", "properties": { "text": "@noone", "color": "4284704497", "fontSize": 12 } }
+                      ]
+                    },
+                    { "type": "Spacer" },
+                    { "type": "Icon", "properties": { "icon": "Icons.more_horiz", "color": "4287600792" } }
+                  ]
+                },
+                { "type": "SizedBox", "properties": { "height": 12 } },
+                {
+                  "type": "Container",
+                  "properties": {
+                    "height": 300,
+                    "width": 1000,
+                    "borderRadius": 16,
+                    "backgroundColor": "4293915128"
+                  },
+                  "children": [
+                    {
+                      "type": "Image",
+                      "properties": {
+                        "imageUrl": "https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=1000",
+                        "fit": "cover"
+                      }
+                    }
+                  ]
+                },
+                { "type": "SizedBox", "properties": { "height": 12 } },
+                {
+                  "type": "Row",
+                  "children": [
+                    { "type": "Icon", "properties": { "icon": "Icons.favorite_border", "color": "4284704497", "size": 24 } },
+                    { "type": "SizedBox", "properties": { "width": 8 } },
+                    { "type": "Text", "properties": { "text": "0", "color": "4287600792" } },
+                    { "type": "SizedBox", "properties": { "width": 16 } },
+                    { "type": "Icon", "properties": { "icon": "Icons.chat_bubble_outline", "color": "4287600792", "size": 24 } },
+                    { "type": "SizedBox", "properties": { "width": 8 } },
+                    { "type": "Text", "properties": { "text": "[numComments]", "color": "4287600792" } },
+                    { "type": "Spacer" },
+                    { "type": "Text", "properties": { "text": "[relative]", "color": "4287600792", "fontSize": 12 } }
+                  ]
+                },
+                { "type": "SizedBox", "properties": { "height": 12 } },
+                {
+                  "type": "Text",
+                  "properties": {
+                    "text": "I'm back with a super quick Instagram redesign just for the fan. Rounded corners and cute icons, what else do we need, haha.",
+                    "fontSize": 14,
+                    "color": "4281545523"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -11,7 +11,7 @@ class ListViewGenerator extends BaseWidgetGenerator {
     final props = <String>[];
     
     if (node.properties['scrollDirection'] != null) {
-      props.add('scrollDirection: Axis.${node.properties['scrollDirection']}');
+      props.add('scrollDirection: ${axisExpression(node.properties['scrollDirection'])}');
     }
     
     if (node.properties['padding'] != null) {
@@ -50,7 +50,7 @@ class ListViewBuilderGenerator extends BaseWidgetGenerator {
     props.add('itemBuilder: (context, index) => Container()');
     
     if (node.properties['scrollDirection'] != null) {
-      props.add('scrollDirection: Axis.${node.properties['scrollDirection']}');
+      props.add('scrollDirection: ${axisExpression(node.properties['scrollDirection'])}');
     }
     
     if (node.properties['padding'] != null) {

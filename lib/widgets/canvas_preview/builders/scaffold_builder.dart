@@ -18,56 +18,46 @@ class ScaffoldBuilder extends BaseWidgetBuilder {
     Widget? bottomNavigationBarWidget;
 
     // Handle AppBar from properties
-    if (node.properties['appBar'] is Map<String, dynamic>) {
-      final appBarNode = WidgetNode.fromJson(node.properties['appBar']);
-      appBarWidget = WidgetBuilderFactory.buildWidget(context, appBarNode, hoveredNode);
-    } else if (node.properties['appBar'] is WidgetNode) { // Handle direct WidgetNode if it somehow gets here
-      appBarWidget = WidgetBuilderFactory.buildWidget(context, node.properties['appBar'] as WidgetNode, hoveredNode);
+    if (node.properties['appBar'] is WidgetNode) {
+      final appBarNode = node.properties['appBar'] as WidgetNode;
+      final bool isVisible = appBarNode.properties['conditionalVisibility'] != true;
+      if (isVisible) {
+        appBarWidget = WidgetBuilderFactory.buildWidget(context, appBarNode, hoveredNode);
+      }
     }
 
     // Handle FloatingActionButton from properties
     final dynamic fabProperty = node.properties['floatingActionButton'];
-    print('ScaffoldBuilder: FloatingActionButton property: value=$fabProperty, type=${fabProperty?.runtimeType}');
-    if (fabProperty is Map<String, dynamic>) {
-      try {
-        final fabNode = WidgetNode.fromJson(fabProperty);
-        floatingActionButtonWidget = WidgetBuilderFactory.buildWidget(context, fabNode, hoveredNode);
-      } catch (e) {
-        print('ScaffoldBuilder: Error building FloatingActionButton from Map: $e. Falling back to null.');
-        floatingActionButtonWidget = null;
-      }
-    } else if (fabProperty is WidgetNode) {
-      floatingActionButtonWidget = WidgetBuilderFactory.buildWidget(context, fabProperty as WidgetNode, hoveredNode);
+    if (fabProperty is WidgetNode) {
+      floatingActionButtonWidget = WidgetBuilderFactory.buildWidget(context, fabProperty, hoveredNode);
     }
 
     // Handle Drawer from properties
-    if (node.properties['drawer'] is Map<String, dynamic>) {
-      final drawerNode = WidgetNode.fromJson(node.properties['drawer']);
-      drawerWidget = WidgetBuilderFactory.buildWidget(context, drawerNode, hoveredNode);
-    } else if (node.properties['drawer'] is WidgetNode) {
+    if (node.properties['drawer'] is WidgetNode) {
       drawerWidget = WidgetBuilderFactory.buildWidget(context, node.properties['drawer'] as WidgetNode, hoveredNode);
     }
 
     // Handle EndDrawer from properties
-    if (node.properties['endDrawer'] is Map<String, dynamic>) {
-      final endDrawerNode = WidgetNode.fromJson(node.properties['endDrawer']);
-      endDrawerWidget = WidgetBuilderFactory.buildWidget(context, endDrawerNode, hoveredNode);
-    } else if (node.properties['endDrawer'] is WidgetNode) {
+    if (node.properties['endDrawer'] is WidgetNode) {
       endDrawerWidget = WidgetBuilderFactory.buildWidget(context, node.properties['endDrawer'] as WidgetNode, hoveredNode);
     }
 
     // Handle BottomNavigationBar from properties
-    if (node.properties['bottomNavigationBar'] is Map<String, dynamic>) {
-      final bottomNavNode = WidgetNode.fromJson(node.properties['bottomNavigationBar']);
-      bottomNavigationBarWidget = WidgetBuilderFactory.buildWidget(context, bottomNavNode, hoveredNode);
-    } else if (node.properties['bottomNavigationBar'] is WidgetNode) {
+    if (node.properties['bottomNavigationBar'] is WidgetNode) {
       bottomNavigationBarWidget = WidgetBuilderFactory.buildWidget(context, node.properties['bottomNavigationBar'] as WidgetNode, hoveredNode);
     }
 
     // Remaining children are assumed to be part of the body
+    // Rescue any BottomNavigationBar or AppBar that AI mistakenly put in children
     List<Widget> bodyChildren = [];
     for (var child in node.children) {
-      bodyChildren.add(WidgetBuilderFactory.buildWidget(context, child, hoveredNode));
+      if ((child.type == 'BottomNavigationBar') && bottomNavigationBarWidget == null) {
+        bottomNavigationBarWidget = WidgetBuilderFactory.buildWidget(context, child, hoveredNode);
+      } else if (child.type == 'AppBar' && appBarWidget == null) {
+        appBarWidget = WidgetBuilderFactory.buildWidget(context, child, hoveredNode);
+      } else {
+        bodyChildren.add(WidgetBuilderFactory.buildWidget(context, child, hoveredNode));
+      }
     }
 
     if (bodyChildren.isEmpty) {
@@ -81,7 +71,7 @@ class ScaffoldBuilder extends BaseWidgetBuilder {
     }
 
     return Scaffold(
-      backgroundColor: parseColor(node.properties['backgroundColor']),
+      backgroundColor: parseColor(node.properties['backgroundColor'], context),
       appBar: appBarWidget is PreferredSizeWidget ? appBarWidget : null, // AppBar must be PreferredSizeWidget
       body: bodyWidget,
       floatingActionButton: floatingActionButtonWidget,

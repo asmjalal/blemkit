@@ -10,18 +10,23 @@ class PaddingGenerator extends BaseWidgetGenerator {
     
     final props = <String>[];
     if (node.properties['padding'] != null) {
-      props.add('padding: EdgeInsets.all(${node.properties['padding']})');
-    } else if (node.properties['horizontal'] != null || node.properties['vertical'] != null) {
-      props.add('padding: EdgeInsets.symmetric(' +
-        'horizontal: ${node.properties['horizontal'] ?? 0.0}, ' +
-        'vertical: ${node.properties['vertical'] ?? 0.0})');
+      props.add('padding: const ${parseEdgeInsets(node.properties['padding'])}');
+    } else {
+      final pTop = (node.properties['paddingTop'] is num) ? node.properties['paddingTop'].toDouble() : 0.0;
+      final pRight = (node.properties['paddingRight'] is num) ? node.properties['paddingRight'].toDouble() : 0.0;
+      final pBottom = (node.properties['paddingBottom'] is num) ? node.properties['paddingBottom'].toDouble() : 0.0;
+      final pLeft = (node.properties['paddingLeft'] is num) ? node.properties['paddingLeft'].toDouble() : 0.0;
+      
+      if (pTop != 0 || pBottom != 0 || pLeft != 0 || pRight != 0) {
+        props.add('padding: const EdgeInsets.only(left: $pLeft, top: $pTop, right: $pRight, bottom: $pBottom)');
+      }
     }
     
     String child = '';
     if (node.children.isNotEmpty) {
-      child = '\n$childIndentStr child: ${generateCode(node.children.first, indent: indent + 1)},';
+      child = '\n$childIndentStr child: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)},';
     }
     
-    return '${indentStr}Padding(${props.join(', ')}$child\n$indentStr)';
+    return '${indentStr}Padding(\n$childIndentStr ${props.join(', ')},\n$childIndentStr $child\n$indentStr)';
   }
 } 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/widget_node.dart';
 import '../selection_wrapper.dart';
+import '../selection_preferred_size_wrapper.dart';
 import 'base_widget_builder.dart';
 import 'scaffold_builder.dart' as wb;
 import 'container_builder.dart' as wb;
@@ -24,6 +25,7 @@ import 'ink_well_builder.dart' as wb;
 import 'elevated_button_builder.dart' as wb;
 import 'text_button_builder.dart' as wb;
 import 'outlined_button_builder.dart' as wb;
+import 'material_button_builder.dart' as wb;
 import 'dropdown_button_builder.dart' as wb;
 import 'popup_menu_button_builder.dart' as wb;
 import 'checkbox_builder.dart' as wb;
@@ -71,6 +73,19 @@ import 'drawer_builder.dart' as wb;
 import 'text_field_builder.dart' as wb;
 import 'list_view_builder.dart' as wb;
 import 'grid_view_builder.dart' as wb;
+import 'themed_widget_builder.dart' as wb;
+import 'vertical_divider_builder.dart' as wb;
+import 'carousel_builder.dart' as wb;
+import 'expandable_builder.dart' as wb;
+import 'safe_area_builder.dart' as wb;
+import 'aspect_ratio_builder.dart' as wb;
+import 'svg_image_builder.dart' as wb;
+import 'badge_builder.dart' as wb;
+import 'avatar_builder.dart' as wb;
+import 'selectable_text_builder.dart' as wb;
+import 'constrained_box_builder.dart' as wb;
+import 'intrinsic_height_builder.dart' as wb;
+import 'intrinsic_width_builder.dart' as wb;
 
 class WidgetBuilderFactory {
   static final WidgetBuilderFactory _instance = WidgetBuilderFactory._internal();
@@ -85,6 +100,11 @@ class WidgetBuilderFactory {
     print('WidgetBuilderFactory: Initializing builders...');
     _builders.clear(); // Clear existing builders to re-initialize
     final factoryInstance = WidgetBuilderFactory(); // Get the singleton instance
+
+    // Register the bridge so BaseWidgetBuilder.safeWidget() can call back here
+    WidgetBuilderFactoryRef.register(
+      (ctx, node, hovered) => buildWidget(ctx, node, hovered),
+    );
 
     _builders['Scaffold'] = wb.ScaffoldBuilder(factoryInstance);
     _builders['Container'] = wb.ContainerBuilder();
@@ -108,6 +128,7 @@ class WidgetBuilderFactory {
     _builders['ElevatedButton'] = wb.ElevatedButtonBuilder();
     _builders['TextButton'] = wb.TextButtonBuilder();
     _builders['OutlinedButton'] = wb.OutlinedButtonBuilder();
+    _builders['MaterialButton'] = wb.MaterialButtonBuilder();
     _builders['DropdownButton'] = wb.DropdownButtonBuilder();
     _builders['PopupMenuButton'] = wb.PopupMenuButtonBuilder();
     _builders['Checkbox'] = wb.CheckboxBuilder();
@@ -155,38 +176,67 @@ class WidgetBuilderFactory {
     _builders['TextField'] = wb.TextFieldBuilder();
     _builders['ListView'] = wb.ListViewBuilder();
     _builders['GridView'] = wb.GridViewBuilder();
+    _builders['ThemedWidget'] = wb.ThemedWidgetBuilder();
+    _builders['VerticalDivider'] = wb.VerticalDividerBuilder();
+    _builders['Carousel'] = wb.CarouselBuilder();
+    _builders['Expandable'] = wb.ExpandableBuilder();
+    _builders['SafeArea'] = wb.SafeAreaBuilder();
+    _builders['AspectRatio'] = wb.AspectRatioBuilder();
+    _builders['SvgImage'] = wb.SvgImageBuilder();
+    _builders['Badge'] = wb.BadgeBuilder();
+    _builders['Avatar'] = wb.AvatarBuilder();
+    _builders['SelectableText'] = wb.SelectableTextBuilder();
+    _builders['ConstrainedBox'] = wb.ConstrainedBoxBuilder();
+    _builders['IntrinsicHeight'] = wb.IntrinsicHeightBuilder();
+    _builders['IntrinsicWidth'] = wb.IntrinsicWidthBuilder();
     print('WidgetBuilderFactory: Initialization complete. Registered ${_builders.length} builders.');
   }
 
+  static Widget buildBaseWidget(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
+    final builder = _builders[node.type];
+    if (builder != null) {
+      return builder.build(context, node, hoveredNode);
+    }
+    return Container(
+      color: Colors.red.withOpacity(0.3),
+      child: Center(child: Text('Unknown: ${node.type}')),
+    );
+  }
+
   static Widget buildWidget(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
+    if (_builders.isEmpty) initialize();
+    
     print('WidgetBuilderFactory: Attempting to build widget of type: ${node.type}');
     final builder = _builders[node.type];
     
     Widget widget;
     if (builder != null) {
-      print('WidgetBuilderFactory: Found builder for ${node.type}');
       widget = builder.build(context, node, hoveredNode);
     } else {
-      print('WidgetBuilderFactory: No builder found for ${node.type}. Returning unknown placeholder.');
-      // Return a placeholder widget for unknown types
       widget = Container(
         color: Colors.red.withOpacity(0.3),
         child: Center(
-          child: Text('Unknown widget type: ${node.type}'),
+          child: Text('Unknown: ${node.type}'),
         ),
       );
     }
 
     // Don't wrap "parent-data" widgets as they must be direct children of their layout parents
     // (e.g., Expanded/Flexible must be children of Column/Row, Positioned must be child of Stack)
-    // Also skip AppBar because it must be a PreferredSizeWidget in Scaffold
     if (node.type == 'Expanded' || 
         node.type == 'Flexible' || 
         node.type == 'Positioned' ||
         node.type == 'TableCell' ||
-        node.type == 'Spacer' ||
-        node.type == 'AppBar') {
+        node.type == 'Spacer') {
       return widget;
+    }
+
+    if (node.type == 'AppBar' && widget is PreferredSizeWidget) {
+      return SelectionPreferredSizeWrapper(
+        node: node,
+        hoveredNode: hoveredNode,
+        child: widget,
+      );
     }
 
     return WidgetSelectionWrapper(

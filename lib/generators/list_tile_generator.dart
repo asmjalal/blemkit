@@ -64,7 +64,11 @@ class ListTileGenerator extends BaseWidgetGenerator {
     }
 
     // onTap
-    props.add('${childIndent}onTap: () {}');
+    if (node.properties.containsKey('navigateTo')) {
+      props.add('${childIndent}onTap: ${generateNavigationCode(node.properties['navigateTo'])}');
+    } else {
+      props.add('${childIndent}onTap: () {}');
+    }
 
     return '${indentStr}ListTile(\n${props.join(',\n')},\n$indentStr)';
   }

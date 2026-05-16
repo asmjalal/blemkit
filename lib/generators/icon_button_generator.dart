@@ -24,15 +24,15 @@ class IconButtonGenerator extends BaseWidgetGenerator {
     }
 
     // Handle onPressed
-    if (node.properties['onPressed'] != null) {
-      props.add('onPressed: () {}');
+    if (node.properties.containsKey('navigateTo')) {
+      props.add('onPressed: ${generateNavigationCode(node.properties['navigateTo'])}');
     } else {
       props.add('onPressed: () {}'); // Always provide onPressed
     }
 
     // Handle other properties
     if (node.properties['color'] != null) {
-      props.add('color: Color(${node.properties['color']})');
+      props.add('color: ${formatColor(node.properties['color'])}');
     }
     
     if (node.properties['iconSize'] != null) {

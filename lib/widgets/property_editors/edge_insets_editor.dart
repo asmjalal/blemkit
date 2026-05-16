@@ -37,7 +37,7 @@ class EdgeInsetsEditor extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF94A3B8))),
         const SizedBox(height: 4),
         Center(
           child: Column(

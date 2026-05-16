@@ -10,8 +10,8 @@ class SliderBuilder extends BaseWidgetBuilder {
       min: (node.properties['min'] as num?)?.toDouble() ?? 0.0,
       max: (node.properties['max'] as num?)?.toDouble() ?? 1.0,
       onChanged: (double newValue) {},
-      activeColor: parseColor(node.properties['activeColor']),
-      inactiveColor: parseColor(node.properties['inactiveColor']),
+      activeColor: parseColor(node.properties['activeColor'], context),
+      inactiveColor: parseColor(node.properties['inactiveColor'], context),
       divisions: node.properties['divisions'] as int?,
       label: node.properties['label'] as String?,
     );

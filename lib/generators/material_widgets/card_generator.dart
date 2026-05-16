@@ -19,16 +19,7 @@ class CardGenerator extends BaseWidgetGenerator {
     }
     
     if (node.properties['margin'] != null) {
-      final margin = node.properties['margin'];
-      if (margin is Map) {
-        final left = margin['left'] ?? 0;
-        final right = margin['right'] ?? 0;
-        final top = margin['top'] ?? 0;
-        final bottom = margin['bottom'] ?? 0;
-        props.add('margin: EdgeInsets.only(left: $left, top: $top, right: $right, bottom: $bottom)');
-      } else {
-        props.add('margin: EdgeInsets.all($margin)');
-      }
+      props.add('margin: const ${parseEdgeInsets(node.properties['margin'])}');
     }
     
     if (node.properties['shape'] != null) {

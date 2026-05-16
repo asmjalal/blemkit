@@ -15,13 +15,13 @@ class ContainerBuilder extends BaseWidgetBuilder {
             : null;
 
     // Color: prefer flat 'color', fall back to decoration.color
-    final Color? parsedColor = parseColor(node.properties['color']) ??
-        parseColor(decorationMap?['color']);
+    final Color? parsedColor = parseColor(node.properties['color'], context) ??
+        parseColor(decorationMap?['color'], context);
 
     // BorderRadius: prefer flat 'borderRadius', fall back to decoration.borderRadius
     final double? borderRadiusValue =
-        (node.properties['borderRadius'] as num?)?.toDouble() ??
-        (decorationMap?['borderRadius'] as num?)?.toDouble();
+        parseDouble(node.properties['borderRadius']) ??
+        parseDouble(decorationMap?['borderRadius']);
 
     // Border
     final bool hasBorder = (node.properties['borderWidth'] != null &&
@@ -42,15 +42,15 @@ class ContainerBuilder extends BaseWidgetBuilder {
             : null,
         border: hasBorder
             ? Border.all(
-                color: parseColor(node.properties['borderColor']) ?? Colors.black,
-                width: node.properties['borderWidth']?.toDouble() ?? 1.0,
+                color: parseColor(node.properties['borderColor'], context) ?? Colors.black,
+                width: parseDouble(node.properties['borderWidth']) ?? 1.0,
               )
             : null,
         boxShadow: hasShadow
             ? [
                 BoxShadow(
-                  color: parseColor(node.properties['shadowColor']) ?? Colors.black26,
-                  blurRadius: node.properties['shadowBlur']?.toDouble() ?? 0.0,
+                  color: parseColor(node.properties['shadowColor'], context) ?? Colors.black26,
+                  blurRadius: parseDouble(node.properties['shadowBlur']) ?? 0.0,
                   offset: Offset(
                     parseDouble(node.properties['shadowX']) ?? 0.0,
                     parseDouble(node.properties['shadowY']) ?? 0.0,
@@ -58,6 +58,12 @@ class ContainerBuilder extends BaseWidgetBuilder {
                 ),
               ]
             : null,
+        gradient: parseGradient(node.properties['gradient'], context),
+      );
+    } else if (node.properties['gradient'] != null) {
+      boxDecoration = BoxDecoration(
+        gradient: parseGradient(node.properties['gradient'], context),
+        color: parsedColor,
       );
     }
 
@@ -65,8 +71,8 @@ class ContainerBuilder extends BaseWidgetBuilder {
       color: hasDecoration ? null : parsedColor,
       padding: parseEdgeInsets(node.properties['padding']),
       margin: parseEdgeInsets(node.properties['margin']),
-      height: node.properties['height']?.toDouble(),
-      width: node.properties['width']?.toDouble(),
+      height: parseDouble(node.properties['height']),
+      width: parseDouble(node.properties['width']),
       decoration: boxDecoration,
       child: node.children.isNotEmpty
           ? WidgetBuilderFactory.buildWidget(context, node.children.first, hoveredNode)

@@ -20,30 +20,12 @@ class ContainerGenerator extends BaseWidgetGenerator {
     
     // Handle padding
     if (node.properties['padding'] != null) {
-      final padding = node.properties['padding'];
-      if (padding is Map) {
-        final left = padding['left'] ?? 0;
-        final right = padding['right'] ?? 0;
-        final top = padding['top'] ?? 0;
-        final bottom = padding['bottom'] ?? 0;
-        props.add('padding: EdgeInsets.only(left: $left, top: $top, right: $right, bottom: $bottom)');
-      } else {
-        props.add('padding: EdgeInsets.all($padding)');
-      }
+      props.add('padding: const ${parseEdgeInsets(node.properties['padding'])}');
     }
     
     // Handle margin
     if (node.properties['margin'] != null) {
-      final margin = node.properties['margin'];
-      if (margin is Map) {
-        final left = margin['left'] ?? 0;
-        final right = margin['right'] ?? 0;
-        final top = margin['top'] ?? 0;
-        final bottom = margin['bottom'] ?? 0;
-        props.add('margin: EdgeInsets.only(left: $left, top: $top, right: $right, bottom: $bottom)');
-      } else {
-        props.add('margin: EdgeInsets.all($margin)');
-      }
+      props.add('margin: const ${parseEdgeInsets(node.properties['margin'])}');
     }
     
     // Handle decoration (BoxDecoration)
@@ -83,6 +65,16 @@ class ContainerGenerator extends BaseWidgetGenerator {
         'boxShadow: [BoxShadow(color: ${formatColor(shadowColor)}, blurRadius: $shadowBlur, '
         'offset: Offset($shadowX, $shadowY))]'
       );
+    }
+
+    // Gradient
+    final dynamic gradientValue = node.properties['gradient'] ?? decorationMap?['gradient'];
+    if (gradientValue is Map<String, dynamic>) {
+      final List<dynamic> colors = gradientValue['colors'] ?? [];
+      final String begin = gradientValue['begin'] ?? 'Alignment.centerLeft';
+      final String end = gradientValue['end'] ?? 'Alignment.centerRight';
+      final formattedColors = colors.map((c) => formatColor(c)).join(', ');
+      decorationProps.add('gradient: LinearGradient(begin: $begin, end: $end, colors: [$formattedColors])');
     }
     
     if (decorationProps.isNotEmpty) {

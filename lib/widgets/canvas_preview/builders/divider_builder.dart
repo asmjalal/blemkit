@@ -10,7 +10,7 @@ class DividerBuilder extends BaseWidgetBuilder {
       thickness: (node.properties['thickness'] as num?)?.toDouble(),
       indent: (node.properties['indent'] as num?)?.toDouble(),
       endIndent: (node.properties['endIndent'] as num?)?.toDouble(),
-      color: parseColor(node.properties['color']),
+      color: parseColor(node.properties['color'], context),
     );
   }
 } 

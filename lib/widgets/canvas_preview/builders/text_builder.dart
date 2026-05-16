@@ -5,25 +5,28 @@ import 'base_widget_builder.dart';
 class TextBuilder extends BaseWidgetBuilder {
   @override
   Widget build(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
+    // safeString() handles String, num, and nested Map widget nodes gracefully
+    final displayText = resolveDataBinding(node, node.properties['text'] ?? '');
+
     return Text(
-      resolveDataBinding(node, node.properties['text'] ?? ''),
+      displayText,
       style: TextStyle(
-        fontSize: (node.properties['fontSize'] is num && node.properties['fontSize'] != null) ? node.properties['fontSize'].toDouble() : 14.0,
-        color: parseColor(node.properties['color']),
+        fontSize: parseDouble(node.properties['fontSize']) ?? 14.0,
+        color: parseColor(node.properties['color'], context),
         fontWeight: parseFontWeight(node.properties['fontWeight']),
         fontStyle: node.properties['fontStyle'] == 'italic' ? FontStyle.italic : FontStyle.normal,
-        fontFamily: node.properties['fontFamily'] as String?,
+        fontFamily: node.properties['fontFamily'] is String ? node.properties['fontFamily'] as String : null,
         decoration: parseTextDecoration(node.properties['textDecoration']),
-        decorationColor: parseColor(node.properties['decorationColor']),
+        decorationColor: parseColor(node.properties['decorationColor'], context),
         decorationStyle: parseTextDecorationStyle(node.properties['decorationStyle']),
-        letterSpacing: node.properties['letterSpacing']?.toDouble(),
-        wordSpacing: node.properties['wordSpacing']?.toDouble(),
-        height: node.properties['height']?.toDouble(),
+        letterSpacing: parseDouble(node.properties['letterSpacing']),
+        wordSpacing: parseDouble(node.properties['wordSpacing']),
+        height: parseDouble(node.properties['height']),
         shadows: node.properties['shadowColor'] != null
             ? [
                 Shadow(
-                  color: parseColor(node.properties['shadowColor']) ?? Colors.black26,
-                  blurRadius: node.properties['shadowBlur']?.toDouble() ?? 0.0,
+                  color: parseColor(node.properties['shadowColor'], context) ?? Colors.black26,
+                  blurRadius: parseDouble(node.properties['shadowBlur']) ?? 0.0,
                   offset: Offset(
                     parseDouble(node.properties['shadowX']) ?? 0.0,
                     parseDouble(node.properties['shadowY']) ?? 0.0,
@@ -34,7 +37,7 @@ class TextBuilder extends BaseWidgetBuilder {
       ),
       textAlign: parseTextAlign(node.properties['textAlign']),
       overflow: parseTextOverflow(node.properties['overflow']),
-      maxLines: node.properties['maxLines'] as int?,
+      maxLines: node.properties['maxLines'] is int ? node.properties['maxLines'] as int : null,
     );
   }
-} 
+}

@@ -25,7 +25,7 @@ class CollapsibleWidgetTree extends StatelessWidget {
                   const SizedBox(width: 8),
                   const Text(
                     'Widget Tree',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   const Spacer(),
                   IconButton(
@@ -47,6 +47,7 @@ class CollapsibleWidgetTree extends StatelessWidget {
                       onAdd: onAdd ?? (_) {},
                       onDelete: provider.removeNode,
                       depth: 0,
+                      index: 0,
                       expanded: expanded ?? const {},
                       onExpandToggle: onExpandToggle,
                       onHover: provider.setHoveredNode,
@@ -107,7 +108,7 @@ class CollapsibleWidgetTree extends StatelessWidget {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Color(0xFF6366f1)),
+                        borderSide: BorderSide(color: Color(0xFF0fadd5)),
                       ),
                     ),
                   ),
@@ -132,7 +133,7 @@ class CollapsibleWidgetTree extends StatelessWidget {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Color(0xFF6366f1)),
+                        borderSide: BorderSide(color: Color(0xFF0fadd5)),
                       ),
                     ),
                   ),
@@ -156,7 +157,7 @@ class CollapsibleWidgetTree extends StatelessWidget {
                       const SizedBox(width: 16),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6366f1),
+                          backgroundColor: const Color(0xFF0fadd5),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                           shape: RoundedRectangleBorder(

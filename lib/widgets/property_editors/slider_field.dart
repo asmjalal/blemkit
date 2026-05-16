@@ -24,7 +24,7 @@ Widget buildSliderField(
               trackHeight: 2,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-              activeTrackColor: const Color(0xFF6366F1),
+              activeTrackColor: const Color(0xFF0fadd5),
               inactiveTrackColor: Colors.white.withOpacity(0.05),
               thumbColor: Colors.white,
             ),

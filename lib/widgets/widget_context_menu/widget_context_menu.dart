@@ -26,7 +26,19 @@ class WidgetContextMenu {
         CustomOverlayMenuItem(
           label: 'Wrap Widget',
           icon: Icons.wrap_text,
-          onTap: () => onAction('wrap'),
+          submenu: [
+            CustomOverlayMenuItem(label: 'Container', onTap: () => onAction('wrap_Container')),
+            CustomOverlayMenuItem(label: 'Row', onTap: () => onAction('wrap_Row')),
+            CustomOverlayMenuItem(label: 'Column', onTap: () => onAction('wrap_Column')),
+            CustomOverlayMenuItem(label: 'Stack', onTap: () => onAction('wrap_Stack')),
+            CustomOverlayMenuItem(label: 'Expanded', onTap: () => onAction('wrap_Expanded')),
+            CustomOverlayMenuItem(label: 'Flexible', onTap: () => onAction('wrap_Flexible')),
+            CustomOverlayMenuItem(label: 'Padding', onTap: () => onAction('wrap_Padding')),
+            CustomOverlayMenuItem(label: 'Center', onTap: () => onAction('wrap_Center')),
+            CustomOverlayMenuItem(label: 'SizedBox', onTap: () => onAction('wrap_SizedBox')),
+            CustomOverlayMenuItem(label: 'Card', onTap: () => onAction('wrap_Card')),
+            CustomOverlayMenuItem(label: 'SingleChildScrollView', onTap: () => onAction('wrap_SingleChildScrollView')),
+          ],
         ),
       CustomOverlayMenuItem(
         label: 'Replace Widget',

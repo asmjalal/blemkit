@@ -217,7 +217,7 @@ List<Widget> buildTextFieldPropertyEditors(BuildContext context, WidgetNode node
     // Content Padding (EdgeInsets)
     Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Text('Content Padding', style: const TextStyle(fontWeight: FontWeight.bold)),
+      child: Text('Content Padding', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF94A3B8))),
     ),
     EdgeInsetsEditor(
       label: 'Content Padding',

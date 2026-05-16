@@ -14,7 +14,7 @@ class ChipBuilder extends BaseWidgetBuilder {
       avatar: node.properties['avatar'] != null
           ? WidgetBuilderFactory.buildWidget(context, WidgetNode.fromJson(node.properties['avatar']), hoveredNode)
           : null,
-      backgroundColor: parseColor(node.properties['backgroundColor']),
+      backgroundColor: parseColor(node.properties['backgroundColor'], context),
       deleteIcon: node.properties['deleteIcon'] != null
           ? WidgetBuilderFactory.buildWidget(context, WidgetNode.fromJson(node.properties['deleteIcon']), hoveredNode)
           : null,

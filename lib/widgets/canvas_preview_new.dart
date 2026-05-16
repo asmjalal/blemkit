@@ -53,11 +53,10 @@ class _CanvasPreviewState extends State<CanvasPreview> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF181A20), // Full canvas/editor background
+      color: const Color(0xFF020408), // Darker professional background
       child: Stack(
-        fit: StackFit.expand, // Ensure the stack fills the canvas area
+        fit: StackFit.expand,
         children: [
-          // Transform applies to everything (grid + phone)
           Transform(
             transform: Matrix4.identity()
               ..translate(_offset.dx, _offset.dy)
@@ -66,70 +65,67 @@ class _CanvasPreviewState extends State<CanvasPreview> with TickerProviderStateM
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Grid as background of the whole canvas area
+                // Minimalist dotted grid
                 CustomPaint(
-                  painter: GridPainter(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    gridSize: 20,
+                  painter: DottedGridPainter(
+                    color: Colors.white.withOpacity(0.05),
+                    gridSize: 30,
                   ),
                   child: Container(),
                 ),
                 Center(
-                  child: Stack(
-                    children: [
-                      // Google Pixel bezel
-                      Container(
-                        width: 400,
-                        height: 800,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF22232E),
-                          borderRadius: BorderRadius.circular(48),
-                          border: Border.all(color: Colors.black, width: 6),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.25),
-                              blurRadius: 24,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
+                  child: Container(
+                    width: 380,
+                    height: 780,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(54),
+                      border: Border.all(color: const Color(0xFF1E293B), width: 8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 40,
+                          spreadRadius: 5,
+                          offset: const Offset(0, 20),
                         ),
-                        child: Stack(
-                          children: [
-                            // Notch/camera cutout
-                            Positioned(
-                              top: 0,
-                              left: 120,
-                              right: 120,
-                              child: Container(
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: const BorderRadius.vertical(
-                                    bottom: Radius.circular(16),
-                                  ),
-                                ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        // Dynamic Island
+                        Positioned(
+                          top: 12,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              width: 100,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                            // Device screen
-                            Positioned.fill(
-                              top: 24,
-                              left: 12,
-                              right: 12,
-                              bottom: 12,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(32),
-                                child: Container(
-                                  color: const Color(0xFF1a1b26),
-                                  child: Consumer<WidgetTreeProvider>(
-                                    builder: (context, provider, _) => _buildCanvasContent(context, provider, provider.hoveredNode),
-                                  ),
-                                ),
+                          ),
+                        ),
+                        // Screen content
+                        Positioned.fill(
+                          top: 10,
+                          left: 10,
+                          right: 10,
+                          bottom: 10,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(44),
+                            child: Container(
+                              color: const Color(0xFF030712),
+                              child: Consumer<WidgetTreeProvider>(
+                                builder: (context, provider, _) => _buildCanvasContent(context, provider, provider.hoveredNode),
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -139,11 +135,11 @@ class _CanvasPreviewState extends State<CanvasPreview> with TickerProviderStateM
             right: 32,
             bottom: 32,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: const Color(0xFF1e293b).withOpacity(0.9), // Darker slate
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                color: const Color(0xFF1E293B).withOpacity(0.9), // Darker slate
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white.withOpacity(0.08)),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
@@ -152,27 +148,27 @@ class _CanvasPreviewState extends State<CanvasPreview> with TickerProviderStateM
                   ),
                 ],
               ),
-              child: Row(
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildZoomBtn(Icons.remove, _zoomOut),
+                  _buildZoomBtn(Icons.add, _zoomIn),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Text(
                       '${(_zoomLevel * 100).toInt()}%',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                        fontSize: 10,
                       ),
                     ),
                   ),
-                  _buildZoomBtn(Icons.add, _zoomIn),
+                  _buildZoomBtn(Icons.remove, _zoomOut),
                   Container(
-                    width: 1,
-                    height: 20,
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    color: Colors.white.withValues(alpha: 0.1),
+                    width: 20,
+                    height: 1,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    color: Colors.white.withOpacity(0.1),
                   ),
                   _buildZoomBtn(Icons.refresh, _resetZoom),
                 ],
@@ -218,15 +214,29 @@ class _CanvasPreviewState extends State<CanvasPreview> with TickerProviderStateM
               setState(() => _isDragging = false);
             },
             child: Container(
-              color: const Color(0xFF1a1b26),
+              color: const Color(0xFF030712),
             ),
           ),
         ),
         // Preview content
         DragTarget<String>(
           onWillAccept: (data) => true,
-          onAccept: (type) {
-            provider.addNode(type, parent: provider.selectedNode ?? provider.rootNode);
+          onAccept: (data) {
+            if (data.startsWith('ThemedWidget:')) {
+              final themedId = data.substring('ThemedWidget:'.length);
+              final newNode = WidgetNode(
+                type: 'ThemedWidget',
+                properties: {'themedWidgetId': themedId},
+              );
+              final parent = provider.selectedNode ?? provider.rootNode;
+              if (parent != null) {
+                provider.addChild(parent, newNode);
+              } else {
+                provider.setRootNode(newNode);
+              }
+            } else {
+              provider.addNode(data, parent: provider.selectedNode ?? provider.rootNode);
+            }
           },
           builder: (context, candidateData, rejectedData) {
             return Center(
@@ -234,18 +244,8 @@ class _CanvasPreviewState extends State<CanvasPreview> with TickerProviderStateM
                   ? const SizedBox.shrink() 
                   : Theme(
                       key: ValueKey('${provider.themeProperties.toString()}_${provider.rootNode?.id}'),
-                      data: ThemeData(
-                        useMaterial3: provider.themeProperties['useMaterial3'] ?? true,
-                        colorScheme: ColorScheme.fromSeed(
-                          seedColor: ColorUtils.parseColor(provider.themeProperties['primaryColor'], Colors.indigo),
-                          primary: ColorUtils.parseColor(provider.themeProperties['primaryColor'], Colors.indigo),
-                          secondary: ColorUtils.parseColor(provider.themeProperties['accentColor'], Colors.indigoAccent),
-                          surface: ColorUtils.parseColor(provider.themeProperties['backgroundColor'], Colors.white),
-                        ),
-                        scaffoldBackgroundColor: ColorUtils.parseColor(provider.themeProperties['scaffoldBackgroundColor'], Colors.white),
-                        fontFamily: provider.themeProperties['fontFamily'],
-                      ),
-                      child: WidgetBuilderFactory.buildWidget(context, provider.rootNode!, hoveredNode),
+                      data: _buildThemeData(provider.themeProperties),
+                      child: _buildScreenWrapper(context, provider, hoveredNode),
                     ),
             );
           },
@@ -253,28 +253,178 @@ class _CanvasPreviewState extends State<CanvasPreview> with TickerProviderStateM
       ],
     );
   }
+
+  Widget _buildScreenWrapper(BuildContext context, WidgetTreeProvider provider, WidgetNode? hoveredNode) {
+    Widget content = WidgetBuilderFactory.buildWidget(context, provider.rootNode!, hoveredNode);
+    
+    // BottomNavigationBar requires at least 2 items.
+    // Provider state can briefly become inconsistent while editing screens, so guard hard here.
+    final screens = provider.screens;
+    if (screens.length >= 2) {
+      bool hasBuiltInNavBar = false;
+      for (var s in screens) {
+        if (s.type == 'Scaffold' && s.properties['bottomNavigationBar'] != null) {
+          hasBuiltInNavBar = true;
+          break;
+        }
+      }
+
+      if (!hasBuiltInNavBar) {
+        int currentIndex = screens.indexWhere((s) => s.id == provider.rootNode?.id);
+        if (currentIndex < 0) currentIndex = 0;
+        if (currentIndex >= screens.length) currentIndex = 0;
+        
+        final items = screens.map((s) {
+        final name = s.properties['pageName'] ?? s.id ?? 'Screen';
+        return BottomNavigationBarItem(
+          icon: Icon(_getIconForScreenName(name.toString())),
+          label: name.toString(),
+        );
+      }).toList();
+
+      if (items.length >= 2) {
+        content = Scaffold(
+          backgroundColor: Colors.transparent,
+          body: content,
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: currentIndex,
+            onTap: (index) {
+              final screen = screens[index];
+              provider.selectScreen(screen);
+            },
+            type: BottomNavigationBarType.fixed,
+            items: items,
+          ),
+        );
+      }
+      }
+    }
+    
+    return content;
+  }
+
+  IconData _getIconForScreenName(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('home') || lower.contains('dash')) return Icons.home;
+    if (lower.contains('profile') || lower.contains('user') || lower.contains('account')) return Icons.person;
+    if (lower.contains('set')) return Icons.settings;
+    if (lower.contains('search')) return Icons.search;
+    if (lower.contains('cart')) return Icons.shopping_cart;
+    if (lower.contains('fav')) return Icons.favorite;
+    if (lower.contains('work') || lower.contains('fit') || lower.contains('train')) return Icons.fitness_center;
+    if (lower.contains('activ')) return Icons.local_activity;
+    if (lower.contains('list')) return Icons.list_alt;
+    if (lower.contains('med')) return Icons.medical_services;
+    return Icons.dashboard;
+  }
+
+  ThemeData _buildThemeData(Map<String, dynamic> props) {
+    final primary = ColorUtils.parseColor(props['primaryColor'], Colors.indigo);
+    final secondary = ColorUtils.parseColor(props['secondaryColor'], Colors.teal);
+    final tertiary = ColorUtils.parseColor(props['tertiaryColor'], Colors.amber);
+    final surface = ColorUtils.parseColor(props['backgroundColor'], Colors.white);
+    final scaffoldBg = ColorUtils.parseColor(props['scaffoldBackgroundColor'], Colors.white);
+    final error = ColorUtils.parseColor(props['errorColor'], Colors.red);
+    final isM3 = props['useMaterial3'] ?? true;
+    final fontFamily = props['fontFamily'] ?? 'Outfit';
+
+    TextStyle buildTextStyle(Map<String, dynamic>? m) {
+      if (m == null) return const TextStyle();
+      return TextStyle(
+        fontSize: (m['fontSize'] as num?)?.toDouble(),
+        fontWeight: _parseFontWeight(m['fontWeight']),
+        letterSpacing: (m['letterSpacing'] as num?)?.toDouble(),
+      );
+    }
+
+    return ThemeData(
+      useMaterial3: isM3,
+      primaryColor: primary,
+      scaffoldBackgroundColor: scaffoldBg,
+      fontFamily: fontFamily,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primary,
+        primary: primary,
+        secondary: secondary,
+        tertiary: tertiary,
+        surface: surface,
+        error: error,
+      ),
+      textTheme: TextTheme(
+        displayLarge: buildTextStyle(props['displayLarge'] as Map<String, dynamic>?),
+        displayMedium: buildTextStyle(props['displayMedium'] as Map<String, dynamic>?),
+        displaySmall: buildTextStyle(props['displaySmall'] as Map<String, dynamic>?),
+        headlineLarge: buildTextStyle(props['headlineLarge'] as Map<String, dynamic>?),
+        headlineMedium: buildTextStyle(props['headlineMedium'] as Map<String, dynamic>?),
+        headlineSmall: buildTextStyle(props['headlineSmall'] as Map<String, dynamic>?),
+        titleLarge: buildTextStyle(props['titleLarge'] as Map<String, dynamic>?),
+        titleMedium: buildTextStyle(props['titleMedium'] as Map<String, dynamic>?),
+        titleSmall: buildTextStyle(props['titleSmall'] as Map<String, dynamic>?),
+        labelLarge: buildTextStyle(props['labelLarge'] as Map<String, dynamic>?),
+        bodyLarge: buildTextStyle(props['bodyLarge'] as Map<String, dynamic>?),
+        bodyMedium: buildTextStyle(props['bodyMedium'] as Map<String, dynamic>?),
+        bodySmall: buildTextStyle(props['bodySmall'] as Map<String, dynamic>?),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: false,
+        iconTheme: const IconThemeData(color: Colors.black87),
+        titleTextStyle: TextStyle(
+          fontFamily: fontFamily,
+          color: Colors.black87,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: surface,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 0,
+        ),
+      ),
+    );
+  }
+
+  FontWeight _parseFontWeight(dynamic value) {
+    if (value == null) return FontWeight.normal;
+    if (value is String) {
+      switch (value) {
+        case 'Bold': return FontWeight.bold;
+        case 'Medium': return FontWeight.w500;
+        case 'Light': return FontWeight.w300;
+        case 'Thin': return FontWeight.w100;
+        case 'Normal':
+        default: return FontWeight.normal;
+      }
+    }
+    return FontWeight.normal;
+  }
 }
 
-class GridPainter extends CustomPainter {
+class DottedGridPainter extends CustomPainter {
   final Color color;
   final double gridSize;
 
-  GridPainter({required this.color, required this.gridSize});
+  DottedGridPainter({required this.color, required this.gridSize});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 0.5;
+      ..style = PaintingStyle.fill;
 
-    // Draw vertical lines
-    for (double i = 0; i < size.width; i += gridSize) {
-      canvas.drawLine(Offset(i, 0), Offset(i, size.height), paint);
-    }
-
-    // Draw horizontal lines
-    for (double i = 0; i < size.height; i += gridSize) {
-      canvas.drawLine(Offset(0, i), Offset(size.width, i), paint);
+    for (double x = 0; x < size.width; x += gridSize) {
+      for (double y = 0; y < size.height; y += gridSize) {
+        canvas.drawCircle(Offset(x, y), 1.0, paint);
+      }
     }
   }
 

@@ -8,8 +8,8 @@ class SwitchBuilder extends BaseWidgetBuilder {
     return Switch(
       value: node.properties['value'] ?? false,
       onChanged: (bool newValue) {},
-      activeColor: parseColor(node.properties['activeColor']),
-      inactiveThumbColor: parseColor(node.properties['inactiveThumbColor']),
+      activeColor: parseColor(node.properties['activeColor'], context),
+      inactiveThumbColor: parseColor(node.properties['inactiveThumbColor'], context),
     );
   }
 } 

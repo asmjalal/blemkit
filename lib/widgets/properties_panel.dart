@@ -28,6 +28,7 @@ import 'property_editors/snackbar_properties/snackbar_property_editors.dart';
 import 'property_editors/tooltip_properties/tooltip_property_editors.dart';
 import 'property_editors/expansion_properties/expansion_property_editors.dart';
 import 'property_editors/padding_properties.dart';
+import 'property_editors/circle_avatar_properties/circle_avatar_property_editors.dart';
 import '../utils/color_utils.dart';
 import 'property_editors/color_picker_field.dart';
 
@@ -318,15 +319,20 @@ class PropertiesPanel extends StatelessWidget {
       case 'ElevatedButton':
       case 'TextButton':
       case 'OutlinedButton':
+      case 'Button':
         return buildButtonPropertyEditors(context, node);
       case 'Image':
         return buildImagePropertyEditors(context, node);
       case 'CircleImage':
         return buildCircleImagePropertyEditors(context, node);
+      case 'CircleAvatar':
+        return buildCircleAvatarPropertyEditors(context, node);
       case 'ListTile':
         return buildListTilePropertyEditors(context, node);
       case 'Icon':
         return buildIconPropertyEditors(context, node);
+      case 'IconButton':
+        return buildIconButtonPropertyEditors(context, node);
       case 'TextField':
         return buildTextFieldPropertyEditors(context, node);
       case 'Radio':
@@ -352,6 +358,7 @@ class PropertiesPanel extends StatelessWidget {
       case 'BottomNavigationBar':
         return buildBottomNavPropertyEditors(context, node);
       case 'FloatingActionButton':
+      case 'FAB':
         return buildFloatingActionPropertyEditors(context, node);
       case 'Dialog':
         return buildDialogPropertyEditors(context, node);
@@ -409,7 +416,7 @@ class PropertiesPanel extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.link, size: 16, color: Color(0xFF6366F1)),
+            const Icon(Icons.link, size: 16, color: Color(0xFF0fadd5)),
             const SizedBox(width: 8),
             Text(
               'DATA BINDING',

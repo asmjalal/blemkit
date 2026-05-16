@@ -64,7 +64,7 @@ class WidgetTreeEditor extends StatefulWidget {
         });
       case 'AppBar':
         return WidgetNode(type: 'AppBar', properties: {
-          'title': WidgetNode(type: 'Text', properties: {'text': 'App Bar'}).toJson(),
+          'title': WidgetNode(type: 'Text', properties: {'text': 'App Bar'}),
           'backgroundColor': Colors.blue.value.toString(),
           'elevation': 0.0,
           'showDefaultButton': false,
@@ -79,7 +79,7 @@ class WidgetTreeEditor extends StatefulWidget {
           'centerTitle': false,
           'useFlexibleSpace': false,
           'addBackgroundWidget': false,
-          'leading': WidgetNode(type: 'Icon', properties: {'icon': 'menu'}).toJson(),
+          'leading': WidgetNode(type: 'Icon', properties: {'icon': 'menu'}),
           'actions': [],
         });
       case 'Image':
@@ -88,6 +88,7 @@ class WidgetTreeEditor extends StatefulWidget {
           'width': 100.0,
           'height': 100.0,
           'fit': 'cover',
+          'borderRadius': 0.0,
         });
       case 'ListView':
         return WidgetNode(type: 'ListView', properties: {
@@ -132,16 +133,16 @@ class WidgetTreeEditor extends StatefulWidget {
         });
       case 'IconButton':
         return WidgetNode(type: 'IconButton', properties: {
-          'icon': WidgetNode(type: 'Icon', properties: {'icon': 'add'}).toJson(),
+          'icon': WidgetNode(type: 'Icon', properties: {'icon': 'add'}),
           'size': 24.0,
           'color': Colors.black.value.toString(),
         });
       case 'ListTile':
         return WidgetNode(type: 'ListTile', properties: {
-          'title': WidgetNode(type: 'Text', properties: {'text': 'List Tile'}).toJson(),
-          'subtitle': WidgetNode(type: 'Text', properties: {'text': 'Subtitle'}).toJson(),
-          'leading': WidgetNode(type: 'Icon', properties: {'icon': 'info'}).toJson(),
-          'trailing': WidgetNode(type: 'Icon', properties: {'icon': 'arrow_forward'}).toJson(),
+          'title': WidgetNode(type: 'Text', properties: {'text': 'List Tile'}),
+          'subtitle': WidgetNode(type: 'Text', properties: {'text': 'Subtitle'}),
+          'leading': WidgetNode(type: 'Icon', properties: {'icon': 'info'}),
+          'trailing': WidgetNode(type: 'Icon', properties: {'icon': 'arrow_forward'}),
         });
       case 'SlidableListTile':
         return WidgetNode(type: 'SlidableListTile', properties: {
@@ -150,7 +151,7 @@ class WidgetTreeEditor extends StatefulWidget {
         });
       case 'FAB':
         return WidgetNode(type: 'FloatingActionButton', properties: {
-          'icon': WidgetNode(type: 'Icon', properties: {'icon': 'add'}).toJson(),
+          'icon': WidgetNode(type: 'Icon', properties: {'icon': 'add'}),
           'backgroundColor': Colors.blue.value.toString(),
         });
       case 'Drawer':
@@ -215,15 +216,15 @@ class WidgetTreeEditor extends StatefulWidget {
       case 'BottomNavigationBar':
         return WidgetNode(type: 'BottomNavigationBar', properties: {
           'items': [
-            WidgetNode(type: 'BottomNavigationBarItem', properties: {'icon': WidgetNode(type: 'Icon', properties: {'icon': 'home'}).toJson(), 'label': 'Home'}).toJson(),
-            WidgetNode(type: 'BottomNavigationBarItem', properties: {'icon': WidgetNode(type: 'Icon', properties: {'icon': 'shopping_cart'}).toJson(), 'label': 'Cart'}).toJson(),
-            WidgetNode(type: 'BottomNavigationBarItem', properties: {'icon': WidgetNode(type: 'Icon', properties: {'icon': 'person'}).toJson(), 'label': 'Profile'}).toJson(),
+            WidgetNode(type: 'BottomNavigationBarItem', properties: {'icon': WidgetNode(type: 'Icon', properties: {'icon': 'home'}), 'label': 'Home'}),
+            WidgetNode(type: 'BottomNavigationBarItem', properties: {'icon': WidgetNode(type: 'Icon', properties: {'icon': 'shopping_cart'}), 'label': 'Cart'}),
+            WidgetNode(type: 'BottomNavigationBarItem', properties: {'icon': WidgetNode(type: 'Icon', properties: {'icon': 'person'}), 'label': 'Profile'}),
           ],
         });
       case 'Scaffold':
         return WidgetNode(type: 'Scaffold', properties: {
-          'appBar': WidgetNode(type: 'AppBar', properties: {'title': WidgetNode(type: 'Text', properties: {'text': 'App Bar'}).toJson()}).toJson(),
-          'body': WidgetNode(type: 'Container', properties: {'color': Colors.white.value.toString(), 'height': 200.0, 'width': 200.0}).toJson(),
+          'appBar': WidgetNode(type: 'AppBar', properties: {'title': WidgetNode(type: 'Text', properties: {'text': 'App Bar'})}),
+          'body': WidgetNode(type: 'Container', properties: {'color': Colors.white.value.toString(), 'height': 200.0, 'width': 200.0}),
         });
       case 'SingleChildScrollView':
         return WidgetNode(type: 'SingleChildScrollView', properties: {
@@ -560,36 +561,24 @@ class _WidgetTreeEditorState extends State<WidgetTreeEditor> {
     if (propertiesToDisplay != null) {
       for (final propName in propertiesToDisplay) {
         final dynamic propValue = node.properties[propName];
-        if (propValue is Map<String, dynamic>) {
-          try {
-            final WidgetNode propNode = WidgetNode.fromJson(propValue);
-            // Create a wrapper node to show property name in the tree
-            extractedNodes.add(WidgetNode(
-              id: '${node.id}_prop_$propName', // Unique ID for property node
-              type: '${propName[0].toUpperCase()}${propName.substring(1)}: ${propNode.type}', // e.g., AppBar: AppBar
-              children: [propNode], // The actual widget node is a child of this wrapper
-              properties: {},
-            ));
-            print('Extracted property node: ${propName[0].toUpperCase()}${propName.substring(1)}: ${propNode.type}');
-          } catch (e) {
-            print('Error parsing widget node from property $propName for type ${node.type}: $e');
-          }
-        } else if (propValue is List<dynamic>) { // Handle lists of widgets, e.g., AppBar actions, BottomNavigationBar items
+        if (propValue is WidgetNode) {
+          // Create a wrapper node to show property name in the tree
+          extractedNodes.add(WidgetNode(
+            id: '${node.id}_prop_$propName', // Unique ID for property node
+            type: '${propName[0].toUpperCase()}${propName.substring(1)}: ${propValue.type}', // e.g., AppBar: AppBar
+            children: [propValue], // The actual widget node is a child of this wrapper
+            properties: {},
+          ));
+        } else if (propValue is List<dynamic>) {
           for (int i = 0; i < propValue.length; i++) {
             final item = propValue[i];
-            if (item is Map<String, dynamic>) {
-              try {
-                final WidgetNode itemNode = WidgetNode.fromJson(item);
-                extractedNodes.add(WidgetNode(
-                  id: '${node.id}_prop_${propName}_$i', // Unique ID for list item property node
-                  type: '${propName[0].toUpperCase()}${propName.substring(1)}[$i]: ${itemNode.type}', // e.g., Actions[0]: IconButton
-                  children: [itemNode],
-                  properties: {},
-                ));
-                print('Extracted list item property node: ${propName[0].toUpperCase()}${propName.substring(1)}[$i]: ${itemNode.type}');
-              } catch (e) {
-                print('Error parsing widget node from list property $propName[$i] for type ${node.type}: $e');
-              }
+            if (item is WidgetNode) {
+              extractedNodes.add(WidgetNode(
+                id: '${node.id}_prop_${propName}_$i', // Unique ID for list item property node
+                type: '${propName[0].toUpperCase()}${propName.substring(1)}[$i]: ${item.type}', // e.g., Actions[0]: IconButton
+                children: [item],
+                properties: {},
+              ));
             }
           }
         }

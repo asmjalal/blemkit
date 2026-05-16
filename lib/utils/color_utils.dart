@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
 
 class ColorUtils {
-  static Color parseColor(dynamic value, [Color defaultColor = Colors.transparent]) {
-    if (value == null) return defaultColor;
+  static Color parseColor(dynamic value, [dynamic themeOrColor, Color? defaultColor]) {
+    Color def = defaultColor ?? Colors.transparent;
+    Map<String, dynamic>? theme;
+    
+    if (themeOrColor is Map<String, dynamic>) {
+      theme = themeOrColor;
+    } else if (themeOrColor is Color) {
+      def = themeOrColor;
+    }
+
+    if (value == null) return def;
     
     if (value is int) {
       return Color(value);
     }
     
     if (value is String) {
+      // Handle semantic theme tokens (primaryColor, accentColor, etc)
+      if (theme != null && theme.containsKey(value)) {
+        return parseColor(theme[value], null, def);
+      }
+
       // Handle decimal integer strings
       final int? parsedInt = int.tryParse(value);
       if (parsedInt != null) {
@@ -20,7 +34,7 @@ class ColorUtils {
         try {
           return Color(int.parse(value));
         } catch (_) {
-          return defaultColor;
+          return def;
         }
       }
       
@@ -30,7 +44,7 @@ class ColorUtils {
           final hex = value.replaceAll('#', '');
           return Color(int.parse(hex.length == 6 ? 'FF$hex' : hex, radix: 16));
         } catch (_) {
-          return defaultColor;
+          return def;
         }
       }
       
@@ -51,9 +65,11 @@ class ColorUtils {
         case 'Colors.black26': return Colors.black26;
         case 'Colors.lightBlueAccent': return Colors.lightBlueAccent;
         case 'Colors.redAccent': return Colors.redAccent;
+        case 'primaryColor': return Colors.indigo; // Fallbacks if no theme provided
+        case 'accentColor': return Colors.indigoAccent;
       }
     }
     
-    return defaultColor;
+    return def;
   }
 }

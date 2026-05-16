@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../models/widget_node.dart';
 import 'base_widget_builder.dart';
 import 'widget_builder_factory.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/widget_tree_provider.dart';
 
 class BottomNavigationBarBuilder extends BaseWidgetBuilder {
   @override
@@ -25,16 +27,7 @@ class BottomNavigationBarBuilder extends BaseWidgetBuilder {
     
     return BottomNavigationBar(
       items: itemsList.map((item) {
-        Widget iconWidget;
-        if (item['icon'] is Map<String, dynamic>) {
-          iconWidget = WidgetBuilderFactory.buildWidget(
-            context, 
-            WidgetNode.fromJson(item['icon']), 
-            hoveredNode
-          );
-        } else {
-          iconWidget = const Icon(Icons.help);
-        }
+        final iconWidget = safeWidget(context, item['icon'], hoveredNode) ?? const Icon(Icons.help);
         
         return BottomNavigationBarItem(
           icon: iconWidget,
@@ -42,9 +35,21 @@ class BottomNavigationBarBuilder extends BaseWidgetBuilder {
         );
       }).toList(),
       currentIndex: node.properties['currentIndex'] ?? 0,
-      onTap: (index) {},
-      selectedItemColor: parseColor(node.properties['selectedItemColor']),
-      unselectedItemColor: parseColor(node.properties['unselectedItemColor']),
+      onTap: (index) {
+        final item = itemsList[index];
+        final navigateTo = item['navigateTo'];
+        if (navigateTo != null) {
+          final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+          try {
+            final target = provider.screens.firstWhere((s) => s.id == navigateTo);
+            provider.selectScreen(target);
+          } catch (_) {
+            // Screen might have been deleted
+          }
+        }
+      },
+      selectedItemColor: parseColor(node.properties['selectedItemColor'], context),
+      unselectedItemColor: parseColor(node.properties['unselectedItemColor'], context),
       type: parseBottomNavigationBarType(node.properties['type']),
     );
   }

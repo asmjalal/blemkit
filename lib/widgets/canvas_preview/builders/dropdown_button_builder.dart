@@ -14,7 +14,7 @@ class DropdownButtonBuilder extends BaseWidgetBuilder {
         );
       }).toList(),
       onChanged: (value) {},
-      hint: node.properties['hint'] != null ? Text(node.properties['hint']) : null,
+      hint: safeWidget(context, node.properties['hint'], hoveredNode, fallback: null),
     );
   }
 } 

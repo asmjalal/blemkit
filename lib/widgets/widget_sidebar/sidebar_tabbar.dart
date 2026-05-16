@@ -12,11 +12,12 @@ class SidebarTabBar extends StatelessWidget {
     final tabs = [
       {'icon': Icons.widgets_outlined, 'label': 'Widgets'},
       {'icon': Icons.account_tree_outlined, 'label': 'Tree'},
+      {'icon': Icons.layers_outlined, 'label': 'Pages'},
       {'icon': Icons.palette_outlined, 'label': 'Theme'},
-      {'icon': Icons.storage_outlined, 'label': 'Data'},
+      // {'icon': Icons.storage_outlined, 'label': 'Data'},
     ];
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -30,9 +31,9 @@ class SidebarTabBar extends StatelessWidget {
                     left: i == 0 ? 0 : 4,
                     right: i == tabs.length - 1 ? 0 : 4,
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: selectedTab == i ? const Color(0xFF6366f1) : const Color(0xFF2d3748).withOpacity(0.5),
+                    color: selectedTab == i ? const Color(0xFF0fadd5) : const Color(0xFF2d3748).withOpacity(0.5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(

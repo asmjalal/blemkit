@@ -16,14 +16,14 @@ class ListViewBuilder extends BaseWidgetBuilder {
             : const SizedBox(),
         scrollDirection: parseAxis(node.properties['scrollDirection']) ?? Axis.vertical,
         padding: parseEdgeInsets(node.properties['padding']),
-        shrinkWrap: node.properties['shrinkWrap'] ?? false,
+        shrinkWrap: node.properties['shrinkWrap'] ?? true,
       );
     } else {
       // Use regular ListView for static lists with multiple different children
       return ListView(
         scrollDirection: parseAxis(node.properties['scrollDirection']) ?? Axis.vertical,
         padding: parseEdgeInsets(node.properties['padding']),
-        shrinkWrap: node.properties['shrinkWrap'] ?? false,
+        shrinkWrap: node.properties['shrinkWrap'] ?? true,
         children: node.children
             .map((child) => WidgetBuilderFactory.buildWidget(context, child, hoveredNode))
             .toList(),

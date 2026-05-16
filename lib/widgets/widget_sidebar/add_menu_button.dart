@@ -11,7 +11,7 @@ class AddMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.add, size: 18, color: Color(0xFF6366f1)),
+      icon: const Icon(Icons.add, size: 18, color: Color(0xFF0fadd5)),
       onPressed: () {
         final RenderBox buttonBox = context.findRenderObject() as RenderBox;
         final Offset buttonPosition = buttonBox.localToGlobal(Offset.zero);

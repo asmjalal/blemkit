@@ -6,12 +6,12 @@ class CheckboxListTileBuilder extends BaseWidgetBuilder {
   @override
   Widget build(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
     return CheckboxListTile(
-      title: node.properties['title'] != null ? Text(node.properties['title']) : null,
+      title: safeWidget(context, node.properties['title'], hoveredNode, fallback: null),
       value: node.properties['value'] ?? false,
       onChanged: (bool? newValue) {},
       controlAffinity: parseListTileControlAffinity(node.properties['controlAffinity']),
-      activeColor: parseColor(node.properties['activeColor']),
-      checkColor: parseColor(node.properties['checkColor']),
+      activeColor: parseColor(node.properties['activeColor'], context),
+      checkColor: parseColor(node.properties['checkColor'], context),
     );
   }
 

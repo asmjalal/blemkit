@@ -10,10 +10,12 @@ class TextButtonBuilder extends BaseWidgetBuilder {
     return TextButton(
       onPressed: () {},
       style: TextButton.styleFrom(
-        foregroundColor: parseColor(node.properties['foregroundColor']),
+        foregroundColor: parseColor(node.properties['foregroundColor'], context),
         padding: parseEdgeInsets(node.properties['padding']),
       ),
-      child: node.children.isNotEmpty ? WidgetBuilderFactory.buildWidget(context, node.children.first, hoveredNode) : const SizedBox(),
+      child: node.children.isNotEmpty 
+          ? WidgetBuilderFactory.buildWidget(context, node.children.first, hoveredNode) 
+          : Text(safeString(node.properties['text'], fallback: 'Button')),
     );
   }
 

@@ -19,7 +19,7 @@ class ExpansionTileBuilder extends BaseWidgetBuilder {
           : null,
       children: node.children.map((child) => WidgetBuilderFactory.buildWidget(context, child, hoveredNode)).toList(),
       initiallyExpanded: node.properties['initiallyExpanded'] ?? false,
-      backgroundColor: parseColor(node.properties['backgroundColor']),
+      backgroundColor: parseColor(node.properties['backgroundColor'], context),
     );
   }
 
