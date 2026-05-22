@@ -1,4 +1,5 @@
 import '../base_widget_generator.dart';
+import '../widget_generator_registry.dart';
 import '../../models/widget_node.dart';
 
 class FormFieldGenerator extends BaseWidgetGenerator {
@@ -18,7 +19,7 @@ class FormFieldGenerator extends BaseWidgetGenerator {
     
     String child = '';
     if (node.children.isNotEmpty) {
-      child = '\n$childIndentStr builder: (FormFieldState state) => ${generateCode(node.children.first, indent: indent + 1)},';
+      child = '\n$childIndentStr builder: (FormFieldState state) => ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)},';
     }
     
     return '${indentStr}FormField(${props.join(', ')}$child\n$indentStr)';

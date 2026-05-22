@@ -77,6 +77,15 @@ import 'selectable_text_generator.dart';
 import 'constrained_box_generator.dart';
 import 'intrinsic_height_generator.dart';
 import 'intrinsic_width_generator.dart';
+import 'clip_r_rect_generator.dart';
+import 'date_picker_generator.dart';
+import 'time_picker_generator.dart';
+import 'range_slider_generator.dart';
+import 'search_field_generator.dart';
+import 'auto_complete_generator.dart';
+import 'toggle_buttons_generator.dart';
+import 'segmented_button_generator.dart';
+import 'navigation_rail_generator.dart';
 import '../models/widget_node.dart';
 
 class WidgetGeneratorRegistry {
@@ -166,6 +175,15 @@ class WidgetGeneratorRegistry {
     'ConstrainedBox': ConstrainedBoxGenerator(),
     'IntrinsicHeight': IntrinsicHeightGenerator(),
     'IntrinsicWidth': IntrinsicWidthGenerator(),
+    'ClipRRect': ClipRRectGenerator(),
+    'DatePicker': DatePickerGenerator(),
+    'TimePicker': TimePickerGenerator(),
+    'RangeSlider': RangeSliderGenerator(),
+    'SearchField': SearchFieldGenerator(),
+    'AutoComplete': AutoCompleteGenerator(),
+    'ToggleButtons': ToggleButtonsGenerator(),
+    'SegmentedButton': SegmentedButtonGenerator(),
+    'NavigationRail': NavigationRailGenerator(),
   };
 
   static String generateCode(WidgetNode node, {int indent = 0}) {

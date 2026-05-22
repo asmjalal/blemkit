@@ -53,15 +53,11 @@ class TemplateService {
   }
 }
 
-// Template metadata - now with categories and descriptions
+// Template categories matching only our three premium templates
 enum TemplateCategory {
   ecommerce,
-  delivery,
-  food,
-  pharmacy,
-  todo,
-  fitness,
-  scratch,
+  productivity,
+  finance,
 }
 
 class TemplateMetadata {
@@ -88,61 +84,44 @@ class TemplateMetadata {
 final List<TemplateMetadata> templates = [
   // E-commerce
   TemplateMetadata(
-    name: 'E-commerce Store',
-    description: 'Sophisticated retail solutions with integrated inventory and checkout flows.',
+    name: 'E-Commerce Store',
+    description: 'Sophisticated light-themed retail product shopping, item detail, and shopping cart checkout flows.',
     icon: Icons.shopping_cart,
     jsonPath: 'lib/templates/ecommerce_home.json',
+    screenNames: [
+      'Login',
+      'Storefront',
+      'Product Details',
+      'Shopping Cart',
+      'Favorites',
+      'Checkout',
+      'Order Success',
+      'Order History',
+      'Order Details'
+    ],
     category: TemplateCategory.ecommerce,
-    screenNames: ['Storefront', 'Product Details', 'Shopping Cart', 'Checkout'],
   ),
-  // Delivery
+  // Notes App
   TemplateMetadata(
-    name: 'Delivery',
-    description: 'Real-time tracking and logistics management for fast-paced fulfillment.',
-    icon: Icons.local_shipping,
-    jsonPath: 'lib/templates/food_delivery.json',
-    category: TemplateCategory.delivery,
-    screenNames: ['Active Orders', 'Map View', 'Order History', 'Courier Chat'],
+    name: 'Notes App',
+    description: 'Clean minimalist personal notes keeper with custom tag cards, notes grid, and editor screens.',
+    icon: Icons.note_alt_outlined,
+    jsonPath: 'lib/templates/notes_app.json',
+    category: TemplateCategory.productivity,
+    screenNames: ['My Notes', 'Note Editor'],
   ),
-  // Food
+  // Expense Tracker
   TemplateMetadata(
-    name: 'Food',
-    description: 'Interactive menus and seamless ordering systems for modern dining experiences.',
-    icon: Icons.restaurant,
-    jsonPath: 'lib/templates/food_delivery.json', // Shared for now
-    category: TemplateCategory.food,
-    screenNames: ['Restaurant Menu', 'Dish Details', 'Order Tracker', 'Reviews'],
-  ),
-  // Pharmacy
-  TemplateMetadata(
-    name: 'Pharmacy',
-    description: 'Compliant and secure medication management with prescription fulfillment.',
-    icon: Icons.local_pharmacy,
-    jsonPath: 'lib/templates/pharmacy_screen.json',
-    category: TemplateCategory.pharmacy,
-    screenNames: ['Medication List', 'Prescription Upload', 'Pharmacy Map', 'Profile'],
-  ),
-  // Todo
-  TemplateMetadata(
-    name: 'Todo',
-    description: 'Advanced productivity tools with task prioritization and team collaboration.',
-    icon: Icons.checklist_rtl,
-    jsonPath: 'lib/templates/high_fidelity_todo.json',
-    category: TemplateCategory.todo,
-    screenNames: ['Dashboard', 'Calendar View', 'New Task', 'Achievements'],
-  ),
-  // Fitness
-  TemplateMetadata(
-    name: 'FitLife Tracker',
-    description: 'Beautiful fitness dashboard with workout tracking, activity feed, and profile management.',
-    icon: Icons.fitness_center,
-    jsonPath: 'lib/templates/fitlife_tracker.json',
-    category: TemplateCategory.fitness,
-    screenNames: ['Dashboard', 'Workouts', 'Activity', 'Profile'],
+    name: 'Expense Tracker',
+    description: 'Luxury personal wallet analytics dashboard, spending category metrics, and quick payment details.',
+    icon: Icons.account_balance_wallet_outlined,
+    jsonPath: 'lib/templates/expense_tracker.json',
+    category: TemplateCategory.finance,
+    screenNames: ['Wallet Dashboard', 'Analytics', 'Add Expense'],
   ),
 ];
 
 // Legacy support - loads the first template for backward compatibility
-Future<WidgetNode> get ecommerceHomeTemplate async {
+Future<dynamic> get ecommerceHomeTemplate async {
   return await TemplateService.loadTemplate('lib/templates/ecommerce_home.json');
 }

@@ -5,6 +5,7 @@ import 'base_widget_builder.dart';
 import 'widget_builder_factory.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
+import '../canvas_preview_mode.dart';
 
 class ListTileBuilder extends BaseWidgetBuilder {
   /// Resolves a leading/trailing property that can be either:
@@ -48,6 +49,8 @@ class ListTileBuilder extends BaseWidgetBuilder {
       subtitle: subtitleWidget,
       trailing: _resolveSlot(context, node.properties['trailing'], hoveredNode),
       onTap: () {
+        if (!CanvasPreviewMode.of(context)) return;
+        
         final navigateTo = node.properties['navigateTo'];
         if (navigateTo != null) {
           final provider = Provider.of<WidgetTreeProvider>(context, listen: false);

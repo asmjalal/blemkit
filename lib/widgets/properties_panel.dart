@@ -28,6 +28,7 @@ import 'property_editors/snackbar_properties/snackbar_property_editors.dart';
 import 'property_editors/tooltip_properties/tooltip_property_editors.dart';
 import 'property_editors/expansion_properties/expansion_property_editors.dart';
 import 'property_editors/padding_properties.dart';
+import 'property_editors/clip_r_rect_properties.dart';
 import 'property_editors/circle_avatar_properties/circle_avatar_property_editors.dart';
 import '../utils/color_utils.dart';
 import 'property_editors/color_picker_field.dart';
@@ -400,6 +401,8 @@ class PropertiesPanel extends StatelessWidget {
             },
           ),
         ];
+      case 'ClipRRect':
+        return buildClipRRectPropertyEditors(context, node);
       default:
         return [
           const Text('No property editor available for this widget.')

@@ -101,12 +101,14 @@ class _AiPanelState extends State<AiPanel> {
       _messages.add({'role': 'user', 'content': promptText});
     });
     
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+    provider.setAiGenerating(true);
+    
     _promptController.clear();
     _scrollToBottom();
     await _saveKey();
 
     try {
-      final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
       String? currentJsonStr;
       
       // If we have an existing root node, pass it as context so the AI can modify it instead of starting from scratch
@@ -146,6 +148,7 @@ class _AiPanelState extends State<AiPanel> {
         _scrollToBottom();
       }
     } finally {
+      provider.setAiGenerating(false);
       if (mounted) {
         setState(() => _isLoading = false);
       }

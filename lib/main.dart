@@ -5,11 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'screens/builder_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/dashboard_screen.dart';
 import 'providers/widget_tree_provider.dart';
 import 'package:flutter/foundation.dart';
 // Add this import for web context menu suppression
 import 'dart:html' as html;
 import 'widgets/canvas_preview/builders/widget_builder_factory.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +29,15 @@ void main() async {
     debugPrint('Firebase initialization warning: $e\nHint: run `flutterfire configure`.');
   }
   
+  try {
+    await supabase.Supabase.initialize(
+      url: 'https://yqrdwakbgywgzffcrquv.supabase.co',
+      anonKey: 'sb_publishable_TRsLIE9_DTvXTMZBfswgTQ_XfGmsFi2',
+    );
+  } catch (e) {
+    debugPrint('Supabase initialization warning: $e');
+  }
+
   WidgetBuilderFactory.initialize();
   runApp(const MyApp());
 }
@@ -56,7 +67,7 @@ class MyApp extends StatelessWidget {
                final user = FirebaseAuth.instance.currentUser;
                // Just pinging instance to see if it throws.
             } catch(e) {
-               return const BuilderScreen(); // Bypass login if Firebase isn't set up yet
+               return const LoginScreen(); // Fallback if Firebase isn't set up yet
             }
             
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -64,7 +75,7 @@ class MyApp extends StatelessWidget {
             }
             
             if (snapshot.hasData) {
-              return const BuilderScreen();
+              return const DashboardScreen();
             }
             return const LoginScreen();
           },

@@ -38,6 +38,7 @@ class WidgetContextMenu {
             CustomOverlayMenuItem(label: 'SizedBox', onTap: () => onAction('wrap_SizedBox')),
             CustomOverlayMenuItem(label: 'Card', onTap: () => onAction('wrap_Card')),
             CustomOverlayMenuItem(label: 'SingleChildScrollView', onTap: () => onAction('wrap_SingleChildScrollView')),
+            CustomOverlayMenuItem(label: 'ClipRRect', onTap: () => onAction('wrap_ClipRRect')),
           ],
         ),
       CustomOverlayMenuItem(

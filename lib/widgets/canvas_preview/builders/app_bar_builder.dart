@@ -36,6 +36,7 @@ class AppBarBuilder extends BaseWidgetBuilder {
       elevation: (node.properties['elevation'] as num?)?.toDouble(),
       centerTitle: node.properties['centerTitle'] == true,
       toolbarHeight: (node.properties['toolbarHeight'] as num?)?.toDouble(),
+      automaticallyImplyLeading: false,
       leading: node.properties['leading'] != null
           ? safeWidget(context, node.properties['leading'], hoveredNode)
           : null,

@@ -4,6 +4,7 @@ import 'base_widget_builder.dart';
 import 'widget_builder_factory.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
+import '../canvas_preview_mode.dart';
 
 class BottomNavigationBarBuilder extends BaseWidgetBuilder {
   @override
@@ -36,6 +37,8 @@ class BottomNavigationBarBuilder extends BaseWidgetBuilder {
       }).toList(),
       currentIndex: node.properties['currentIndex'] ?? 0,
       onTap: (index) {
+        if (!CanvasPreviewMode.of(context)) return;
+        
         final item = itemsList[index];
         final navigateTo = item['navigateTo'];
         if (navigateTo != null) {

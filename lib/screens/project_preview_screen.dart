@@ -15,27 +15,36 @@ class ProjectPreviewScreen extends StatefulWidget {
 class _ProjectPreviewScreenState extends State<ProjectPreviewScreen> {
   String? _selectedFile;
   Map<String, String> _projectFiles = {};
+  String? _lastSelectedScreenId;
 
   @override
-  void initState() {
-    super.initState();
-    _generateFiles();
-  }
+  Widget build(BuildContext context) {
+    final provider = Provider.of<WidgetTreeProvider>(context);
 
-  void _generateFiles() {
-    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
     if (provider.screens.isNotEmpty) {
       _projectFiles = ProjectGenerator.generateFullProject(
         provider.screens,
         provider.themeProperties,
         provider.themedWidgets,
       );
-      _selectedFile = _projectFiles.keys.first;
-    }
-  }
 
-  @override
-  Widget build(BuildContext context) {
+      // Auto-initialize selected file if null
+      if (_selectedFile == null && _projectFiles.isNotEmpty) {
+        _selectedFile = _projectFiles.keys.first;
+      }
+
+      // Sync selection with active screen if it changed in provider
+      final activeScreen = provider.selectedScreen;
+      if (activeScreen != null && activeScreen.id != _lastSelectedScreenId) {
+        _lastSelectedScreenId = activeScreen.id;
+        final base = (activeScreen.properties['pageName'] ?? activeScreen.id).toString().toLowerCase();
+        final expectedFileName = 'lib/' + (base.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_') + '_screen.dart');
+        if (_projectFiles.containsKey(expectedFileName)) {
+          _selectedFile = expectedFileName;
+        }
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
@@ -50,7 +59,7 @@ class _ProjectPreviewScreenState extends State<ProjectPreviewScreen> {
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white70),
             tooltip: 'Regenerate Code',
-            onPressed: () => setState(() => _generateFiles()),
+            onPressed: () => setState(() {}),
           ),
           const SizedBox(width: 8),
         ],
@@ -203,7 +212,7 @@ class _ProjectPreviewScreenState extends State<ProjectPreviewScreen> {
           Expanded(
             child: Transform.scale(
               scale: 0.85,
-              child: const CanvasPreview(),
+              child: const CanvasPreview(isLivePreview: true),
             ),
           ),
           const SizedBox(height: 20),

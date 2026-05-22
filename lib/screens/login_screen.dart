@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'dart:ui';
 import 'dart:math' as math;
-import 'builder_screen.dart';
+import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -93,9 +94,23 @@ class _LoginScreenState extends State<LoginScreen>
           });
         }
 
+        // --- SUPABASE UPSERT ---
+        try {
+          final supabaseClient = supabase.Supabase.instance.client;
+          await supabaseClient.from('users').upsert({
+            'id': user.uid,
+            'email': user.email ?? '',
+            'name': user.displayName ?? '',
+            'avatar_url': user.photoURL ?? '',
+          });
+        } catch (supaErr) {
+          debugPrint('Supabase upsert error: $supaErr');
+        }
+        // -----------------------
+
         if (mounted) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const BuilderScreen()),
+            MaterialPageRoute(builder: (context) => const DashboardScreen()),
           );
         }
       }
@@ -359,7 +374,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   Navigator.of(context).pushReplacement(
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            const BuilderScreen()),
+                                            const DashboardScreen()),
                                   );
                                 },
                                 child: Text(

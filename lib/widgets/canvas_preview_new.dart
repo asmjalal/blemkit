@@ -6,9 +6,15 @@ import 'package:dotted_border/dotted_border.dart';
 import 'canvas_preview/builders/widget_builder_factory.dart';
 import '../utils/color_utils.dart';
 import 'package:designflutterkit/widgets/widget_context_menu/widget_context_menu.dart';
+import 'canvas_preview/canvas_preview_mode.dart';
 
 class CanvasPreview extends StatefulWidget {
-  const CanvasPreview({super.key});
+  final bool isLivePreview;
+
+  const CanvasPreview({
+    super.key,
+    this.isLivePreview = false,
+  });
 
   @override
   State<CanvasPreview> createState() => _CanvasPreviewState();
@@ -52,130 +58,133 @@ class _CanvasPreviewState extends State<CanvasPreview> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF020408), // Darker professional background
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Transform(
-            transform: Matrix4.identity()
-              ..translate(_offset.dx, _offset.dy)
-              ..scale(_zoomLevel),
-            alignment: Alignment.center,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Minimalist dotted grid
-                CustomPaint(
-                  painter: DottedGridPainter(
-                    color: Colors.white.withOpacity(0.05),
-                    gridSize: 30,
-                  ),
-                  child: Container(),
-                ),
-                Center(
-                  child: Container(
-                    width: 380,
-                    height: 780,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(54),
-                      border: Border.all(color: const Color(0xFF1E293B), width: 8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.5),
-                          blurRadius: 40,
-                          spreadRadius: 5,
-                          offset: const Offset(0, 20),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        // Dynamic Island
-                        Positioned(
-                          top: 12,
-                          left: 0,
-                          right: 0,
-                          child: Center(
-                            child: Container(
-                              width: 100,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color: Colors.black,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Screen content
-                        Positioned.fill(
-                          top: 10,
-                          left: 10,
-                          right: 10,
-                          bottom: 10,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(44),
-                            child: Container(
-                              color: const Color(0xFF030712),
-                              child: Consumer<WidgetTreeProvider>(
-                                builder: (context, provider, _) => _buildCanvasContent(context, provider, provider.hoveredNode),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            right: 32,
-            bottom: 32,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B).withOpacity(0.9), // Darker slate
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+    return CanvasPreviewMode(
+      isLivePreview: widget.isLivePreview,
+      child: Container(
+        color: const Color(0xFF020408), // Darker professional background
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Transform(
+              transform: Matrix4.identity()
+                ..translate(_offset.dx, _offset.dy)
+                ..scale(_zoomLevel),
+              alignment: Alignment.center,
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  _buildZoomBtn(Icons.add, _zoomIn),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      '${(_zoomLevel * 100).toInt()}%',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
+                  // Minimalist dotted grid
+                  CustomPaint(
+                    painter: DottedGridPainter(
+                      color: Colors.white.withOpacity(0.05),
+                      gridSize: 30,
+                    ),
+                    child: Container(),
+                  ),
+                  Center(
+                    child: Container(
+                      width: 380,
+                      height: 780,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A),
+                        borderRadius: BorderRadius.circular(54),
+                        border: Border.all(color: const Color(0xFF1E293B), width: 8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.5),
+                            blurRadius: 40,
+                            spreadRadius: 5,
+                            offset: const Offset(0, 20),
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        children: [
+                          // Dynamic Island
+                          Positioned(
+                            top: 12,
+                            left: 0,
+                            right: 0,
+                            child: Center(
+                              child: Container(
+                                width: 100,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Screen content
+                          Positioned.fill(
+                            top: 10,
+                            left: 10,
+                            right: 10,
+                            bottom: 10,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(44),
+                              child: Container(
+                                color: const Color(0xFF030712),
+                                child: Consumer<WidgetTreeProvider>(
+                                  builder: (context, provider, _) => _buildCanvasContent(context, provider, provider.hoveredNode),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  _buildZoomBtn(Icons.remove, _zoomOut),
-                  Container(
-                    width: 20,
-                    height: 1,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    color: Colors.white.withOpacity(0.1),
-                  ),
-                  _buildZoomBtn(Icons.refresh, _resetZoom),
                 ],
               ),
             ),
-          ),
-        ],
+            Positioned(
+              right: 32,
+              bottom: 32,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B).withOpacity(0.9), // Darker slate
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildZoomBtn(Icons.add, _zoomIn),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        '${(_zoomLevel * 100).toInt()}%',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                    _buildZoomBtn(Icons.remove, _zoomOut),
+                    Container(
+                      width: 20,
+                      height: 1,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      color: Colors.white.withOpacity(0.1),
+                    ),
+                    _buildZoomBtn(Icons.refresh, _resetZoom),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

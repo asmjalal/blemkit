@@ -11,6 +11,7 @@ class ElevatedButtonBuilder extends BaseWidgetBuilder {
       onPressed: () {},
       style: ElevatedButton.styleFrom(
         backgroundColor: parseColor(node.properties['backgroundColor'], context),
+        foregroundColor: parseColor(node.properties['foregroundColor'], context),
         padding: parseEdgeInsets(node.properties['padding']),
       ),
       child: node.children.isNotEmpty 

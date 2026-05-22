@@ -1,0 +1,1909 @@
+[
+  {
+    "id": "xp_dash",
+    "type": "Scaffold",
+    "properties": {
+      "backgroundColor": "4294967295",
+      "pageName": "Wallet Dashboard",
+      "appBar": {
+        "id": "xp_appbar",
+        "type": "AppBar",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "elevation": 0,
+          "title": {
+            "id": "xp_appbar_title",
+            "type": "Text",
+            "properties": {
+              "text": "SpendWave Wallet",
+              "fontSize": 18,
+              "color": "4279179050",
+              "fontWeight": "bold"
+            },
+            "children": []
+          },
+          "actions": [
+            {
+              "id": "xp_notif",
+              "type": "IconButton",
+              "properties": {
+                "icon": "Icons.notifications_none"
+              },
+              "children": []
+            }
+          ]
+        }
+      },
+      "bottomNavigationBar": {
+        "id": "xp_bnb",
+        "type": "BottomNavigationBar",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "selectedItemColor": "4283385573",
+          "unselectedItemColor": "4284963515",
+          "currentIndex": 0,
+          "type": "fixed",
+          "items": [
+            {
+              "icon": {
+                "id": "xp_bnb_item_icon_0",
+                "type": "Icon",
+                "properties": {
+                  "icon": "Icons.home"
+                },
+                "children": []
+              },
+              "label": "Home"
+            },
+            {
+              "icon": {
+                "id": "xp_bnb_item_icon_1",
+                "type": "Icon",
+                "properties": {
+                  "icon": "Icons.show_chart"
+                },
+                "children": []
+              },
+              "label": "Analytics"
+            },
+            {
+              "icon": {
+                "id": "xp_bnb_item_icon_2",
+                "type": "Icon",
+                "properties": {
+                  "icon": "Icons.add"
+                },
+                "children": []
+              },
+              "label": "Add Pay"
+            },
+            {
+              "icon": {
+                "id": "xp_bnb_item_icon_3",
+                "type": "Icon",
+                "properties": {
+                  "icon": "Icons.person_outline"
+                },
+                "children": []
+              },
+              "label": "Profile"
+            }
+          ]
+        }
+      }
+    },
+    "children": [
+      {
+        "id": "xp_dash_scsv",
+        "type": "SingleChildScrollView",
+        "properties": {
+          "scrollDirection": "Axis.vertical"
+        },
+        "children": [
+          {
+            "id": "xp_dash_col",
+            "type": "Column",
+            "properties": {
+              "mainAxisAlignment": "MainAxisAlignment.start",
+              "crossAxisAlignment": "CrossAxisAlignment.start"
+            },
+            "children": [
+              {
+                "id": "xp_card_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": {
+                    "left": 16,
+                    "top": 16,
+                    "right": 16,
+                    "bottom": 16
+                  }
+                },
+                "children": [
+                  {
+                    "id": "xp_card",
+                    "type": "Container",
+                    "properties": {
+                      "height": 180,
+                      "padding": {
+                        "left": 24,
+                        "top": 24,
+                        "right": 24,
+                        "bottom": 24
+                      },
+                      "borderRadius": 20,
+                      "gradient": {
+                        "colors": [
+                          "4283385573",
+                          "4287323126"
+                        ],
+                        "begin": "Alignment.topLeft",
+                        "end": "Alignment.bottomRight"
+                      }
+                    },
+                    "children": [
+                      {
+                        "id": "xp_card_col",
+                        "type": "Column",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.start",
+                          "crossAxisAlignment": "CrossAxisAlignment.start"
+                        },
+                        "children": [
+                          {
+                            "id": "xp_card_lbl",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Total Balance",
+                              "fontSize": 13,
+                              "color": "4294967295"
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "xp_card_sp1",
+                            "type": "SizedBox",
+                            "properties": {
+                              "height": 6
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "xp_card_bal",
+                            "type": "Text",
+                            "properties": {
+                              "text": "$12,450.80",
+                              "fontSize": 26,
+                              "color": "4294967295",
+                              "fontWeight": "bold"
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "xp_card_spc",
+                            "type": "Spacer",
+                            "properties": {},
+                            "children": []
+                          },
+                          {
+                            "id": "xp_card_details",
+                            "type": "Row",
+                            "properties": {
+                              "mainAxisAlignment": "MainAxisAlignment.spaceBetween",
+                              "crossAxisAlignment": "CrossAxisAlignment.center"
+                            },
+                            "children": [
+                              {
+                                "id": "xp_card_no_col",
+                                "type": "Column",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.start"
+                                },
+                                "children": [
+                                  {
+                                    "id": "xp_card_no_lbl",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "Card Number",
+                                      "fontSize": 10,
+                                      "color": "4294967295"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "xp_card_no",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "**** **** **** 8824",
+                                      "fontSize": 13,
+                                      "color": "4294967295",
+                                      "fontWeight": "w600"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "id": "xp_card_name_col",
+                                "type": "Column",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.start"
+                                },
+                                "children": [
+                                  {
+                                    "id": "xp_card_name_lbl",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "Card Holder",
+                                      "fontSize": 10,
+                                      "color": "4294967295"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "xp_card_name",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "Mohamed Jalal",
+                                      "fontSize": 13,
+                                      "color": "4294967295",
+                                      "fontWeight": "w600"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "xp_actions_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": {
+                    "left": 16,
+                    "top": 0,
+                    "right": 16,
+                    "bottom": 16
+                  }
+                },
+                "children": [
+                  {
+                    "id": "xp_actions_row",
+                    "type": "Row",
+                    "properties": {
+                      "mainAxisAlignment": "MainAxisAlignment.spaceAround",
+                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                    },
+                    "children": [
+                      {
+                        "id": "xp_act_send_col",
+                        "type": "Column",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.start",
+                          "crossAxisAlignment": "CrossAxisAlignment.center"
+                        },
+                        "children": [
+                          {
+                            "id": "xp_act_send_c",
+                            "type": "Container",
+                            "properties": {
+                              "width": 50,
+                              "height": 50,
+                              "backgroundColor": "4294047225",
+                              "borderRadius": 25
+                            },
+                            "children": [
+                              {
+                                "id": "xp_act_send_btn",
+                                "type": "IconButton",
+                                "properties": {
+                                  "icon": "Icons.send",
+                                  "color": "4283385573"
+                                },
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "id": "xp_act_send_sp",
+                            "type": "SizedBox",
+                            "properties": {
+                              "height": 6
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "xp_act_send_t",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Send",
+                              "fontSize": 12,
+                              "fontWeight": "w600"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_act_rec_col",
+                        "type": "Column",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.start",
+                          "crossAxisAlignment": "CrossAxisAlignment.center"
+                        },
+                        "children": [
+                          {
+                            "id": "xp_act_rec_c",
+                            "type": "Container",
+                            "properties": {
+                              "width": 50,
+                              "height": 50,
+                              "backgroundColor": "4294047225",
+                              "borderRadius": 25
+                            },
+                            "children": [
+                              {
+                                "id": "xp_act_rec_btn",
+                                "type": "IconButton",
+                                "properties": {
+                                  "icon": "Icons.call_received",
+                                  "color": "4279166441"
+                                },
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "id": "xp_act_rec_sp",
+                            "type": "SizedBox",
+                            "properties": {
+                              "height": 6
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "xp_act_rec_t",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Receive",
+                              "fontSize": 12,
+                              "fontWeight": "w600"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_act_chart_col",
+                        "type": "Column",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.start",
+                          "crossAxisAlignment": "CrossAxisAlignment.center"
+                        },
+                        "children": [
+                          {
+                            "id": "xp_act_chart_c",
+                            "type": "Container",
+                            "properties": {
+                              "width": 50,
+                              "height": 50,
+                              "backgroundColor": "4294047225",
+                              "borderRadius": 25
+                            },
+                            "children": [
+                              {
+                                "id": "xp_act_chart_btn",
+                                "type": "IconButton",
+                                "properties": {
+                                  "icon": "Icons.show_chart",
+                                  "color": "4287323126"
+                                },
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "id": "xp_act_chart_sp",
+                            "type": "SizedBox",
+                            "properties": {
+                              "height": 6
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "xp_act_chart_t",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Analytics",
+                              "fontSize": 12,
+                              "fontWeight": "w600"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_act_set_col",
+                        "type": "Column",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.start",
+                          "crossAxisAlignment": "CrossAxisAlignment.center"
+                        },
+                        "children": [
+                          {
+                            "id": "xp_act_set_c",
+                            "type": "Container",
+                            "properties": {
+                              "width": 50,
+                              "height": 50,
+                              "backgroundColor": "4294047225",
+                              "borderRadius": 25
+                            },
+                            "children": [
+                              {
+                                "id": "xp_act_set_btn",
+                                "type": "IconButton",
+                                "properties": {
+                                  "icon": "Icons.settings",
+                                  "color": "4284963515"
+                                },
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "id": "xp_act_set_sp",
+                            "type": "SizedBox",
+                            "properties": {
+                              "height": 6
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "xp_act_set_t",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Settings",
+                              "fontSize": 12,
+                              "fontWeight": "w600"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "xp_tx_title_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": {
+                    "left": 16,
+                    "top": 12,
+                    "right": 16,
+                    "bottom": 12
+                  }
+                },
+                "children": [
+                  {
+                    "id": "xp_tx_title",
+                    "type": "Text",
+                    "properties": {
+                      "text": "Recent Transactions",
+                      "fontSize": 16,
+                      "fontWeight": "bold"
+                    },
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "id": "xp_tx_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": {
+                    "left": 16,
+                    "top": 0,
+                    "right": 16,
+                    "bottom": 16
+                  }
+                },
+                "children": [
+                  {
+                    "id": "xp_tx_col",
+                    "type": "Column",
+                    "properties": {
+                      "mainAxisAlignment": "MainAxisAlignment.start",
+                      "crossAxisAlignment": "CrossAxisAlignment.stretch"
+                    },
+                    "children": [
+                      {
+                        "id": "xp_tx1_card",
+                        "type": "Card",
+                        "properties": {
+                          "color": "4294967295",
+                          "borderRadius": 16,
+                          "elevation": 0,
+                          "margin": {
+                            "left": 0,
+                            "top": 0,
+                            "right": 0,
+                            "bottom": 10
+                          }
+                        },
+                        "children": [
+                          {
+                            "id": "xp_tx1_inner",
+                            "type": "Padding",
+                            "properties": {
+                              "padding": {
+                                "left": 14,
+                                "top": 14,
+                                "right": 14,
+                                "bottom": 14
+                              }
+                            },
+                            "children": [
+                              {
+                                "id": "xp_tx1_row",
+                                "type": "Row",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.center"
+                                },
+                                "children": [
+                                  {
+                                    "id": "xp_tx1_icon_c",
+                                    "type": "Container",
+                                    "properties": {
+                                      "width": 42,
+                                      "height": 42,
+                                      "backgroundColor": "4294047225",
+                                      "borderRadius": 8
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_tx1_icon",
+                                        "type": "Icon",
+                                        "properties": {
+                                          "icon": "Icons.tv",
+                                          "color": "4294197086",
+                                          "size": 20
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_tx1_wsp",
+                                    "type": "SizedBox",
+                                    "properties": {
+                                      "width": 12
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "xp_tx1_exp",
+                                    "type": "Expanded",
+                                    "properties": {
+                                      "flex": 1
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_tx1_col",
+                                        "type": "Column",
+                                        "properties": {
+                                          "mainAxisAlignment": "MainAxisAlignment.start",
+                                          "crossAxisAlignment": "CrossAxisAlignment.start"
+                                        },
+                                        "children": [
+                                          {
+                                            "id": "xp_tx1_title",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Netflix Premium",
+                                              "fontSize": 14,
+                                              "fontWeight": "bold"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "xp_tx1_cat",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Entertainment \u2022 May 20",
+                                              "fontSize": 11,
+                                              "color": "4284963515"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_tx1_amt",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "-$15.49",
+                                      "fontSize": 14,
+                                      "color": "4294197086",
+                                      "fontWeight": "bold"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_tx2_card",
+                        "type": "Card",
+                        "properties": {
+                          "color": "4294967295",
+                          "borderRadius": 16,
+                          "elevation": 0,
+                          "margin": {
+                            "left": 0,
+                            "top": 0,
+                            "right": 0,
+                            "bottom": 10
+                          }
+                        },
+                        "children": [
+                          {
+                            "id": "xp_tx2_inner",
+                            "type": "Padding",
+                            "properties": {
+                              "padding": {
+                                "left": 14,
+                                "top": 14,
+                                "right": 14,
+                                "bottom": 14
+                              }
+                            },
+                            "children": [
+                              {
+                                "id": "xp_tx2_row",
+                                "type": "Row",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.center"
+                                },
+                                "children": [
+                                  {
+                                    "id": "xp_tx2_icon_c",
+                                    "type": "Container",
+                                    "properties": {
+                                      "width": 42,
+                                      "height": 42,
+                                      "backgroundColor": "4294047225",
+                                      "borderRadius": 8
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_tx2_icon",
+                                        "type": "Icon",
+                                        "properties": {
+                                          "icon": "Icons.payments",
+                                          "color": "4279294337",
+                                          "size": 20
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_tx2_wsp",
+                                    "type": "SizedBox",
+                                    "properties": {
+                                      "width": 12
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "xp_tx2_exp",
+                                    "type": "Expanded",
+                                    "properties": {
+                                      "flex": 1
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_tx2_col",
+                                        "type": "Column",
+                                        "properties": {
+                                          "mainAxisAlignment": "MainAxisAlignment.start",
+                                          "crossAxisAlignment": "CrossAxisAlignment.start"
+                                        },
+                                        "children": [
+                                          {
+                                            "id": "xp_tx2_title",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Salary Deposit",
+                                              "fontSize": 14,
+                                              "fontWeight": "bold"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "xp_tx2_cat",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Income \u2022 May 18",
+                                              "fontSize": 11,
+                                              "color": "4284963515"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_tx2_amt",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "+$4,800.00",
+                                      "fontSize": 14,
+                                      "color": "4279294337",
+                                      "fontWeight": "bold"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_tx3_card",
+                        "type": "Card",
+                        "properties": {
+                          "color": "4294967295",
+                          "borderRadius": 16,
+                          "elevation": 0
+                        },
+                        "children": [
+                          {
+                            "id": "xp_tx3_inner",
+                            "type": "Padding",
+                            "properties": {
+                              "padding": {
+                                "left": 14,
+                                "top": 14,
+                                "right": 14,
+                                "bottom": 14
+                              }
+                            },
+                            "children": [
+                              {
+                                "id": "xp_tx3_row",
+                                "type": "Row",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.center"
+                                },
+                                "children": [
+                                  {
+                                    "id": "xp_tx3_icon_c",
+                                    "type": "Container",
+                                    "properties": {
+                                      "width": 42,
+                                      "height": 42,
+                                      "backgroundColor": "4294047225",
+                                      "borderRadius": 8
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_tx3_icon",
+                                        "type": "Icon",
+                                        "properties": {
+                                          "icon": "Icons.restaurant",
+                                          "color": "4294303243",
+                                          "size": 20
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_tx3_wsp",
+                                    "type": "SizedBox",
+                                    "properties": {
+                                      "width": 12
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "xp_tx3_exp",
+                                    "type": "Expanded",
+                                    "properties": {
+                                      "flex": 1
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_tx3_col",
+                                        "type": "Column",
+                                        "properties": {
+                                          "mainAxisAlignment": "MainAxisAlignment.start",
+                                          "crossAxisAlignment": "CrossAxisAlignment.start"
+                                        },
+                                        "children": [
+                                          {
+                                            "id": "xp_tx3_title",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Starbucks Coffee",
+                                              "fontSize": 14,
+                                              "fontWeight": "bold"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "xp_tx3_cat",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Food & Dining \u2022 May 17",
+                                              "fontSize": 11,
+                                              "color": "4284963515"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_tx3_amt",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "-$6.80",
+                                      "fontSize": 14,
+                                      "color": "4294197086",
+                                      "fontWeight": "bold"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "xp_analytics",
+    "type": "Scaffold",
+    "properties": {
+      "backgroundColor": "4294967295",
+      "pageName": "Analytics",
+      "appBar": {
+        "id": "xp_an_ab",
+        "type": "AppBar",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "elevation": 0,
+          "title": {
+            "id": "xp_an_ab_title",
+            "type": "Text",
+            "properties": {
+              "text": "Spending Analytics",
+              "fontSize": 18,
+              "color": "4279179050",
+              "fontWeight": "bold"
+            },
+            "children": []
+          },
+          "actions": []
+        }
+      }
+    },
+    "children": [
+      {
+        "id": "xp_an_scsv",
+        "type": "SingleChildScrollView",
+        "properties": {
+          "scrollDirection": "Axis.vertical"
+        },
+        "children": [
+          {
+            "id": "xp_an_col",
+            "type": "Column",
+            "properties": {
+              "mainAxisAlignment": "MainAxisAlignment.start",
+              "crossAxisAlignment": "CrossAxisAlignment.start"
+            },
+            "children": [
+              {
+                "id": "xp_an_tf_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": {
+                    "left": 16,
+                    "top": 16,
+                    "right": 16,
+                    "bottom": 12
+                  }
+                },
+                "children": [
+                  {
+                    "id": "xp_an_tf_row",
+                    "type": "Row",
+                    "properties": {
+                      "mainAxisAlignment": "MainAxisAlignment.spaceBetween",
+                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                    },
+                    "children": [
+                      {
+                        "id": "xp_an_tf1",
+                        "type": "Container",
+                        "properties": {
+                          "backgroundColor": "4294967295",
+                          "padding": {
+                            "left": 20,
+                            "top": 8,
+                            "right": 20,
+                            "bottom": 8
+                          },
+                          "borderRadius": 10,
+                          "borderWidth": 1,
+                          "borderColor": "4293003504"
+                        },
+                        "children": [
+                          {
+                            "id": "xp_an_tf1_t",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Week",
+                              "fontSize": 12,
+                              "color": "4284963515"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_an_tf2",
+                        "type": "Container",
+                        "properties": {
+                          "backgroundColor": "4283385573",
+                          "padding": {
+                            "left": 20,
+                            "top": 8,
+                            "right": 20,
+                            "bottom": 8
+                          },
+                          "borderRadius": 10
+                        },
+                        "children": [
+                          {
+                            "id": "xp_an_tf2_t",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Month",
+                              "fontSize": 12,
+                              "color": "4294967295",
+                              "fontWeight": "bold"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_an_tf3",
+                        "type": "Container",
+                        "properties": {
+                          "backgroundColor": "4294967295",
+                          "padding": {
+                            "left": 20,
+                            "top": 8,
+                            "right": 20,
+                            "bottom": 8
+                          },
+                          "borderRadius": 10,
+                          "borderWidth": 1,
+                          "borderColor": "4293003504"
+                        },
+                        "children": [
+                          {
+                            "id": "xp_an_tf3_t",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Year",
+                              "fontSize": 12,
+                              "color": "4284963515"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "xp_an_g_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": {
+                    "left": 16,
+                    "top": 8,
+                    "right": 16,
+                    "bottom": 16
+                  }
+                },
+                "children": [
+                  {
+                    "id": "xp_an_g_card",
+                    "type": "Card",
+                    "properties": {
+                      "color": "4294967295",
+                      "borderRadius": 16,
+                      "elevation": 0
+                    },
+                    "children": [
+                      {
+                        "id": "xp_an_g_inner",
+                        "type": "Padding",
+                        "properties": {
+                          "padding": {
+                            "left": 16,
+                            "top": 16,
+                            "right": 16,
+                            "bottom": 16
+                          }
+                        },
+                        "children": [
+                          {
+                            "id": "xp_an_g_col",
+                            "type": "Column",
+                            "properties": {
+                              "mainAxisAlignment": "MainAxisAlignment.start",
+                              "crossAxisAlignment": "CrossAxisAlignment.start"
+                            },
+                            "children": [
+                              {
+                                "id": "xp_an_g_title",
+                                "type": "Text",
+                                "properties": {
+                                  "text": "Monthly Overview",
+                                  "fontSize": 15,
+                                  "fontWeight": "bold"
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "xp_an_g_sp1",
+                                "type": "SizedBox",
+                                "properties": {
+                                  "height": 24
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "xp_an_g_rows",
+                                "type": "Row",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.spaceAround",
+                                  "crossAxisAlignment": "CrossAxisAlignment.bottom"
+                                },
+                                "children": [
+                                  {
+                                    "id": "xp_g_c1",
+                                    "type": "Column",
+                                    "properties": {
+                                      "mainAxisAlignment": "MainAxisAlignment.start",
+                                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_g_c1_bar",
+                                        "type": "Container",
+                                        "properties": {
+                                          "width": 22,
+                                          "height": 120,
+                                          "backgroundColor": "4279294337",
+                                          "borderRadius": 6
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "xp_g_c1_sp",
+                                        "type": "SizedBox",
+                                        "properties": {
+                                          "height": 6
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "xp_g_c1_lbl",
+                                        "type": "Text",
+                                        "properties": {
+                                          "text": "Food",
+                                          "fontSize": 10,
+                                          "color": "4284963515"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_g_c2",
+                                    "type": "Column",
+                                    "properties": {
+                                      "mainAxisAlignment": "MainAxisAlignment.start",
+                                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_g_c2_bar",
+                                        "type": "Container",
+                                        "properties": {
+                                          "width": 22,
+                                          "height": 80,
+                                          "backgroundColor": "4294197086",
+                                          "borderRadius": 6
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "xp_g_c2_sp",
+                                        "type": "SizedBox",
+                                        "properties": {
+                                          "height": 6
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "xp_g_c2_lbl",
+                                        "type": "Text",
+                                        "properties": {
+                                          "text": "Bills",
+                                          "fontSize": 10,
+                                          "color": "4284963515"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_g_c3",
+                                    "type": "Column",
+                                    "properties": {
+                                      "mainAxisAlignment": "MainAxisAlignment.start",
+                                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_g_c3_bar",
+                                        "type": "Container",
+                                        "properties": {
+                                          "width": 22,
+                                          "height": 100,
+                                          "backgroundColor": "4287323126",
+                                          "borderRadius": 6
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "xp_g_c3_sp",
+                                        "type": "SizedBox",
+                                        "properties": {
+                                          "height": 6
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "xp_g_c3_lbl",
+                                        "type": "Text",
+                                        "properties": {
+                                          "text": "Shop",
+                                          "fontSize": 10,
+                                          "color": "4284963515"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_g_c4",
+                                    "type": "Column",
+                                    "properties": {
+                                      "mainAxisAlignment": "MainAxisAlignment.start",
+                                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_g_c4_bar",
+                                        "type": "Container",
+                                        "properties": {
+                                          "width": 22,
+                                          "height": 50,
+                                          "backgroundColor": "4279166441",
+                                          "borderRadius": 6
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "xp_g_c4_sp",
+                                        "type": "SizedBox",
+                                        "properties": {
+                                          "height": 6
+                                        },
+                                        "children": []
+                                      },
+                                      {
+                                        "id": "xp_g_c4_lbl",
+                                        "type": "Text",
+                                        "properties": {
+                                          "text": "Travel",
+                                          "fontSize": 10,
+                                          "color": "4284963515"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "xp_an_b_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": {
+                    "left": 16,
+                    "top": 8,
+                    "right": 16,
+                    "bottom": 16
+                  }
+                },
+                "children": [
+                  {
+                    "id": "xp_an_b_col",
+                    "type": "Column",
+                    "properties": {
+                      "mainAxisAlignment": "MainAxisAlignment.start",
+                      "crossAxisAlignment": "CrossAxisAlignment.start"
+                    },
+                    "children": [
+                      {
+                        "id": "xp_an_b_lbl",
+                        "type": "Text",
+                        "properties": {
+                          "text": "Category Breakdown",
+                          "fontSize": 16,
+                          "fontWeight": "bold"
+                        },
+                        "children": []
+                      },
+                      {
+                        "id": "xp_an_b_sp",
+                        "type": "SizedBox",
+                        "properties": {
+                          "height": 12
+                        },
+                        "children": []
+                      },
+                      {
+                        "id": "xp_b1",
+                        "type": "Card",
+                        "properties": {
+                          "color": "4294967295",
+                          "borderRadius": 16,
+                          "elevation": 0,
+                          "margin": {
+                            "left": 0,
+                            "top": 0,
+                            "right": 0,
+                            "bottom": 10
+                          }
+                        },
+                        "children": [
+                          {
+                            "id": "xp_b1_inner",
+                            "type": "Padding",
+                            "properties": {
+                              "padding": {
+                                "left": 14,
+                                "top": 14,
+                                "right": 14,
+                                "bottom": 14
+                              }
+                            },
+                            "children": [
+                              {
+                                "id": "xp_b1_row",
+                                "type": "Row",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.center"
+                                },
+                                "children": [
+                                  {
+                                    "id": "xp_b1_ic",
+                                    "type": "Icon",
+                                    "properties": {
+                                      "icon": "Icons.restaurant",
+                                      "color": "4279294337",
+                                      "size": 20
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "xp_b1_wsp",
+                                    "type": "SizedBox",
+                                    "properties": {
+                                      "width": 12
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "xp_b1_exp",
+                                    "type": "Expanded",
+                                    "properties": {
+                                      "flex": 1
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_b1_col",
+                                        "type": "Column",
+                                        "properties": {
+                                          "mainAxisAlignment": "MainAxisAlignment.start",
+                                          "crossAxisAlignment": "CrossAxisAlignment.start"
+                                        },
+                                        "children": [
+                                          {
+                                            "id": "xp_b1_title",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Food & Dining",
+                                              "fontSize": 14,
+                                              "fontWeight": "bold"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "xp_b1_pct",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "35% of total budget",
+                                              "fontSize": 11,
+                                              "color": "4284963515"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_b1_amt",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "$540.00",
+                                      "fontSize": 14,
+                                      "fontWeight": "bold"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_b2",
+                        "type": "Card",
+                        "properties": {
+                          "color": "4294967295",
+                          "borderRadius": 16,
+                          "elevation": 0,
+                          "margin": {
+                            "left": 0,
+                            "top": 0,
+                            "right": 0,
+                            "bottom": 10
+                          }
+                        },
+                        "children": [
+                          {
+                            "id": "xp_b2_inner",
+                            "type": "Padding",
+                            "properties": {
+                              "padding": {
+                                "left": 14,
+                                "top": 14,
+                                "right": 14,
+                                "bottom": 14
+                              }
+                            },
+                            "children": [
+                              {
+                                "id": "xp_b2_row",
+                                "type": "Row",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.center"
+                                },
+                                "children": [
+                                  {
+                                    "id": "xp_b2_ic",
+                                    "type": "Icon",
+                                    "properties": {
+                                      "icon": "Icons.shopping_bag_outlined",
+                                      "color": "4287323126",
+                                      "size": 20
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "xp_b2_wsp",
+                                    "type": "SizedBox",
+                                    "properties": {
+                                      "width": 12
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "xp_b2_exp",
+                                    "type": "Expanded",
+                                    "properties": {
+                                      "flex": 1
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "xp_b2_col",
+                                        "type": "Column",
+                                        "properties": {
+                                          "mainAxisAlignment": "MainAxisAlignment.start",
+                                          "crossAxisAlignment": "CrossAxisAlignment.start"
+                                        },
+                                        "children": [
+                                          {
+                                            "id": "xp_b2_title",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Shopping",
+                                              "fontSize": 14,
+                                              "fontWeight": "bold"
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "xp_b2_pct",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "25% of total budget",
+                                              "fontSize": 11,
+                                              "color": "4284963515"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "xp_b2_amt",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "$380.00",
+                                      "fontSize": 14,
+                                      "fontWeight": "bold"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "xp_add",
+    "type": "Scaffold",
+    "properties": {
+      "backgroundColor": "4294967295",
+      "pageName": "Add Expense",
+      "appBar": {
+        "id": "xp_add_ab",
+        "type": "AppBar",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "elevation": 0,
+          "title": {
+            "id": "xp_add_ab_title",
+            "type": "Text",
+            "properties": {
+              "text": "Add Transaction",
+              "fontSize": 18,
+              "color": "4279179050",
+              "fontWeight": "bold"
+            },
+            "children": []
+          },
+          "actions": []
+        }
+      }
+    },
+    "children": [
+      {
+        "id": "xp_add_scsv",
+        "type": "SingleChildScrollView",
+        "properties": {
+          "scrollDirection": "Axis.vertical"
+        },
+        "children": [
+          {
+            "id": "xp_add_pad",
+            "type": "Padding",
+            "properties": {
+              "padding": {
+                "left": 20,
+                "top": 24,
+                "right": 20,
+                "bottom": 24
+              }
+            },
+            "children": [
+              {
+                "id": "xp_add_col",
+                "type": "Column",
+                "properties": {
+                  "mainAxisAlignment": "MainAxisAlignment.start",
+                  "crossAxisAlignment": "CrossAxisAlignment.stretch"
+                },
+                "children": [
+                  {
+                    "id": "xp_add_val_lbl",
+                    "type": "Text",
+                    "properties": {
+                      "text": "Enter Amount",
+                      "fontSize": 13,
+                      "color": "4284963515",
+                      "textAlign": "TextAlign.center"
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "xp_add_sp1",
+                    "type": "SizedBox",
+                    "properties": {
+                      "height": 12
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "xp_add_val",
+                    "type": "Text",
+                    "properties": {
+                      "text": "$120.00",
+                      "fontSize": 42,
+                      "color": "4283385573",
+                      "fontWeight": "bold",
+                      "textAlign": "TextAlign.center"
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "xp_add_sp2",
+                    "type": "SizedBox",
+                    "properties": {
+                      "height": 32
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "xp_add_cat_lbl",
+                    "type": "Text",
+                    "properties": {
+                      "text": "Select Category",
+                      "fontSize": 14,
+                      "fontWeight": "bold"
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "xp_add_sp3",
+                    "type": "SizedBox",
+                    "properties": {
+                      "height": 12
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "xp_add_cat_grid",
+                    "type": "GridView",
+                    "properties": {
+                      "crossAxisCount": 2,
+                      "crossAxisSpacing": 12,
+                      "mainAxisSpacing": 12,
+                      "childAspectRatio": 1.6
+                    },
+                    "children": [
+                      {
+                        "id": "xp_c1",
+                        "type": "Container",
+                        "properties": {
+                          "backgroundColor": "4294047225",
+                          "borderRadius": 12
+                        },
+                        "children": [
+                          {
+                            "id": "xp_c1_col",
+                            "type": "Column",
+                            "properties": {
+                              "mainAxisAlignment": "MainAxisAlignment.center",
+                              "crossAxisAlignment": "CrossAxisAlignment.center"
+                            },
+                            "children": [
+                              {
+                                "id": "xp_c1_ic",
+                                "type": "Icon",
+                                "properties": {
+                                  "icon": "Icons.restaurant",
+                                  "color": "4279294337",
+                                  "size": 20
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "xp_c1_sp",
+                                "type": "SizedBox",
+                                "properties": {
+                                  "height": 6
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "xp_c1_t",
+                                "type": "Text",
+                                "properties": {
+                                  "text": "Food & Dining",
+                                  "fontSize": 12,
+                                  "fontWeight": "bold"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_c2",
+                        "type": "Container",
+                        "properties": {
+                          "backgroundColor": "4283385573",
+                          "borderRadius": 12
+                        },
+                        "children": [
+                          {
+                            "id": "xp_c2_col",
+                            "type": "Column",
+                            "properties": {
+                              "mainAxisAlignment": "MainAxisAlignment.center",
+                              "crossAxisAlignment": "CrossAxisAlignment.center"
+                            },
+                            "children": [
+                              {
+                                "id": "xp_c2_ic",
+                                "type": "Icon",
+                                "properties": {
+                                  "icon": "Icons.shopping_bag_outlined",
+                                  "color": "4294967295",
+                                  "size": 20
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "xp_c2_sp",
+                                "type": "SizedBox",
+                                "properties": {
+                                  "height": 6
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "xp_c2_t",
+                                "type": "Text",
+                                "properties": {
+                                  "text": "Shopping",
+                                  "fontSize": 12,
+                                  "color": "4294967295",
+                                  "fontWeight": "bold"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_c3",
+                        "type": "Container",
+                        "properties": {
+                          "backgroundColor": "4294047225",
+                          "borderRadius": 12
+                        },
+                        "children": [
+                          {
+                            "id": "xp_c3_col",
+                            "type": "Column",
+                            "properties": {
+                              "mainAxisAlignment": "MainAxisAlignment.center",
+                              "crossAxisAlignment": "CrossAxisAlignment.center"
+                            },
+                            "children": [
+                              {
+                                "id": "xp_c3_ic",
+                                "type": "Icon",
+                                "properties": {
+                                  "icon": "Icons.tv",
+                                  "color": "4294197086",
+                                  "size": 20
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "xp_c3_sp",
+                                "type": "SizedBox",
+                                "properties": {
+                                  "height": 6
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "xp_c3_t",
+                                "type": "Text",
+                                "properties": {
+                                  "text": "Entertainment",
+                                  "fontSize": 12,
+                                  "fontWeight": "bold"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "xp_c4",
+                        "type": "Container",
+                        "properties": {
+                          "backgroundColor": "4294047225",
+                          "borderRadius": 12
+                        },
+                        "children": [
+                          {
+                            "id": "xp_c4_col",
+                            "type": "Column",
+                            "properties": {
+                              "mainAxisAlignment": "MainAxisAlignment.center",
+                              "crossAxisAlignment": "CrossAxisAlignment.center"
+                            },
+                            "children": [
+                              {
+                                "id": "xp_c4_ic",
+                                "type": "Icon",
+                                "properties": {
+                                  "icon": "Icons.directions_car",
+                                  "color": "4279166441",
+                                  "size": 20
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "xp_c4_sp",
+                                "type": "SizedBox",
+                                "properties": {
+                                  "height": 6
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "xp_c4_t",
+                                "type": "Text",
+                                "properties": {
+                                  "text": "Transportation",
+                                  "fontSize": 12,
+                                  "fontWeight": "bold"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "xp_add_sp4",
+                    "type": "SizedBox",
+                    "properties": {
+                      "height": 24
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "xp_add_note",
+                    "type": "TextField",
+                    "properties": {
+                      "hintText": "Add a brief note (e.g. Shopping sneakers)",
+                      "filled": true,
+                      "fillColor": "4294047225",
+                      "border": "none",
+                      "prefixIcon": "Icons.edit_outlined"
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "xp_add_sp5",
+                    "type": "SizedBox",
+                    "properties": {
+                      "height": 28
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "xp_add_save",
+                    "type": "ElevatedButton",
+                    "properties": {
+                      "text": "Save Transaction Details",
+                      "backgroundColor": "4283385573",
+                      "foregroundColor": "4294967295",
+                      "height": 48,
+                      "borderRadius": 12
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

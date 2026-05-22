@@ -4,6 +4,7 @@ import 'base_widget_builder.dart';
 import 'widget_builder_factory.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
+import '../canvas_preview_mode.dart';
 
 class FloatingActionButtonBuilder extends BaseWidgetBuilder {
   @override
@@ -23,6 +24,8 @@ class FloatingActionButtonBuilder extends BaseWidgetBuilder {
 
     return FloatingActionButton(
       onPressed: () {
+        if (!CanvasPreviewMode.of(context)) return;
+        
         final navigateTo = node.properties['navigateTo'];
         if (navigateTo != null) {
           final provider = Provider.of<WidgetTreeProvider>(context, listen: false);

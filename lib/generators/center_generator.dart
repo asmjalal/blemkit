@@ -10,7 +10,7 @@ class CenterGenerator extends BaseWidgetGenerator {
     
     String child = '';
     if (node.children.isNotEmpty) {
-      child = '\n$childIndentStr child: ${generateCode(node.children.first, indent: indent + 1)},';
+      child = '\n$childIndentStr child: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)},';
     }
     
     return '${indentStr}Center($child\n$indentStr)';

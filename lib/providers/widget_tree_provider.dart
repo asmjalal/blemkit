@@ -5,18 +5,42 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:html' as html;
 import '../widgets/widget_tree/widget_tree_editor.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class WidgetTreeProvider extends ChangeNotifier {
   List<WidgetNode> screens = [];
   WidgetNode? selectedScreen;
   WidgetNode? selectedNode;
   WidgetNode? _hoveredNode;
+  
+  bool hasUnsavedChanges = false;
+  String? currentProjectId;
 
   WidgetNode? get rootNode => selectedScreen;
   WidgetNode? get hoveredNode => _hoveredNode;
 
+  bool _isAiGenerating = false;
+  bool get isAiGenerating => _isAiGenerating;
+
+  void setAiGenerating(bool value) {
+    _isAiGenerating = value;
+    notifyListeners();
+  }
+
   /// Public wrapper for notifyListeners to allow external actions to trigger rebuilds
-  void notify() => notifyListeners();
+  void notify() {
+    hasUnsavedChanges = true;
+    notifyListeners();
+  }
+
+  void clearState() {
+    screens = [];
+    selectedScreen = null;
+    selectedNode = null;
+    hasUnsavedChanges = false;
+    currentProjectId = null;
+    notifyListeners();
+  }
 
   final WidgetCommandManager commandManager = WidgetCommandManager();
 
@@ -110,6 +134,7 @@ class WidgetTreeProvider extends ChangeNotifier {
       screens.remove(selectedScreen);
       selectedScreen = screens.isNotEmpty ? screens.first : null;
     }
+    hasUnsavedChanges = true;
     _saveToStorage();
     notifyListeners();
   }
@@ -119,6 +144,7 @@ class WidgetTreeProvider extends ChangeNotifier {
     screens = newScreens;
     selectedScreen = screens.first;
     selectedNode = selectedScreen;
+    hasUnsavedChanges = true;
     _saveToStorage();
     notifyListeners();
   }
@@ -127,6 +153,7 @@ class WidgetTreeProvider extends ChangeNotifier {
     screens.add(node);
     selectedScreen = node;
     selectedNode = node;
+    hasUnsavedChanges = true;
     notifyListeners();
   }
 
@@ -139,6 +166,7 @@ class WidgetTreeProvider extends ChangeNotifier {
     } else {
       addChild(rootNode!, newNode);
     }
+    hasUnsavedChanges = true;
   }
 
   void selectScreen(WidgetNode node) {
@@ -153,6 +181,7 @@ class WidgetTreeProvider extends ChangeNotifier {
       selectedScreen = screens.isNotEmpty ? screens.first : null;
       selectedNode = selectedScreen;
     }
+    hasUnsavedChanges = true;
     notifyListeners();
   }
 
@@ -163,6 +192,7 @@ class WidgetTreeProvider extends ChangeNotifier {
 
   void addChild(WidgetNode parent, WidgetNode child) {
     parent.children.add(child);
+    hasUnsavedChanges = true;
     notifyListeners();
   }
 
@@ -184,11 +214,13 @@ class WidgetTreeProvider extends ChangeNotifier {
         removeFromParent(selectedScreen!);
       }
     }
+    hasUnsavedChanges = true;
     notifyListeners();
   }
 
   void updateNodeProperties(WidgetNode node, Map<String, dynamic> properties) {
     node.properties = properties;
+    hasUnsavedChanges = true;
     notifyListeners();
   }
 
@@ -199,12 +231,14 @@ class WidgetTreeProvider extends ChangeNotifier {
     } else {
       newParent.children.add(node);
     }
+    hasUnsavedChanges = true;
     notifyListeners();
   }
 
   void reorderNode(WidgetNode parent, int oldIndex, int newIndex) {
     final node = parent.children.removeAt(oldIndex);
     parent.children.insert(newIndex, node);
+    hasUnsavedChanges = true;
     notifyListeners();
   }
 
@@ -215,6 +249,7 @@ class WidgetTreeProvider extends ChangeNotifier {
 
   void updateThemeProperties(Map<String, dynamic> newProperties) {
     _themeProperties = {..._themeProperties, ...newProperties};
+    hasUnsavedChanges = true;
     _saveToStorage();
     notifyListeners();
   }
@@ -231,12 +266,14 @@ class WidgetTreeProvider extends ChangeNotifier {
     screens.add(newNode);
     selectedScreen = newNode;
     selectedNode = newNode;
+    hasUnsavedChanges = true;
     _saveToStorage();
     notifyListeners();
   }
 
   void renameScreen(WidgetNode node, String newName) {
     node.properties['pageName'] = newName;
+    hasUnsavedChanges = true;
     _saveToStorage();
     notifyListeners();
   }
@@ -309,6 +346,79 @@ class WidgetTreeProvider extends ChangeNotifier {
       } catch (e) {
         debugPrint('Error loading themed widgets: $e');
       }
+    }
+  }
+
+  // --- SUPABASE MVP INTEGRATION ---
+
+  Future<void> saveProjectToSupabase() async {
+    if (currentProjectId == null) return;
+    
+    try {
+      final supabase = Supabase.instance.client;
+      
+      // Update projects updated_at
+      await supabase.from('projects').update({
+        'updated_at': DateTime.now().toIso8601String()
+      }).eq('id', currentProjectId!);
+
+      // Delete existing screens for this project
+      await supabase.from('screens').delete().eq('project_id', currentProjectId!);
+
+      // Insert all current screens
+      if (screens.isNotEmpty) {
+        final screenInserts = screens.asMap().entries.map((entry) {
+          final index = entry.key;
+          final screen = entry.value;
+          return {
+            'project_id': currentProjectId,
+            'screen_name': screen.properties['pageName'] ?? 'Page \${index + 1}',
+            'screen_json': screen.toJson(),
+            'order_index': index,
+          };
+        }).toList();
+
+        await supabase.from('screens').insert(screenInserts);
+      }
+
+      hasUnsavedChanges = false;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error saving project to Supabase: $e');
+    }
+  }
+
+  Future<void> loadProjectFromSupabase(String projectId) async {
+    try {
+      final supabase = Supabase.instance.client;
+      
+      currentProjectId = projectId;
+      hasUnsavedChanges = false;
+
+      final response = await supabase
+          .from('screens')
+          .select()
+          .eq('project_id', projectId)
+          .order('order_index', ascending: true);
+
+      final screenRecords = List<Map<String, dynamic>>.from(response);
+
+      if (screenRecords.isNotEmpty) {
+        screens = screenRecords.map((record) {
+          final json = record['screen_json'] as Map<String, dynamic>;
+          return WidgetNode.fromJson(json);
+        }).toList();
+        
+        selectedScreen = screens.first;
+        selectedNode = selectedScreen;
+      } else {
+        screens = [];
+        selectedScreen = null;
+        selectedNode = null;
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading project from Supabase: $e');
     }
   }
 }

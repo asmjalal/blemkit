@@ -146,6 +146,12 @@ class _VisualEdgeInsetsEditorState extends State<VisualEdgeInsetsEditor> {
   bool allMode = true;
   final accent = const Color(0xFF4a9eff);
 
+  late TextEditingController _controllerAll;
+  late TextEditingController _controllerTop;
+  late TextEditingController _controllerRight;
+  late TextEditingController _controllerBottom;
+  late TextEditingController _controllerLeft;
+
   @override
   void initState() {
     super.initState();
@@ -154,16 +160,64 @@ class _VisualEdgeInsetsEditorState extends State<VisualEdgeInsetsEditor> {
     bottom = widget.bottom;
     left = widget.left;
     linked = widget.linked;
+
+    _controllerAll = TextEditingController(text: top.toStringAsFixed(0));
+    _controllerTop = TextEditingController(text: top.toStringAsFixed(0));
+    _controllerRight = TextEditingController(text: right.toStringAsFixed(0));
+    _controllerBottom = TextEditingController(text: bottom.toStringAsFixed(0));
+    _controllerLeft = TextEditingController(text: left.toStringAsFixed(0));
   }
 
-  void _updateAll(double value) {
+  @override
+  void dispose() {
+    _controllerAll.dispose();
+    _controllerTop.dispose();
+    _controllerRight.dispose();
+    _controllerBottom.dispose();
+    _controllerLeft.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(VisualEdgeInsetsEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.top != widget.top ||
+        oldWidget.right != widget.right ||
+        oldWidget.bottom != widget.bottom ||
+        oldWidget.left != widget.left ||
+        oldWidget.linked != widget.linked) {
+      setState(() {
+        top = widget.top;
+        right = widget.right;
+        bottom = widget.bottom;
+        left = widget.left;
+        linked = widget.linked;
+        _syncControllers();
+      });
+    }
+  }
+
+  void _syncControllers() {
+    _controllerAll.text = top.toStringAsFixed(0);
+    _controllerTop.text = top.toStringAsFixed(0);
+    _controllerRight.text = right.toStringAsFixed(0);
+    _controllerBottom.text = bottom.toStringAsFixed(0);
+    _controllerLeft.text = left.toStringAsFixed(0);
+  }
+
+  void _updateAll(double value, {TextEditingController? source}) {
     setState(() {
       top = right = bottom = left = value;
+      if (source != _controllerAll) _controllerAll.text = value.toStringAsFixed(0);
+      if (source != _controllerTop) _controllerTop.text = value.toStringAsFixed(0);
+      if (source != _controllerRight) _controllerRight.text = value.toStringAsFixed(0);
+      if (source != _controllerBottom) _controllerBottom.text = value.toStringAsFixed(0);
+      if (source != _controllerLeft) _controllerLeft.text = value.toStringAsFixed(0);
       widget.onChanged(EdgeInsets.only(top: top, right: right, bottom: bottom, left: left));
     });
   }
 
-  void _updateSide(String side, double value) {
+  void _updateSide(String side, double value, {required TextEditingController source}) {
     setState(() {
       switch (side) {
         case 'top': top = value; break;
@@ -171,67 +225,92 @@ class _VisualEdgeInsetsEditorState extends State<VisualEdgeInsetsEditor> {
         case 'bottom': bottom = value; break;
         case 'left': left = value; break;
       }
+      if (linked) {
+        top = right = bottom = left = value;
+        if (source != _controllerAll) _controllerAll.text = value.toStringAsFixed(0);
+        if (source != _controllerTop) _controllerTop.text = value.toStringAsFixed(0);
+        if (source != _controllerRight) _controllerRight.text = value.toStringAsFixed(0);
+        if (source != _controllerBottom) _controllerBottom.text = value.toStringAsFixed(0);
+        if (source != _controllerLeft) _controllerLeft.text = value.toStringAsFixed(0);
+      }
       widget.onChanged(EdgeInsets.only(top: top, right: right, bottom: bottom, left: left));
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final boxSize = 140.0;
-    final inputSize = 32.0;
-    final borderRadius = 16.0;
-    final bgColor = const Color(0xFF23263a);
+    final boxSize = 100.0;
+    final inputSize = 28.0;
+    final borderRadius = 12.0;
+    final bgColor = const Color(0xFF1E293B); // Muted Tailwind slate color
     final fgColor = Colors.white;
     final borderColor = Colors.grey.shade700;
-    final activeColor = accent;
-    final inactiveColor = Colors.grey.shade600;
+    final inactiveColor = Colors.grey.shade500;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(widget.label, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)),
-              const SizedBox(width: 12),
-              ToggleButtons(
-                borderRadius: BorderRadius.circular(8),
-                selectedColor: Colors.white,
-                fillColor: accent.withOpacity(0.2),
-                color: inactiveColor,
-                isSelected: [allMode, !allMode],
-                onPressed: (i) => setState(() => allMode = i == 0),
+              Text(
+                widget.label,
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white70, fontSize: 14),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('All', style: TextStyle(color: allMode ? accent : inactiveColor)),
+                  Container(
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.black26,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: ToggleButtons(
+                      borderRadius: BorderRadius.circular(6),
+                      selectedColor: Colors.white,
+                      fillColor: accent.withOpacity(0.25),
+                      color: inactiveColor,
+                      isSelected: [allMode, !allMode],
+                      constraints: const BoxConstraints(minWidth: 40, minHeight: 22),
+                      onPressed: (i) => setState(() => allMode = i == 0),
+                      children: [
+                        Text('All', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: allMode ? accent : inactiveColor)),
+                        Text('Sides', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: !allMode ? accent : inactiveColor)),
+                      ],
+                    ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('Sides', style: TextStyle(color: !allMode ? accent : inactiveColor)),
+                  const SizedBox(width: 4),
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      iconSize: 16,
+                      icon: Icon(linked ? Icons.link : Icons.link_off, color: linked ? accent : inactiveColor),
+                      tooltip: linked ? 'Unlink sides' : 'Link all sides',
+                      onPressed: () {
+                        setState(() {
+                          linked = !linked;
+                          widget.onLinkChanged(linked);
+                          if (linked) {
+                            final v = top;
+                            top = right = bottom = left = v;
+                            _syncControllers();
+                            widget.onChanged(EdgeInsets.only(top: v, right: v, bottom: v, left: v));
+                          }
+                        });
+                      },
+                    ),
                   ),
                 ],
-              ),
-              const Spacer(),
-              IconButton(
-                icon: Icon(linked ? Icons.link : Icons.link_off, color: linked ? accent : inactiveColor),
-                tooltip: linked ? 'Unlink sides' : 'Link all sides',
-                onPressed: () {
-                  setState(() {
-                    linked = !linked;
-                    widget.onLinkChanged(linked);
-                    if (linked) {
-                      final v = top;
-                      top = right = bottom = left = v;
-                      widget.onChanged(EdgeInsets.only(top: v, right: v, bottom: v, left: v));
-                    }
-                  });
-                },
               ),
             ],
           ),
@@ -251,15 +330,15 @@ class _VisualEdgeInsetsEditorState extends State<VisualEdgeInsetsEditor> {
                   ),
                   // Inner solid rectangle
                   Positioned(
-                    left: 36,
-                    top: 36,
-                    right: 36,
-                    bottom: 36,
+                    left: 28,
+                    top: 28,
+                    right: 28,
+                    bottom: 28,
                     child: Container(
                       decoration: BoxDecoration(
                         color: bgColor.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: borderColor, width: 2),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: borderColor, width: 1.5),
                       ),
                     ),
                   ),
@@ -272,47 +351,47 @@ class _VisualEdgeInsetsEditorState extends State<VisualEdgeInsetsEditor> {
                   if (allMode)
                     Positioned(
                       left: boxSize / 2 - inputSize / 2,
-                      bottom: -inputSize - 8,
+                      bottom: -inputSize - 4,
                       width: inputSize,
-                      child: _inputField('all', top, (v) => _updateAll(v)),
+                      child: _inputField(_controllerAll, (v) => _updateAll(v, source: _controllerAll)),
                     )
                   else ...[
                     Positioned(
                       left: boxSize / 2 - inputSize / 2,
-                      top: -inputSize - 8,
+                      top: -inputSize - 4,
                       width: inputSize,
-                      child: _inputField('top', top, (v) => _updateSide('top', v)),
+                      child: _inputField(_controllerTop, (v) => _updateSide('top', v, source: _controllerTop)),
                     ),
                     Positioned(
-                      right: -inputSize - 8,
+                      right: -inputSize - 4,
                       top: boxSize / 2 - inputSize / 2,
                       width: inputSize,
-                      child: _inputField('right', right, (v) => _updateSide('right', v)),
+                      child: _inputField(_controllerRight, (v) => _updateSide('right', v, source: _controllerRight)),
                     ),
                     Positioned(
                       left: boxSize / 2 - inputSize / 2,
-                      bottom: -inputSize - 8,
+                      bottom: -inputSize - 4,
                       width: inputSize,
-                      child: _inputField('bottom', bottom, (v) => _updateSide('bottom', v)),
+                      child: _inputField(_controllerBottom, (v) => _updateSide('bottom', v, source: _controllerBottom)),
                     ),
                     Positioned(
-                      left: -inputSize - 8,
+                      left: -inputSize - 4,
                       top: boxSize / 2 - inputSize / 2,
                       width: inputSize,
-                      child: _inputField('left', left, (v) => _updateSide('left', v)),
+                      child: _inputField(_controllerLeft, (v) => _updateSide('left', v, source: _controllerLeft)),
                     ),
                   ],
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Center(
             child: Text(
               allMode
                   ? 'All sides: ${top.toStringAsFixed(0)}px'
                   : 'Top: ${top.toStringAsFixed(0)}  Right: ${right.toStringAsFixed(0)}  Bottom: ${bottom.toStringAsFixed(0)}  Left: ${left.toStringAsFixed(0)}',
-              style: TextStyle(color: fgColor.withOpacity(0.8)),
+              style: TextStyle(color: fgColor.withOpacity(0.7), fontSize: 11),
             ),
           ),
         ],
@@ -320,23 +399,24 @@ class _VisualEdgeInsetsEditorState extends State<VisualEdgeInsetsEditor> {
     );
   }
 
-  Widget _inputField(String side, double value, ValueChanged<double> onChanged) {
+  Widget _inputField(TextEditingController controller, ValueChanged<double> onChanged) {
     return Container(
-      height: 32,
-      width: 32,
+      height: 24,
+      width: 28,
       decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFF4a9eff), width: 2),
+        color: Colors.black45,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: const Color(0xFF4a9eff), width: 1.5),
       ),
       child: Center(
         child: TextField(
+          controller: controller,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
           decoration: const InputDecoration(
             border: InputBorder.none,
             isDense: true,
-            contentPadding: EdgeInsets.zero,
+            contentPadding: EdgeInsets.symmetric(vertical: 2),
           ),
           keyboardType: TextInputType.number,
           onChanged: (val) {
@@ -352,31 +432,31 @@ class _VisualEdgeInsetsEditorState extends State<VisualEdgeInsetsEditor> {
     switch (side) {
       case 'top':
         return Positioned(
-          left: 36,
-          right: 36,
-          top: 24,
-          child: Container(height: 2, color: color.withOpacity(0.5)),
+          left: 28,
+          right: 28,
+          top: 18,
+          child: Container(height: 1.5, color: color.withOpacity(0.4)),
         );
       case 'right':
         return Positioned(
-          right: 24,
-          top: 36,
-          bottom: 36,
-          child: Container(width: 2, color: color.withOpacity(0.5)),
+          right: 18,
+          top: 28,
+          bottom: 28,
+          child: Container(width: 1.5, color: color.withOpacity(0.4)),
         );
       case 'bottom':
         return Positioned(
-          left: 36,
-          right: 36,
-          bottom: 24,
-          child: Container(height: 2, color: color.withOpacity(0.5)),
+          left: 28,
+          right: 28,
+          bottom: 18,
+          child: Container(height: 1.5, color: color.withOpacity(0.4)),
         );
       case 'left':
         return Positioned(
-          left: 24,
-          top: 36,
-          bottom: 36,
-          child: Container(width: 2, color: color.withOpacity(0.5)),
+          left: 18,
+          top: 28,
+          bottom: 28,
+          child: Container(width: 1.5, color: color.withOpacity(0.4)),
         );
       default:
         return const SizedBox.shrink();
@@ -387,13 +467,13 @@ class _VisualEdgeInsetsEditorState extends State<VisualEdgeInsetsEditor> {
 class _DashedRectPainter extends CustomPainter {
   final Color color;
   final double borderRadius;
-  _DashedRectPainter({required this.color, this.borderRadius = 16});
+  _DashedRectPainter({required this.color, this.borderRadius = 12});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 2
+      ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
     final path = Path()
       ..addRRect(RRect.fromRectAndRadius(
@@ -404,8 +484,8 @@ class _DashedRectPainter extends CustomPainter {
   }
 
   void _drawDashedPath(Canvas canvas, Path path, Paint paint) {
-    const dashWidth = 8.0;
-    const dashSpace = 6.0;
+    const dashWidth = 6.0;
+    const dashSpace = 4.0;
     final metrics = path.computeMetrics();
     for (final metric in metrics) {
       double distance = 0.0;

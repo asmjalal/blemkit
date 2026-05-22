@@ -91,16 +91,20 @@ class _BuilderScreenState extends State<BuilderScreen> {
   Future<void> _handleSave() async {
     final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
     if (provider.rootNode == null) return;
-    final jsonStr = jsonEncode(provider.rootNode!.toJson());
-    String? outputFile = await FilePicker.platform.saveFile(
-      dialogTitle: 'Save your design as JSON',
-      fileName: 'design.json',
-      type: FileType.custom,
-      allowedExtensions: ['json'],
+    
+    showDialog(
+      context: context, 
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator(color: Color(0xFF38BDF8))),
     );
-    if (outputFile != null) {
-      final file = File(outputFile);
-      await file.writeAsString(jsonStr);
+    
+    await provider.saveProjectToSupabase();
+    
+    if (mounted) {
+      Navigator.pop(context); // remove loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Project saved successfully to the cloud!')),
+      );
     }
   }
 
@@ -150,7 +154,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
                       filled: true,
                       fillColor: const Color(0xFF1E293B),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF3B82F6))),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF38BDF8))),
                     ),
                   ),
                   child: Column(
@@ -192,8 +196,8 @@ class _BuilderScreenState extends State<BuilderScreen> {
                         _showProjectExportDialog(context, projectFiles, appName, bundleName);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3B82F6),
-                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xFF38BDF8),
+                        foregroundColor: Colors.black,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
@@ -488,11 +492,52 @@ class _BuilderScreenState extends State<BuilderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      focusNode: _keyboardFocusNode,
-      autofocus: true,
-      onKeyEvent: _handleKeyEvent,
-      child: Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+        if (!provider.hasUnsavedChanges) return true;
+
+        final shouldPop = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Unsaved Changes', style: TextStyle(color: Colors.white)),
+            backgroundColor: const Color(0xFF0B1D3A),
+            content: const Text(
+              'You have unsaved changes. Do you want to save before leaving?',
+              style: TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false), // Cancel
+                child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true), // Leave without saving
+                child: const Text('Leave Without Saving', style: TextStyle(color: Colors.redAccent)),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await provider.saveProjectToSupabase();
+                  if (context.mounted) {
+                    Navigator.pop(context, true); // Save & Exit
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF38BDF8),
+                  foregroundColor: Colors.black,
+                ),
+                child: const Text('Save & Exit'),
+              ),
+            ],
+          ),
+        );
+        return shouldPop ?? false;
+      },
+      child: Focus(
+        focusNode: _keyboardFocusNode,
+        autofocus: true,
+        onKeyEvent: _handleKeyEvent,
+        child: Scaffold(
         appBar: TopNavBar(
         onSave: _handleSave,
         onExport: _handleExport,
@@ -607,7 +652,61 @@ class _BuilderScreenState extends State<BuilderScreen> {
                   });
                   return const SizedBox.shrink();
                 }
-                return const CanvasPreview();
+                return Stack(
+                  children: [
+                    const CanvasPreview(),
+                    if (provider.isAiGenerating)
+                      Positioned.fill(
+                        child: Container(
+                          color: const Color(0xFF0F172A).withValues(alpha: 0.8),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Glow effect around the loader
+                                Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF1E293B).withValues(alpha: 0.8),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF38BDF8).withValues(alpha: 0.3),
+                                        blurRadius: 40,
+                                        spreadRadius: 10,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const CircularProgressIndicator(
+                                    color: Color(0xFF38BDF8),
+                                    strokeWidth: 3,
+                                  ),
+                                ),
+                                const SizedBox(height: 32),
+                                const Text(
+                                  'AI is generating your UI...',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'This may take 10-30 seconds depending on complexity.',
+                                  style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
               },
             ),
           ),
@@ -646,7 +745,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
         ],
       ),
     ),  // closes Scaffold
-    );  // closes Focus
+      ));  // closes Focus & WillPopScope
   }
 
 

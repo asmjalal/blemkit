@@ -9,7 +9,7 @@ class ButtonGenerator extends BaseWidgetGenerator {
     
     String child;
     if (node.children.isNotEmpty) {
-      child = generateCode(node.children.first, indent: indent + 1);
+      child = WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1).trim();
     } else {
       child = "Text('${node.properties['text'] ?? 'Button'}')";
     }

@@ -1,0 +1,944 @@
+[
+  {
+    "id": "nt_home",
+    "type": "Scaffold",
+    "properties": {
+      "backgroundColor": "4294967295",
+      "pageName": "My Notes",
+      "appBar": {
+        "id": "nt_appbar",
+        "type": "AppBar",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "elevation": 0,
+          "title": {
+            "id": "nt_appbar_title",
+            "type": "Text",
+            "properties": {
+              "text": "ZenNotes",
+              "fontSize": 18,
+              "color": "4279179050",
+              "fontWeight": "bold"
+            },
+            "children": []
+          },
+          "actions": [
+            {
+              "id": "nt_user_avatar",
+              "type": "CircleAvatar",
+              "properties": {
+                "radius": 16,
+                "imageUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100"
+              },
+              "children": []
+            }
+          ]
+        }
+      }
+    },
+    "children": [
+      {
+        "id": "nt_home_stack",
+        "type": "Stack",
+        "properties": {},
+        "children": [
+          {
+            "id": "nt_home_scsv",
+            "type": "SingleChildScrollView",
+            "properties": {
+              "scrollDirection": "Axis.vertical"
+            },
+            "children": [
+              {
+                "id": "nt_home_col",
+                "type": "Column",
+                "properties": {
+                  "mainAxisAlignment": "MainAxisAlignment.start",
+                  "crossAxisAlignment": "CrossAxisAlignment.start"
+                },
+                "children": [
+                  {
+                    "id": "nt_search_pad",
+                    "type": "Padding",
+                    "properties": {
+                      "padding": {
+                        "left": 16,
+                        "top": 16,
+                        "right": 16,
+                        "bottom": 8
+                      }
+                    },
+                    "children": [
+                      {
+                        "id": "nt_search_tf",
+                        "type": "TextField",
+                        "properties": {
+                          "hintText": "Search note contents...",
+                          "filled": true,
+                          "fillColor": "4294047225",
+                          "border": "none",
+                          "prefixIcon": "Icons.search"
+                        },
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "id": "nt_tags_pad",
+                    "type": "Padding",
+                    "properties": {
+                      "padding": {
+                        "left": 16,
+                        "top": 8,
+                        "right": 16,
+                        "bottom": 12
+                      }
+                    },
+                    "children": [
+                      {
+                        "id": "nt_tags_sb",
+                        "type": "SizedBox",
+                        "properties": {
+                          "height": 38
+                        },
+                        "children": [
+                          {
+                            "id": "nt_tags_lv",
+                            "type": "ListView",
+                            "properties": {
+                              "scrollDirection": "Axis.horizontal"
+                            },
+                            "children": [
+                              {
+                                "id": "nt_tag1",
+                                "type": "Container",
+                                "properties": {
+                                  "backgroundColor": "4283385573",
+                                  "padding": {
+                                    "left": 16,
+                                    "top": 8,
+                                    "right": 16,
+                                    "bottom": 8
+                                  },
+                                  "margin": {
+                                    "left": 0,
+                                    "top": 0,
+                                    "right": 8,
+                                    "bottom": 0
+                                  },
+                                  "borderRadius": 12
+                                },
+                                "children": [
+                                  {
+                                    "id": "nt_tag1_t",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "All Notes",
+                                      "fontSize": 12,
+                                      "color": "4294967295",
+                                      "fontWeight": "bold"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "id": "nt_tag2",
+                                "type": "Container",
+                                "properties": {
+                                  "backgroundColor": "4294967295",
+                                  "padding": {
+                                    "left": 16,
+                                    "top": 8,
+                                    "right": 16,
+                                    "bottom": 8
+                                  },
+                                  "margin": {
+                                    "left": 0,
+                                    "top": 0,
+                                    "right": 8,
+                                    "bottom": 0
+                                  },
+                                  "borderRadius": 12,
+                                  "borderWidth": 1,
+                                  "borderColor": "4293003504"
+                                },
+                                "children": [
+                                  {
+                                    "id": "nt_tag2_t",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "\ud83d\udca1 Ideas",
+                                      "fontSize": 12,
+                                      "color": "4284963515"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "id": "nt_tag3",
+                                "type": "Container",
+                                "properties": {
+                                  "backgroundColor": "4294967295",
+                                  "padding": {
+                                    "left": 16,
+                                    "top": 8,
+                                    "right": 16,
+                                    "bottom": 8
+                                  },
+                                  "margin": {
+                                    "left": 0,
+                                    "top": 0,
+                                    "right": 8,
+                                    "bottom": 0
+                                  },
+                                  "borderRadius": 12,
+                                  "borderWidth": 1,
+                                  "borderColor": "4293003504"
+                                },
+                                "children": [
+                                  {
+                                    "id": "nt_tag3_t",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "\ud83d\udcbc Work",
+                                      "fontSize": 12,
+                                      "color": "4284963515"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              },
+                              {
+                                "id": "nt_tag4",
+                                "type": "Container",
+                                "properties": {
+                                  "backgroundColor": "4294967295",
+                                  "padding": {
+                                    "left": 16,
+                                    "top": 8,
+                                    "right": 16,
+                                    "bottom": 8
+                                  },
+                                  "margin": {
+                                    "left": 0,
+                                    "top": 0,
+                                    "right": 8,
+                                    "bottom": 0
+                                  },
+                                  "borderRadius": 12,
+                                  "borderWidth": 1,
+                                  "borderColor": "4293003504"
+                                },
+                                "children": [
+                                  {
+                                    "id": "nt_tag4_t",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "\ud83d\uded2 Personal",
+                                      "fontSize": 12,
+                                      "color": "4284963515"
+                                    },
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "nt_grid_pad",
+                    "type": "Padding",
+                    "properties": {
+                      "padding": {
+                        "left": 16,
+                        "top": 8,
+                        "right": 16,
+                        "bottom": 16
+                      }
+                    },
+                    "children": [
+                      {
+                        "id": "nt_grid",
+                        "type": "GridView",
+                        "properties": {
+                          "crossAxisCount": 2,
+                          "crossAxisSpacing": 12,
+                          "mainAxisSpacing": 12,
+                          "childAspectRatio": 0.85
+                        },
+                        "children": [
+                          {
+                            "id": "nt_n1",
+                            "type": "Container",
+                            "properties": {
+                              "backgroundColor": "4294897802",
+                              "padding": {
+                                "left": 14,
+                                "top": 14,
+                                "right": 14,
+                                "bottom": 14
+                              },
+                              "borderRadius": 16
+                            },
+                            "children": [
+                              {
+                                "id": "nt_n1_col",
+                                "type": "Column",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.start"
+                                },
+                                "children": [
+                                  {
+                                    "id": "nt_n1_title",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "\ud83d\udca1 App UI Design Ideas",
+                                      "fontSize": 14,
+                                      "fontWeight": "bold"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n1_sp1",
+                                    "type": "SizedBox",
+                                    "properties": {
+                                      "height": 6
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n1_desc",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "Clean light theme designs, warm cards, rounded buttons, simple spacing, custom charts...",
+                                      "fontSize": 11,
+                                      "color": "4279179050",
+                                      "maxLines": 4,
+                                      "overflow": "TextOverflow.ellipsis"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n1_spc",
+                                    "type": "Spacer",
+                                    "properties": {},
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n1_footer",
+                                    "type": "Row",
+                                    "properties": {
+                                      "mainAxisAlignment": "MainAxisAlignment.spaceBetween",
+                                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "nt_n1_tag",
+                                        "type": "Container",
+                                        "properties": {
+                                          "backgroundColor": "4294967040",
+                                          "padding": {
+                                            "left": 6,
+                                            "top": 2,
+                                            "right": 6,
+                                            "bottom": 2
+                                          },
+                                          "borderRadius": 6
+                                        },
+                                        "children": [
+                                          {
+                                            "id": "nt_n1_tag_t",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Ideas",
+                                              "fontSize": 9,
+                                              "color": "4279179050",
+                                              "fontWeight": "bold"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "id": "nt_n1_date",
+                                        "type": "Text",
+                                        "properties": {
+                                          "text": "May 20",
+                                          "fontSize": 10,
+                                          "color": "4284963515"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "id": "nt_n2",
+                            "type": "Container",
+                            "properties": {
+                              "backgroundColor": "4293514751",
+                              "padding": {
+                                "left": 14,
+                                "top": 14,
+                                "right": 14,
+                                "bottom": 14
+                              },
+                              "borderRadius": 16
+                            },
+                            "children": [
+                              {
+                                "id": "nt_n2_col",
+                                "type": "Column",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.start"
+                                },
+                                "children": [
+                                  {
+                                    "id": "nt_n2_title",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "\ud83d\udcbc Project Meeting",
+                                      "fontSize": 14,
+                                      "fontWeight": "bold"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n2_sp1",
+                                    "type": "SizedBox",
+                                    "properties": {
+                                      "height": 6
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n2_desc",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "Implement dynamic SQLite templates. Clear db rows, seed light-theme layouts, test icons resolution...",
+                                      "fontSize": 11,
+                                      "color": "4279179050",
+                                      "maxLines": 4,
+                                      "overflow": "TextOverflow.ellipsis"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n2_spc",
+                                    "type": "Spacer",
+                                    "properties": {},
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n2_footer",
+                                    "type": "Row",
+                                    "properties": {
+                                      "mainAxisAlignment": "MainAxisAlignment.spaceBetween",
+                                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "nt_n2_tag",
+                                        "type": "Container",
+                                        "properties": {
+                                          "backgroundColor": "4294303231",
+                                          "padding": {
+                                            "left": 6,
+                                            "top": 2,
+                                            "right": 6,
+                                            "bottom": 2
+                                          },
+                                          "borderRadius": 6
+                                        },
+                                        "children": [
+                                          {
+                                            "id": "nt_n2_tag_t",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Work",
+                                              "fontSize": 9,
+                                              "color": "4279179050",
+                                              "fontWeight": "bold"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "id": "nt_n2_date",
+                                        "type": "Text",
+                                        "properties": {
+                                          "text": "May 19",
+                                          "fontSize": 10,
+                                          "color": "4284963515"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "id": "nt_n3",
+                            "type": "Container",
+                            "properties": {
+                              "backgroundColor": "4290443216",
+                              "padding": {
+                                "left": 14,
+                                "top": 14,
+                                "right": 14,
+                                "bottom": 14
+                              },
+                              "borderRadius": 16
+                            },
+                            "children": [
+                              {
+                                "id": "nt_n3_col",
+                                "type": "Column",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.start"
+                                },
+                                "children": [
+                                  {
+                                    "id": "nt_n3_title",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "\ud83d\uded2 Grocery Shopping",
+                                      "fontSize": 14,
+                                      "fontWeight": "bold"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n3_sp1",
+                                    "type": "SizedBox",
+                                    "properties": {
+                                      "height": 6
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n3_desc",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "Fresh spinach, organic eggs, Greek yogurt, whole grain oats, specialty light roast coffee beans...",
+                                      "fontSize": 11,
+                                      "color": "4279179050",
+                                      "maxLines": 4,
+                                      "overflow": "TextOverflow.ellipsis"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n3_spc",
+                                    "type": "Spacer",
+                                    "properties": {},
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n3_footer",
+                                    "type": "Row",
+                                    "properties": {
+                                      "mainAxisAlignment": "MainAxisAlignment.spaceBetween",
+                                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "nt_n3_tag",
+                                        "type": "Container",
+                                        "properties": {
+                                          "backgroundColor": "4290043136",
+                                          "padding": {
+                                            "left": 6,
+                                            "top": 2,
+                                            "right": 6,
+                                            "bottom": 2
+                                          },
+                                          "borderRadius": 6
+                                        },
+                                        "children": [
+                                          {
+                                            "id": "nt_n3_tag_t",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Personal",
+                                              "fontSize": 9,
+                                              "color": "4279179050",
+                                              "fontWeight": "bold"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "id": "nt_n3_date",
+                                        "type": "Text",
+                                        "properties": {
+                                          "text": "May 18",
+                                          "fontSize": 10,
+                                          "color": "4284963515"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "id": "nt_n4",
+                            "type": "Container",
+                            "properties": {
+                              "backgroundColor": "4290903806",
+                              "padding": {
+                                "left": 14,
+                                "top": 14,
+                                "right": 14,
+                                "bottom": 14
+                              },
+                              "borderRadius": 16
+                            },
+                            "children": [
+                              {
+                                "id": "nt_n4_col",
+                                "type": "Column",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.start"
+                                },
+                                "children": [
+                                  {
+                                    "id": "nt_n4_title",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "\ud83d\udcda Books to Read",
+                                      "fontSize": 14,
+                                      "fontWeight": "bold"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n4_sp1",
+                                    "type": "SizedBox",
+                                    "properties": {
+                                      "height": 6
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n4_desc",
+                                    "type": "Text",
+                                    "properties": {
+                                      "text": "Atomic Habits by James Clear, Designing Systems at Scale, The Creative Act by Rick Rubin...",
+                                      "fontSize": 11,
+                                      "color": "4279179050",
+                                      "maxLines": 4,
+                                      "overflow": "TextOverflow.ellipsis"
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n4_spc",
+                                    "type": "Spacer",
+                                    "properties": {},
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "nt_n4_footer",
+                                    "type": "Row",
+                                    "properties": {
+                                      "mainAxisAlignment": "MainAxisAlignment.spaceBetween",
+                                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "nt_n4_tag",
+                                        "type": "Container",
+                                        "properties": {
+                                          "backgroundColor": "4290435327",
+                                          "padding": {
+                                            "left": 6,
+                                            "top": 2,
+                                            "right": 6,
+                                            "bottom": 2
+                                          },
+                                          "borderRadius": 6
+                                        },
+                                        "children": [
+                                          {
+                                            "id": "nt_n4_tag_t",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Personal",
+                                              "fontSize": 9,
+                                              "color": "4279179050",
+                                              "fontWeight": "bold"
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "id": "nt_n4_date",
+                                        "type": "Text",
+                                        "properties": {
+                                          "text": "May 15",
+                                          "fontSize": 10,
+                                          "color": "4284963515"
+                                        },
+                                        "children": []
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "nt_fab_align",
+            "type": "Align",
+            "properties": {
+              "alignment": "Alignment.bottomRight"
+            },
+            "children": [
+              {
+                "id": "nt_fab_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": {
+                    "left": 0,
+                    "top": 0,
+                    "right": 20,
+                    "bottom": 20
+                  }
+                },
+                "children": [
+                  {
+                    "id": "nt_fab",
+                    "type": "Container",
+                    "properties": {
+                      "width": 56,
+                      "height": 56,
+                      "backgroundColor": "4283385573",
+                      "borderRadius": 28
+                    },
+                    "children": [
+                      {
+                        "id": "nt_fab_btn",
+                        "type": "IconButton",
+                        "properties": {
+                          "icon": "Icons.add",
+                          "color": "4294967295",
+                          "size": 28
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "nt_editor",
+    "type": "Scaffold",
+    "properties": {
+      "backgroundColor": "4294967295",
+      "pageName": "Note Editor",
+      "appBar": {
+        "id": "nt_ed_ab",
+        "type": "AppBar",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "elevation": 0,
+          "title": {
+            "id": "nt_ed_ab_title",
+            "type": "Text",
+            "properties": {
+              "text": "Edit Note",
+              "fontSize": 18,
+              "color": "4279179050",
+              "fontWeight": "bold"
+            },
+            "children": []
+          },
+          "actions": [
+            {
+              "id": "nt_ed_save",
+              "type": "IconButton",
+              "properties": {
+                "icon": "Icons.check",
+                "color": "4283385573"
+              },
+              "children": []
+            },
+            {
+              "id": "nt_ed_delete",
+              "type": "IconButton",
+              "properties": {
+                "icon": "Icons.delete_outline",
+                "color": "4284963515"
+              },
+              "children": []
+            }
+          ]
+        }
+      }
+    },
+    "children": [
+      {
+        "id": "nt_ed_scsv",
+        "type": "SingleChildScrollView",
+        "properties": {
+          "scrollDirection": "Axis.vertical"
+        },
+        "children": [
+          {
+            "id": "nt_ed_pad",
+            "type": "Padding",
+            "properties": {
+              "padding": {
+                "left": 20,
+                "top": 20,
+                "right": 20,
+                "bottom": 20
+              }
+            },
+            "children": [
+              {
+                "id": "nt_ed_col",
+                "type": "Column",
+                "properties": {
+                  "mainAxisAlignment": "MainAxisAlignment.start",
+                  "crossAxisAlignment": "CrossAxisAlignment.start"
+                },
+                "children": [
+                  {
+                    "id": "nt_ed_title",
+                    "type": "TextField",
+                    "properties": {
+                      "hintText": "\ud83d\udca1 App UI Design Ideas",
+                      "filled": false,
+                      "fillColor": "4294047225",
+                      "border": "none"
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "nt_ed_sp1",
+                    "type": "SizedBox",
+                    "properties": {
+                      "height": 8
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "nt_ed_tag_row",
+                    "type": "Row",
+                    "properties": {
+                      "mainAxisAlignment": "MainAxisAlignment.start",
+                      "crossAxisAlignment": "CrossAxisAlignment.center"
+                    },
+                    "children": [
+                      {
+                        "id": "nt_ed_tag_chip",
+                        "type": "Container",
+                        "properties": {
+                          "backgroundColor": "4294897802",
+                          "padding": {
+                            "left": 10,
+                            "top": 4,
+                            "right": 10,
+                            "bottom": 4
+                          },
+                          "borderRadius": 8
+                        },
+                        "children": [
+                          {
+                            "id": "nt_ed_tag_txt",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Ideas",
+                              "fontSize": 12,
+                              "fontWeight": "bold"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "id": "nt_ed_tag_sp",
+                        "type": "SizedBox",
+                        "properties": {
+                          "width": 12
+                        },
+                        "children": []
+                      },
+                      {
+                        "id": "nt_ed_date_txt",
+                        "type": "Text",
+                        "properties": {
+                          "text": "Edited May 20, 10:15 AM",
+                          "fontSize": 12,
+                          "color": "4284963515"
+                        },
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "id": "nt_ed_div",
+                    "type": "Divider",
+                    "properties": {
+                      "color": "4293003504",
+                      "thickness": 1,
+                      "height": 16
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "nt_ed_body",
+                    "type": "TextField",
+                    "properties": {
+                      "hintText": "Build a low-code Flutter app builder with cloud storage and templates. Focus on premium light theme UI/UX designs featuring soft shadows, warm pastels tags, simple category controls and highly polished layout trees.",
+                      "filled": false,
+                      "fillColor": "4294047225",
+                      "border": "none"
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

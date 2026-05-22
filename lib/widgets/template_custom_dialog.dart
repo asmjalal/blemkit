@@ -480,11 +480,8 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
   String _getCategoryImageUrl(TemplateCategory category) {
     switch (category) {
       case TemplateCategory.ecommerce: return 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80';
-      case TemplateCategory.delivery: return 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&q=80';
-      case TemplateCategory.food: return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80';
-      case TemplateCategory.pharmacy: return 'https://images.unsplash.com/photo-1587854692152-cbe660dbbb88?w=800&q=80';
-      case TemplateCategory.todo: return 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=800&q=80';
-      case TemplateCategory.fitness: return 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80';
+      case TemplateCategory.productivity: return 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80';
+      case TemplateCategory.finance: return 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&q=80';
       default: return 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80';
     }
   }
@@ -500,14 +497,11 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
       case 'Storefront': return 'Modern grid with discovery-first UX';
       case 'Product Details': return 'Immersive gallery & sticky actions';
       case 'Shopping Cart': return 'Swipe-to-delete and dynamic totals';
-      case 'Checkout': return 'One-tap payment and security focus';
-      case 'medication list': return 'Organized list of prescriptions';
-      case 'Medication List': return 'Organized list of prescriptions';
-      case 'Medication Search': return 'Search by brand or active ingredient';
-      case 'Dashboard': return 'Activity overview and priority tasks';
-      case 'Workouts': return 'Categorized fitness and training plans';
-      case 'Activity': return 'Progress tracking and daily timeline';
-      case 'Profile': return 'User achievements and global settings';
+      case 'My Notes': return 'Pastel note grid with quick actions';
+      case 'Note Editor': return 'Clean editor interface with rich content layout';
+      case 'Wallet Dashboard': return 'Luxury credit card visualizer & transaction history';
+      case 'Analytics': return 'Interactive budget overview and breakdown charts';
+      case 'Add Expense': return 'Sleek transaction builder and details logger';
       default: return 'Optimized view for high-fidelity app experience';
     }
   }

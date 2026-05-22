@@ -43,7 +43,13 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
           // Logo and Title
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Image.asset('assets/images/logo_bg.jpeg',height: 60),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () => Navigator.maybePop(context),
+                child: Image.asset('assets/images/logo_bg.jpeg', height: 60),
+              ),
+            ),
           ),
           const Spacer(),
           
@@ -53,9 +59,9 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
           // _buildActionIcon(Icons.file_open_outlined, onLoad, 'Load Design'),
           _buildActionIcon(Icons.dashboard_customize_outlined, onTemplate, 'Choose Template'),
           // _buildActionIcon(Icons.palette_outlined, onTheme, 'Theme Settings'),
-          // _buildActionIcon(Icons.save_outlined, onSave, 'Save Design'),
-          // _buildActionIcon(Icons.undo, onUndo ?? () {}, 'Undo'),
-          // _buildActionIcon(Icons.redo, onRedo ?? () {}, 'Redo'),
+          _buildActionIcon(Icons.save_outlined, onSave, 'Save Project'),
+          _buildActionIcon(Icons.undo, onUndo ?? () {}, 'Undo'),
+          _buildActionIcon(Icons.redo, onRedo ?? () {}, 'Redo'),
           _buildActionIcon(Icons.visibility_outlined, onPreview, 'Live Preview Mode'),
           
           const SizedBox(width: 16),

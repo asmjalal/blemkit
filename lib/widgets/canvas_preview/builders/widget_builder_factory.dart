@@ -3,6 +3,7 @@ import '../../../models/widget_node.dart';
 import '../selection_wrapper.dart';
 import '../selection_preferred_size_wrapper.dart';
 import 'base_widget_builder.dart';
+import 'clip_r_rect_builder.dart';
 import 'scaffold_builder.dart' as wb;
 import 'container_builder.dart' as wb;
 import 'text_builder.dart' as wb;
@@ -86,6 +87,15 @@ import 'selectable_text_builder.dart' as wb;
 import 'constrained_box_builder.dart' as wb;
 import 'intrinsic_height_builder.dart' as wb;
 import 'intrinsic_width_builder.dart' as wb;
+import 'clip_r_rect_builder.dart' as wb;
+import 'date_picker_builder.dart' as wb;
+import 'time_picker_builder.dart' as wb;
+import 'range_slider_builder.dart' as wb;
+import 'search_field_builder.dart' as wb;
+import 'auto_complete_builder.dart' as wb;
+import 'toggle_buttons_builder.dart' as wb;
+import 'segmented_button_builder.dart' as wb;
+import 'navigation_rail_builder.dart' as wb;
 
 class WidgetBuilderFactory {
   static final WidgetBuilderFactory _instance = WidgetBuilderFactory._internal();
@@ -189,6 +199,15 @@ class WidgetBuilderFactory {
     _builders['ConstrainedBox'] = wb.ConstrainedBoxBuilder();
     _builders['IntrinsicHeight'] = wb.IntrinsicHeightBuilder();
     _builders['IntrinsicWidth'] = wb.IntrinsicWidthBuilder();
+    _builders['ClipRRect'] = wb.ClipRRectBuilder();
+    _builders['DatePicker'] = wb.DatePickerBuilder();
+    _builders['TimePicker'] = wb.TimePickerBuilder();
+    _builders['RangeSlider'] = wb.RangeSliderBuilder();
+    _builders['SearchField'] = wb.SearchFieldBuilder();
+    _builders['AutoComplete'] = wb.AutoCompleteBuilder();
+    _builders['ToggleButtons'] = wb.ToggleButtonsBuilder();
+    _builders['SegmentedButton'] = wb.SegmentedButtonBuilder();
+    _builders['NavigationRail'] = wb.NavigationRailBuilder();
     print('WidgetBuilderFactory: Initialization complete. Registered ${_builders.length} builders.');
   }
 

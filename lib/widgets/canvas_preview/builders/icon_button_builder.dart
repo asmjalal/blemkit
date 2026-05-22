@@ -5,6 +5,7 @@ import 'base_widget_builder.dart';
 import 'widget_builder_factory.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
+import '../canvas_preview_mode.dart';
 
 class IconButtonBuilder extends BaseWidgetBuilder {
   @override
@@ -37,6 +38,8 @@ class IconButtonBuilder extends BaseWidgetBuilder {
     return IconButton(
       icon: iconWidget!,
       onPressed: () {
+        if (!CanvasPreviewMode.of(context)) return;
+        
         final navigateTo = node.properties['navigateTo'];
         if (navigateTo != null) {
           final provider = Provider.of<WidgetTreeProvider>(context, listen: false);

@@ -1,4 +1,5 @@
 import '../base_widget_generator.dart';
+import '../widget_generator_registry.dart';
 import '../../models/widget_node.dart';
 
 class MediaQueryGenerator extends BaseWidgetGenerator {
@@ -14,7 +15,7 @@ class MediaQueryGenerator extends BaseWidgetGenerator {
     }
     
     final child = node.children.isNotEmpty 
-        ? generateCode(node.children.first, indent: indent + 1)
+        ? WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)
         : 'Container()';
     
     props.add('child: $child');

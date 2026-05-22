@@ -1,4 +1,5 @@
 import '../base_widget_generator.dart';
+import '../widget_generator_registry.dart';
 import '../../models/widget_node.dart';
 
 class AlertDialogGenerator extends BaseWidgetGenerator {
@@ -16,7 +17,7 @@ class AlertDialogGenerator extends BaseWidgetGenerator {
     if (node.properties['content'] != null) {
       props.add('content: Text(\'${node.properties['content']}\')');
     } else if (node.children.isNotEmpty) {
-      props.add('content: ${generateCode(node.children.first, indent: indent + 1)}');
+      props.add('content: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)}');
     }
     
     if (node.properties['actions'] != null) {
