@@ -18,9 +18,15 @@ class TemplatePreviewDialog extends StatelessWidget {
     dynamic screensData = template['screens_json'];
     List<WidgetNode> loadedScreens = [];
     if (screensData is List) {
-      loadedScreens = screensData.map((e) => WidgetNode.fromJson(e as Map<String, dynamic>)).toList();
+      loadedScreens = screensData
+          .map((e) => WidgetNode.fromJson(e as Map<String, dynamic>))
+          .where((node) => node.id != '__settings__')
+          .toList();
     } else if (screensData is Map<String, dynamic>) {
-      loadedScreens = [WidgetNode.fromJson(screensData as Map<String, dynamic>)];
+      final node = WidgetNode.fromJson(screensData as Map<String, dynamic>);
+      if (node.id != '__settings__') {
+        loadedScreens = [node];
+      }
     }
 
     if (loadedScreens.isEmpty) return;
@@ -39,9 +45,15 @@ class TemplatePreviewDialog extends StatelessWidget {
     dynamic screensData = template['screens_json'];
     List<WidgetNode> loadedScreens = [];
     if (screensData is List) {
-      loadedScreens = screensData.map((e) => WidgetNode.fromJson(e as Map<String, dynamic>)).toList();
+      loadedScreens = screensData
+          .map((e) => WidgetNode.fromJson(e as Map<String, dynamic>))
+          .where((node) => node.id != '__settings__')
+          .toList();
     } else if (screensData is Map<String, dynamic>) {
-      loadedScreens = [WidgetNode.fromJson(screensData as Map<String, dynamic>)];
+      final node = WidgetNode.fromJson(screensData as Map<String, dynamic>);
+      if (node.id != '__settings__') {
+        loadedScreens = [node];
+      }
     }
 
     final categoryName = template['category'] ?? 'Template';

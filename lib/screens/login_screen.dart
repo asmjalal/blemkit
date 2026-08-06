@@ -89,6 +89,7 @@ class _LoginScreenState extends State<LoginScreen>
             'apiKeys': {
               'deepseek': '',
               'openai': '',
+              'kimi': '',
             },
             'createdAt': FieldValue.serverTimestamp(),
           });

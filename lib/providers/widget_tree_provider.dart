@@ -6,6 +6,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:html' as html;
 import '../widgets/widget_tree/widget_tree_editor.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/supabase_connection_model.dart';
+import '../models/backend_query_model.dart';
+import '../services/supabase_data_service.dart';
 
 class WidgetTreeProvider extends ChangeNotifier {
   List<WidgetNode> screens = [];
@@ -15,6 +18,24 @@ class WidgetTreeProvider extends ChangeNotifier {
   
   bool hasUnsavedChanges = false;
   String? currentProjectId;
+
+  // Supabase Data Integration State
+  SupabaseConnection? activeConnection;
+  List<BackendQuery> queries = [];
+  final Map<String, List<Map<String, dynamic>>> queryResults = {};
+  final Map<String, Stream<List<Map<String, dynamic>>>> activeStreams = {};
+  final SupabaseDataService _dataService = SupabaseDataService();
+  bool isConnecting = false;
+  bool isFetchingSchema = false;
+
+  Map<String, dynamic>? _activeRowData;
+  Map<String, dynamic> widgetStates = {};
+  Map<String, dynamic>? get activeRowData => _activeRowData;
+  set activeRowData(Map<String, dynamic>? val) {
+    _activeRowData = val;
+    queryResults.clear();
+    notifyListeners();
+  }
 
   WidgetNode? get rootNode => selectedScreen;
   WidgetNode? get hoveredNode => _hoveredNode;
@@ -39,6 +60,10 @@ class WidgetTreeProvider extends ChangeNotifier {
     selectedNode = null;
     hasUnsavedChanges = false;
     currentProjectId = null;
+    activeConnection = null;
+    queries = [];
+    queryResults.clear();
+    activeStreams.clear();
     notifyListeners();
   }
 
@@ -97,6 +122,25 @@ class WidgetTreeProvider extends ChangeNotifier {
 
   Map<String, dynamic> get apiSettings => _apiSettings;
 
+  // Global Project Settings
+  Map<String, dynamic> _projectSettings = {
+    'projectName': 'Synappkit Project',
+    'bundleId': 'com.example.synappkit',
+    'version': '1.0.0',
+    'buildNumber': '1',
+    'platforms': ['android', 'ios', 'web'],
+  };
+
+  Map<String, dynamic> get projectSettings => _projectSettings;
+
+  void updateProjectSettings(Map<String, dynamic> newSettings) {
+    _projectSettings = {..._projectSettings, ...newSettings};
+    hasUnsavedChanges = true;
+    _saveToStorage();
+    saveProjectSettingsToSupabase();
+    notifyListeners();
+  }
+
   // Custom Themed Widgets (Components)
   List<Map<String, dynamic>> _themedWidgets = [];
   List<Map<String, dynamic>> get themedWidgets => _themedWidgets;
@@ -141,7 +185,49 @@ class WidgetTreeProvider extends ChangeNotifier {
 
   void setProject(List<WidgetNode> newScreens) {
     if (newScreens.isEmpty) return;
-    screens = newScreens;
+    
+    // Check if there's a settings screen
+    final settingsIndex = newScreens.indexWhere((s) {
+      final pageName = s.properties['pageName'] ?? s.id;
+      return pageName == '__settings__';
+    });
+    
+    if (settingsIndex != -1) {
+      final settingsNode = newScreens[settingsIndex];
+      // Load queries
+      if (settingsNode.properties['queries'] != null) {
+        try {
+          queries = (settingsNode.properties['queries'] as List)
+              .map((q) => BackendQuery.fromJson(Map<String, dynamic>.from(q as Map)))
+              .toList();
+          for (final q in queries) {
+            runQuery(q.id);
+          }
+        } catch (e) {
+          debugPrint('Error loading queries from settings: $e');
+        }
+      }
+      
+      // Load active connection
+      if (settingsNode.properties['activeConnection'] != null) {
+        try {
+          activeConnection = SupabaseConnection.fromJson(
+            Map<String, dynamic>.from(settingsNode.properties['activeConnection'] as Map),
+          );
+        } catch (e) {
+          debugPrint('Error loading activeConnection from settings: $e');
+        }
+      }
+      
+      // Remove __settings__ from screens list so it doesn't show in the visual UI
+      final list = List<WidgetNode>.from(newScreens);
+      list.removeAt(settingsIndex);
+      screens = list;
+    } else {
+      screens = newScreens;
+    }
+
+    if (screens.isEmpty) return;
     selectedScreen = screens.first;
     selectedNode = selectedScreen;
     hasUnsavedChanges = true;
@@ -185,31 +271,132 @@ class WidgetTreeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  WidgetNode? findNodeById(String id) {
+    for (var screen in screens) {
+      final found = _findNodeInTree(screen, id);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
+  WidgetNode? _findNodeInTree(WidgetNode root, String id) {
+    if (root.id == id) return root;
+    
+    // Check in properties (like title, leading, trailing, etc. which can contain WidgetNodes)
+    for (var val in root.properties.values) {
+      if (val is WidgetNode) {
+        final found = _findNodeInTree(val, id);
+        if (found != null) return found;
+      } else if (val is List) {
+        for (var item in val) {
+          if (item is WidgetNode) {
+            final found = _findNodeInTree(item, id);
+            if (found != null) return found;
+          }
+        }
+      }
+    }
+
+    // Check in children
+    for (var child in root.children) {
+      final found = _findNodeInTree(child, id);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
   void selectNode(WidgetNode? node) {
-    selectedNode = node;
+    if (node == null) {
+      selectedNode = null;
+    } else {
+      selectedNode = findNodeById(node.id) ?? node;
+    }
     notifyListeners();
   }
 
   void addChild(WidgetNode parent, WidgetNode child) {
-    parent.children.add(child);
+    if (parent.properties['isSlot'] == true || parent.id.contains('_slot_') || parent.id.contains('_prop_')) {
+      final isSlot = parent.properties['isSlot'] == true;
+      final slotName = isSlot ? (parent.properties['slotName'] as String) : parent.id.split(parent.id.contains('_slot_') ? '_slot_' : '_prop_')[1];
+      final parentId = parent.id.split(parent.id.contains('_slot_') ? '_slot_' : '_prop_')[0];
+      final realParent = findNodeById(parentId);
+      if (realParent != null) {
+        final isList = parent.properties['isList'] == true;
+        if (isList) {
+          if (realParent.properties[slotName] is List) {
+            (realParent.properties[slotName] as List).add(child);
+          } else {
+            realParent.properties[slotName] = [child];
+          }
+        } else {
+          realParent.properties[slotName] = child;
+        }
+        hasUnsavedChanges = true;
+        notifyListeners();
+      }
+      return;
+    }
+
+    final originalParent = findNodeById(parent.id) ?? parent;
+    originalParent.children.add(child);
     hasUnsavedChanges = true;
     notifyListeners();
   }
 
   void removeNode(WidgetNode node) {
-    if (node == selectedScreen) {
+    final originalNode = findNodeById(node.id) ?? node;
+    if (originalNode == selectedScreen) {
       selectedScreen = null;
     } else {
-      // Find and remove the node from its parent
-      void removeFromParent(WidgetNode parent) {
-        parent.children.removeWhere((child) {
-          if (child == node) {
-            return true;
+      // Find and remove the node from its parent (either in children or in properties)
+      bool removeFromParent(WidgetNode parent) {
+        // 1. Check children
+        final oldLen = parent.children.length;
+        parent.children.removeWhere((child) => child.id == originalNode.id);
+        if (parent.children.length < oldLen) {
+          return true;
+        }
+
+        // 2. Check properties
+        final keysToUpdate = <String>[];
+        parent.properties.forEach((key, value) {
+          if (value is WidgetNode && value.id == originalNode.id) {
+            keysToUpdate.add(key);
+          } else if (value is List) {
+            final oldListLen = value.length;
+            value.removeWhere((item) => item is WidgetNode && item.id == originalNode.id);
+            if (value.length < oldListLen) {
+              keysToUpdate.add(key);
+            }
           }
-          removeFromParent(child);
-          return false;
         });
+        for (var key in keysToUpdate) {
+          if (parent.properties[key] is WidgetNode) {
+            parent.properties.remove(key);
+          }
+        }
+        if (keysToUpdate.isNotEmpty) return true;
+
+        // 3. Recurse children
+        for (var child in parent.children) {
+          if (removeFromParent(child)) return true;
+        }
+
+        // 4. Recurse properties
+        for (var val in parent.properties.values) {
+          if (val is WidgetNode) {
+            if (removeFromParent(val)) return true;
+          } else if (val is List) {
+            for (var item in val) {
+              if (item is WidgetNode) {
+                if (removeFromParent(item)) return true;
+              }
+            }
+          }
+        }
+        return false;
       }
+
       if (selectedScreen != null) {
         removeFromParent(selectedScreen!);
       }
@@ -219,25 +406,54 @@ class WidgetTreeProvider extends ChangeNotifier {
   }
 
   void updateNodeProperties(WidgetNode node, Map<String, dynamic> properties) {
-    node.properties = properties;
+    final originalNode = findNodeById(node.id) ?? node;
+    originalNode.properties = properties;
     hasUnsavedChanges = true;
     notifyListeners();
   }
 
   void moveNode(WidgetNode node, WidgetNode newParent, {int? newIndex}) {
-    removeNode(node);
-    if (newIndex != null) {
-      newParent.children.insert(newIndex, node);
+    final originalNode = findNodeById(node.id) ?? node;
+    removeNode(originalNode);
+
+    if (newParent.properties['isSlot'] == true || newParent.id.contains('_slot_') || newParent.id.contains('_prop_')) {
+      final isSlot = newParent.properties['isSlot'] == true;
+      final slotName = isSlot ? (newParent.properties['slotName'] as String) : newParent.id.split(newParent.id.contains('_slot_') ? '_slot_' : '_prop_')[1];
+      final parentId = newParent.id.split(newParent.id.contains('_slot_') ? '_slot_' : '_prop_')[0];
+      final realParent = findNodeById(parentId);
+      if (realParent != null) {
+        final isList = newParent.properties['isList'] == true;
+        if (isList) {
+          if (realParent.properties[slotName] is List) {
+            final list = realParent.properties[slotName] as List;
+            if (newIndex != null && newIndex <= list.length) {
+              list.insert(newIndex, originalNode);
+            } else {
+              list.add(originalNode);
+            }
+          } else {
+            realParent.properties[slotName] = [originalNode];
+          }
+        } else {
+          realParent.properties[slotName] = originalNode;
+        }
+      }
     } else {
-      newParent.children.add(node);
+      final originalParent = findNodeById(newParent.id) ?? newParent;
+      if (newIndex != null && newIndex <= originalParent.children.length) {
+        originalParent.children.insert(newIndex, originalNode);
+      } else {
+        originalParent.children.add(originalNode);
+      }
     }
     hasUnsavedChanges = true;
     notifyListeners();
   }
 
   void reorderNode(WidgetNode parent, int oldIndex, int newIndex) {
-    final node = parent.children.removeAt(oldIndex);
-    parent.children.insert(newIndex, node);
+    final originalParent = findNodeById(parent.id) ?? parent;
+    final node = originalParent.children.removeAt(oldIndex);
+    originalParent.children.insert(newIndex, node);
     hasUnsavedChanges = true;
     notifyListeners();
   }
@@ -259,6 +475,23 @@ class WidgetTreeProvider extends ChangeNotifier {
     _saveToStorage();
     notifyListeners();
   }
+
+  void setWidgetState(String widgetId, dynamic value) {
+    widgetStates[widgetId] = value;
+    // Don't call notifyListeners here as it might trigger rebuild loops for typing.
+    // It's just a value store.
+  }
+
+  dynamic getWidgetState(String widgetId) {
+    return widgetStates[widgetId];
+  }
+
+  // void _ensureIdIsUnique(WidgetNode node, Set<String> existingIds) {
+  //   node.properties['pageName'] = newName;
+  //   hasUnsavedChanges = true;
+  //   _saveToStorage();
+  //   notifyListeners();
+  // }
 
   void duplicateScreen(WidgetNode node) {
     final newNode = node.copy();
@@ -295,8 +528,19 @@ class WidgetTreeProvider extends ChangeNotifier {
       html.window.localStorage['${_storageKey}_theme'] = jsonEncode(_themeProperties);
       // Save API
       html.window.localStorage['${_storageKey}_api'] = jsonEncode(_apiSettings);
+      // Save Project Settings
+      html.window.localStorage['${_storageKey}_project_info'] = jsonEncode(_projectSettings);
       // Save Themed Widgets
       html.window.localStorage['${_storageKey}_themed'] = jsonEncode(_themedWidgets);
+      
+      // Save Supabase Connection
+      if (activeConnection != null) {
+        html.window.localStorage['${_storageKey}_connection'] = jsonEncode(activeConnection!.toJson());
+      } else {
+        html.window.localStorage.remove('${_storageKey}_connection');
+      }
+      // Save Supabase Queries
+      html.window.localStorage['${_storageKey}_queries'] = jsonEncode(queries.map((q) => q.toJson()).toList());
     } catch (e) {
       debugPrint('Error saving to storage: $e');
     }
@@ -347,9 +591,209 @@ class WidgetTreeProvider extends ChangeNotifier {
         debugPrint('Error loading themed widgets: $e');
       }
     }
+    // Load Project Settings
+    final String? projectStr = html.window.localStorage['${_storageKey}_project_info'];
+    if (projectStr != null && projectStr.isNotEmpty) {
+      try {
+        _projectSettings = jsonDecode(projectStr);
+      } catch (e) {
+        debugPrint('Error loading project settings from storage: $e');
+      }
+    }
+    // Load Supabase Connection
+    final String? connStr = html.window.localStorage['${_storageKey}_connection'];
+    if (connStr != null && connStr.isNotEmpty) {
+      try {
+        activeConnection = SupabaseConnection.fromJson(jsonDecode(connStr));
+      } catch (e) {
+        debugPrint('Error loading connection from storage: $e');
+      }
+    }
+    // Load Supabase Queries
+    final String? queriesStr = html.window.localStorage['${_storageKey}_queries'];
+    if (queriesStr != null && queriesStr.isNotEmpty) {
+      try {
+        queries = (jsonDecode(queriesStr) as List)
+            .map((q) => BackendQuery.fromJson(q as Map<String, dynamic>))
+            .toList();
+        for (final q in queries) {
+          runQuery(q.id);
+        }
+      } catch (e) {
+        debugPrint('Error loading queries from storage: $e');
+      }
+    }
   }
 
   // --- SUPABASE MVP INTEGRATION ---
+
+  Future<void> saveProjectSettingsToSupabase() async {
+    if (currentProjectId == null) return;
+    try {
+      final supabase = Supabase.instance.client;
+      final settingsJson = {
+        'activeConnection': activeConnection?.toJson(),
+        'queries': queries.map((q) => q.toJson()).toList(),
+      };
+      
+      await supabase.from('screens').upsert({
+        'project_id': currentProjectId,
+        'screen_name': '__settings__',
+        'screen_json': settingsJson,
+        'order_index': -1,
+      });
+    } catch (e) {
+      debugPrint('Error saving project settings to Supabase: $e');
+    }
+  }
+
+  Future<void> loadProjectSettingsFromSupabase(String projectId) async {
+    try {
+      final supabase = Supabase.instance.client;
+      final response = await supabase
+          .from('screens')
+          .select()
+          .eq('project_id', projectId)
+          .eq('screen_name', '__settings__')
+          .maybeSingle();
+
+      if (response != null && response['screen_json'] != null) {
+        final settingsJson = response['screen_json'] as Map<String, dynamic>;
+        
+        if (settingsJson['activeConnection'] != null) {
+          activeConnection = SupabaseConnection.fromJson(settingsJson['activeConnection'] as Map<String, dynamic>);
+        } else {
+          activeConnection = null;
+        }
+
+        if (settingsJson['queries'] != null) {
+          queries = (settingsJson['queries'] as List)
+              .map((q) => BackendQuery.fromJson(q as Map<String, dynamic>))
+              .toList();
+        } else {
+          queries = [];
+        }
+
+        // Run all queries to cache results initially
+        for (final q in queries) {
+          runQuery(q.id);
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading project settings from Supabase: $e');
+    }
+  }
+
+  Future<bool> connectDataSource(String name, String url, String anonKey, {String? serviceRoleKey}) async {
+    isConnecting = true;
+    notifyListeners();
+    debugPrint('Attempting to connect Supabase: name=$name, url=$url');
+    bool success = false;
+    try {
+      success = await _dataService.testConnection(url, anonKey);
+      debugPrint('Supabase testConnection result: $success');
+      if (success) {
+        activeConnection = SupabaseConnection(
+          id: UniqueKey().toString(),
+          projectUrl: url,
+          anonKey: anonKey,
+          serviceRoleKey: serviceRoleKey,
+          name: name,
+          createdAt: DateTime.now(),
+          isConnected: true,
+        );
+        debugPrint('Supabase connection established, fetching schema...');
+        hasUnsavedChanges = true;
+        _saveToStorage();
+        await saveProjectSettingsToSupabase();
+        await fetchActiveSchema();
+        debugPrint('Schema fetched and connection saved.');
+      } else {
+        debugPrint('Supabase connection failed: testConnection returned false');
+      }
+    } catch (e) {
+      debugPrint('Error during connectDataSource: $e');
+      success = false;
+    }
+    isConnecting = false;
+    notifyListeners();
+    return success;
+  }
+
+  Future<void> fetchActiveSchema() async {
+    if (activeConnection == null) return;
+    isFetchingSchema = true;
+    notifyListeners();
+    try {
+      final tables = await _dataService.fetchSchema(activeConnection!);
+      activeConnection!.tables = tables;
+      hasUnsavedChanges = true;
+      _saveToStorage();
+      await saveProjectSettingsToSupabase();
+    } catch (e) {
+      debugPrint('Error fetching schema: $e');
+    } finally {
+      isFetchingSchema = false;
+      notifyListeners();
+    }
+  }
+
+  void disconnectDataSource() {
+    activeConnection = null;
+    queries = [];
+    queryResults.clear();
+    activeStreams.clear();
+    hasUnsavedChanges = true;
+    _saveToStorage();
+    saveProjectSettingsToSupabase();
+    notifyListeners();
+  }
+
+  void addQuery(BackendQuery query) {
+    queries.add(query);
+    hasUnsavedChanges = true;
+    _saveToStorage();
+    saveProjectSettingsToSupabase();
+    notifyListeners();
+    runQuery(query.id);
+  }
+
+  void updateQuery(BackendQuery query) {
+    final index = queries.indexWhere((q) => q.id == query.id);
+    if (index != -1) {
+      queries[index] = query;
+      hasUnsavedChanges = true;
+      _saveToStorage();
+      saveProjectSettingsToSupabase();
+      notifyListeners();
+      runQuery(query.id);
+    }
+  }
+
+  void removeQuery(String queryId) {
+    queries.removeWhere((q) => q.id == queryId);
+    queryResults.remove(queryId);
+    hasUnsavedChanges = true;
+    _saveToStorage();
+    saveProjectSettingsToSupabase();
+    notifyListeners();
+  }
+
+  Future<void> runQuery(String queryId) async {
+    final query = queries.where((q) => q.id == queryId).firstOrNull;
+    if (query == null || activeConnection == null) return;
+
+    try {
+      final results = await _dataService.executeQuery(activeConnection!, query, activeRowData: activeRowData);
+      queryResults[queryId] = results;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error running query $queryId: $e');
+      queryResults[queryId] = []; // Prevent infinite loading loop on query error
+      notifyListeners();
+    }
+  }
 
   Future<void> saveProjectToSupabase() async {
     if (currentProjectId == null) return;
@@ -362,8 +806,8 @@ class WidgetTreeProvider extends ChangeNotifier {
         'updated_at': DateTime.now().toIso8601String()
       }).eq('id', currentProjectId!);
 
-      // Delete existing screens for this project
-      await supabase.from('screens').delete().eq('project_id', currentProjectId!);
+      // Delete existing screens for this project (except __settings__)
+      await supabase.from('screens').delete().eq('project_id', currentProjectId!).neq('screen_name', '__settings__');
 
       // Insert all current screens
       if (screens.isNotEmpty) {
@@ -372,7 +816,7 @@ class WidgetTreeProvider extends ChangeNotifier {
           final screen = entry.value;
           return {
             'project_id': currentProjectId,
-            'screen_name': screen.properties['pageName'] ?? 'Page \${index + 1}',
+            'screen_name': screen.properties['pageName'] ?? 'Page ${index + 1}',
             'screen_json': screen.toJson(),
             'order_index': index,
           };
@@ -380,6 +824,8 @@ class WidgetTreeProvider extends ChangeNotifier {
 
         await supabase.from('screens').insert(screenInserts);
       }
+
+      await saveProjectSettingsToSupabase();
 
       hasUnsavedChanges = false;
       notifyListeners();
@@ -399,6 +845,7 @@ class WidgetTreeProvider extends ChangeNotifier {
           .from('screens')
           .select()
           .eq('project_id', projectId)
+          .neq('screen_name', '__settings__')
           .order('order_index', ascending: true);
 
       final screenRecords = List<Map<String, dynamic>>.from(response);
@@ -416,6 +863,8 @@ class WidgetTreeProvider extends ChangeNotifier {
         selectedScreen = null;
         selectedNode = null;
       }
+      
+      await loadProjectSettingsFromSupabase(projectId);
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading project from Supabase: $e');

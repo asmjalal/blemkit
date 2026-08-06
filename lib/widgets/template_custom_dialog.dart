@@ -62,7 +62,7 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
           } else if (data is WidgetNode) {
             _loadedScreens = [data];
           }
-          _screenCount = _loadedScreens?.length ?? 0;
+          _screenCount = _loadedScreens?.where((s) => s.id != '__settings__').length ?? 0;
           _isLoading = false;
         });
       }
@@ -340,10 +340,11 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
                   ? const Center(child: Text('No screens found in this template', style: TextStyle(color: Colors.white54)))
                   : ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: _loadedScreens!.length,
+                      itemCount: _loadedScreens!.where((s) => s.id != '__settings__').length,
                       separatorBuilder: (context, index) => const SizedBox(width: 24),
                       itemBuilder: (context, index) {
-                        final screen = _loadedScreens![index];
+                        final visibleScreens = _loadedScreens!.where((s) => s.id != '__settings__').toList();
+                        final screen = visibleScreens[index];
                         final name = screen.properties['pageName'] ?? screen.id ?? 'Module';
                         return _buildModuleCard(name.toString(), index + 1, _selectedCategory!, screen);
                       },

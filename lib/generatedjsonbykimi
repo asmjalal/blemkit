@@ -1,0 +1,1017 @@
+
+WidgetBuilderFactory: Attempting to build widget of type: Scaffold
+WidgetBuilderFactory: Attempting to build widget of type: AppBar
+AppBarBuilder: Processing title property: value=Instance of 'WidgetNode', type=WidgetNode
+WidgetBuilderFactory: Attempting to build widget of type: Text
+WidgetBuilderFactory: Attempting to build widget of type: SingleChildScrollView
+WidgetBuilderFactory: Attempting to build widget of type: Column
+WidgetBuilderFactory: Attempting to build widget of type: Text
+🛠️ Using agent: AiAgentType.kimi
+🔑 API Key provided: ******
+🔍 RAW AI OUTPUT:
+```json
+{
+  "version": 1,
+  "screens": [
+    {
+      "name": "FacebookHome",
+      "rootWidget": {
+        "id": "facebook_home_scaffold",
+        "type": "Scaffold",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "appBar": {
+            "id": "facebook_appbar",
+            "type": "AppBar",
+            "properties": {
+              "backgroundColor": "4283215696",
+              "foregroundColor": "4294967295",
+              "elevation": 0,
+              "title": {
+                "id": "appbar_title",
+                "type": "Text",
+                "properties": {
+                  "text": "facebook",
+                  "fontSize": 28,
+                  "fontWeight": "bold",
+                  "color": "4294967295"
+                },
+                "children": []
+              },
+              "actions": [
+                {
+                  "id": "search_icon",
+                  "type": "IconButton",
+                  "properties": {
+                    "icon": "Icons.search",
+                    "color": "4294967295",
+                    "size": 26
+                  },
+                  "children": []
+                },
+                {
+                  "id": "messenger_icon",
+                  "type": "IconButton",
+                  "properties": {
+                    "icon": "Icons.chat_bubble_outline",
+                    "color": "4294967295",
+                    "size": 26
+                  },
+                  "children": []
+                }
+              ]
+            },
+            "children": []
+          },
+          "bottomNavigationBar": {
+            "id": "facebook_bottom_nav",
+            "type": "BottomNavigationBar",
+            "properties": {
+              "currentIndex": 0,
+              "type": "fixed",
+              "backgroundColor": "4294967295",
+              "selectedItemColor": "4283215696",
+              "unselectedItemColor": "4286144000",
+              "items": [
+                {
+                  "icon": {
+                    "id": "nav_home_icon",
+                    "type": "Icon",
+                    "properties": {
+                      "icon": "Icons.home",
+                      "size": 28
+                    },
+                    "children": []
+                  },
+                  "label": "Home",
+                  "navigateTo": "facebook_home_scaffold"
+                },
+                {
+                  "icon": {
+                    "id": "nav_friends_icon",
+                    "type": "Icon",
+                    "properties": {
+                      "icon": "Icons.people_outline",
+                      "size": 28
+                    },
+                    "children": []
+                  },
+                  "label": "Friends",
+                  "navigateTo": "friends_screen"
+                },
+                {
+                  "icon": {
+                    "id": "nav_post_icon",
+                    "type": "Icon",
+                    "properties": {
+                      "icon": "Icons.add_circle_outline",
+                      "size": 28
+                    },
+                    "children": []
+                  },
+                  "label": "Post",
+                  "navigateTo": "create_post_screen"
+                },
+                {
+                  "icon": {
+                    "id": "nav_notifications_icon",
+                    "type": "Icon",
+                    "properties": {
+                      "icon": "Icons.notifications_none",
+                      "size": 28
+                    },
+                    "children": []
+                  },
+                  "label": "Notifications",
+                  "navigateTo": "notifications_screen"
+                },
+                {
+                  "icon": {
+                    "id": "nav_menu_icon",
+                    "type": "Icon",
+                    "properties": {
+                      "icon": "Icons.menu",
+                      "size": 28
+                    },
+                    "children": []
+                  },
+                  "label": "Menu",
+                  "navigateTo": "menu_screen"
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        "children": [
+          {
+            "id": "home_scroll",
+            "type": "SingleChildScrollView",
+            "properties": {
+              "scrollDirection": "Axis.vertical"
+            },
+            "children": [
+              {
+                "id": "home_column",
+                "type": "Column",
+                "properties": {
+                  "mainAxisAlignment": "MainAxisAlignment.start",
+                  "crossAxisAlignment": "CrossAxisAlignment.stretch"
+                },
+                "children": [
+                  {
+                    "id": "stories_container",
+                    "type": "Container",
+                    "properties": {
+                      "height": 200,
+                      "padding": 8,
+                      "color": "4294967295"
+                    },
+                    "children": [
+                      {
+                        "id": "stories_list",
+                        "type": "ListView",
+                        "properties": {
+                          "scrollDirection": "Axis.horizontal",
+                          "padding": 0
+                        },
+                        "children": [
+                          {
+                            "id": "story_card_1",
+                            "type": "Container",
+                            "properties": {
+                              "width": 110,
+                              "margin": 4,
+                              "borderRadius": 12,
+                              "backgroundColor": "4286144000"
+                            },
+                            "children": [
+                              {
+                                "id": "story_image_1",
+                                "type": "Image",
+                                "properties": {
+                                  "src": "https://picsum.photos/110/200",
+                                  "width": 110,
+                                  "height": 200,
+                                  "fit": "BoxFit.cover",
+                                  "borderRadius": 12
+                                },
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "id": "story_card_2",
+                            "type": "Container",
+                            "properties": {
+                              "width": 110,
+                              "margin": 4,
+                              "borderRadius": 12,
+                              "backgroundColor": "4286144000"
+                            },
+                            "children": [
+                              {
+                                "id": "story_image_2",
+                                "type": "Image",
+                                "properties": {
+                                  "src": "https://picsum.photos/110/200",
+                                  "width": 110,
+                                  "height": 200,
+                                  "fit": "BoxFit.cover",
+                                  "borderRadius": 12
+                                },
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "id": "story_card_3",
+                            "type": "Container",
+                            "properties": {
+                              "width": 110,
+                              "margin": 4,
+                              "borderRadius": 12,
+                              "backgroundColor": "4286144000"
+                            },
+                            "children": [
+                              {
+                                "id": "story_image_3",
+                                "type": "Image",
+                                "properties": {
+                                  "src": "https://picsum.photos/110/200",
+                                  "width": 110,
+                                  "height": 200,
+                                  "fit": "BoxFit.cover",
+                                  "borderRadius": 12
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "create_post_card",
+                    "type": "Card",
+                    "properties": {
+                      "elevation": 1,
+                      "margin": 8,
+                      "color": "4294967295"
+                    },
+                    "children": [
+                      {
+                        "id": "create_post_row",
+                        "type": "Row",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.start",
+                          "crossAxisAlignment": ""CrossAxisAlignment.center",
+                          "padding": 12
+                        },
+                        "children": [
+                          {
+                            "id": "user_avatar",
+                            "type": "CircleAvatar",
+                            "properties": {
+                              "radius": 20,
+                              "backgroundColor": "4283215696",
+                              "imageUrl": "https://picsum.photos/40/40"
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "post_hint",
+                            "type": "Expanded",
+                            "properties": {
+                              "flex": 1
+                            },
+                            "children": [
+                              {
+                                "id": "post_text",
+                                "type": "Text",
+                                "properties": {
+                                  "text": "What's on your mind?",
+                                  "fontSize": 16,
+                                  "color": "4286144000"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "post_actions_divider",
+                        "type": "Divider",
+                        "properties": {
+                          "color": "4282266422",
+                          "thickness": 0.5,
+                          "height": 1
+                        },
+                        "children": []
+                      },
+                      {
+                        "id": "post_actions_row",
+                        "type": "Row",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.spaceEvenly",
+                          "padding": 8
+                        },
+                        "children": [
+                          {
+                            "id": "photo_action",
+                            "type": "TextButton",
+                            "properties": {
+                              "text": "Photo",
+                              "foregroundColor": "4286144000"
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "video_action",
+                            "type": "TextButton",
+                            "properties": {
+                              "text": "Video",
+                              "foregroundColor": "4286144000"
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "feeling_action",
+                            "type": "TextButton",
+                            "properties": {
+                              "text": "Feeling",
+                              "foregroundColor": "4286144000"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "post_card_1",
+                    "type": "Card",
+                    "properties": {
+                      "elevation": 1,
+                      "margin": 8,
+                      "color": "4294967295"
+                    },
+                    "children": [
+                      {
+                        "id": "post_header",
+                        "type": "ListTile",
+                        "properties": {
+                          "leading": {
+                            "id": "post_user_avatar",
+                            "type": "CircleAvatar",
+                            "properties": {
+                              "radius": 20,
+                              "backgroundColor": "4283215696",
+                              "imageUrl": "https://picsum.photos/40/40"
+                            },
+                            "children": []
+                          },
+                          "title": {
+                            "id": "post_user_name",
+                            "type": "Text",
+                            "properties": {
+                              "text": "John Doe",
+                              "fontSize": 16,
+                              "fontWeight": "bold",
+                              "color": "4278190080"
+                            },
+                            "children": []
+                          },
+                          "subtitle": {
+                            "id": "post_time",
+                            "type": "Text",
+                            "properties": {
+                              "text": "2 hours ago",
+",
+                              "fontSize": 12,
+                              "color": "4286144000"
+                            },
+                            "children": []
+                          },
+                          "trailing": {
+                            "id": "post_menu",
+                            "type": "IconButton",
+                            "properties": {
+                              "icon": "Icons.more_vert",
+                              "color": "4286144000"
+                            },
+                            "children": []
+                          }
+                        },
+                        "children": []
+                      },
+                      {
+                        "id": "post_content",
+                        "type": "Text",
+                        "properties": {
+                          "text": "Enjoying a beautiful day at the beach! 🏖️",
+                          "fontSize": 16,
+                          "color": "4278190080",
+                          "padding": 12
+                        },
+                        "children": []
+                      },
+                      {
+                        "id": "post_image",
+                        "type": "Image",
+                        "properties": {
+                          "src": "https://picsum.photos/400/300",
+                          "width": "double.infinity",
+                          "height": 300,
+                          "fit": "BoxFit.cover"
+                        },
+                        "children": []
+                      },
+                      {
+                        "id": "post_stats",
+                        "type": "Padding",
+                        "properties": {
+                          "padding": 12
+                        },
+                        "children": [
+                          {
+                            "id": "stats_row",
+                            "type": "Row",
+                            "properties": {
+                              "mainAxisAlignment": "MainAxisAlignment.spaceBetween"
+                            },
+                            "children": [
+                              {
+                                "id": "likes_count",
+                                "type": "Text",
+                                "properties": {
+                                  "text": "1.2K Likes",
+                                  "fontSize": 14,
+                                  "color": "4286144000"
+                                },
+                                "children": []
+                              },
+                              {
+                                "id": "comments_count",
+                                "type": "Text",
+                                "properties": {
+                                  "text": "89 Comments • 45 Shares",
+                                  "fontSize": 14,
+                                  "color": "4286144000"
+                                },
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "post_actions",
+                        "type": "Divider",
+                        "properties": {
+                          "color": "4282266422",
+                          "thickness": 0.5,
+                          "height": 1
+                        },
+                        "children": []
+                      },
+                      {
+                        "id": "action_buttons",
+                        "type": "Row",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.spaceEvenly",
+                          "padding": 8
+                        },
+                        "children": [
+                          {
+                            "id": "like_button",
+                            "type": "TextButton",
+                            "properties": {
+                              "text": "Like",
+                              "foregroundColor": "4286144000"
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "comment_button",
+                            "type": "TextButton",
+                            "properties": {
+                              "text": "Comment",
+                              "foregroundColor": "4286144000"
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "share_button",
+                            "type": "TextButton",
+                            "properties": {
+                              "text": "Share",
+                              "foregroundColor": "4286144000"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "FacebookProfile",
+      "rootWidget": {
+        "id": "profile_scaffold",
+        "type": "Scaffold",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "appBar": {
+            "id": "profile_appbar",
+            "type": "AppBar",
+            "properties": {
+              "backgroundColor": "4283215696",
+              "foregroundColor": "4294967295",
+              "elevation": 0,
+              "title": {
+                "id": "profile_title",
+                "type": "Text",
+                "properties": {
+                  "text": "John Doe",
+                  "fontSize": 20,
+                  "fontWeight": "bold",
+                  "color": "4294967295"
+                },
+                "children": []
+              },
+              "actions": [
+                {
+                  "id": "profile_search",
+                  "type": "IconButton",
+                  "properties": {
+                    "icon": "Icons.search",
+                    "color": "4294967295"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "profile_menu",
+                  "type": "IconButton",
+                  "properties": {
+                    "icon": "Icons.more_vert",
+                    "color": "4294967295"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        "children": [
+          {
+            "id": "profile_scroll",
+            "type": "SingleChildScrollView",
+            "properties": {},
+            "children": [
+              {
+                "id": "profile_column",
+                "type": "Column",
+                "properties": {
+                  "crossAxisAlignment": "CrossAxisAlignment.center"
+                },
+                "children": [
+                  {
+                    "id": "cover_container",
+                    "type": "Container",
+                    "properties": {
+                      "height": 200,
+                      "width": "double.infinity"
+                    },
+                    "children": [
+                      {
+                        "id": "cover_image",
+                        "type": "Image",
+                        "properties": {
+                          "src": "https://picsum.photos/400/200",
+                          "width": "double.infinity",
+                          "height": 200,
+                          "fit": "BoxFit.cover"
+                        },
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "id": "profile_info",
+                    "type": "Container",
+                    "properties": {
+                      "padding": 16,
+                      "color": "4294967295"
+                    },
+                    "children": [
+                      {
+                        "id": "avatar_row",
+                        "type": "Row",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.center",
+                          "crossAxisAlignment": "CrossAxisAlignment.end"
+                        },
+                        "children": [
+                          {
+                            "id": "profile_avatar",
+                            "type": "CircleAvatar",
+                            "properties": {
+                              "radius": 60,
+                              "backgroundColor": "4294967295",
+                              "imageUrl": "https://picsum.photos/120/120"
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "id": "name_text",
+                        "type": "Text",
+                        "properties": {
+                          "text": "John Doe",
+                          "fontSize": 24,
+                          "fontWeight": "bold",
+                          "color": "4278190080",
+                          "textAlign": "TextAlign.center"
+                        },
+                        "children": []
+                      },
+                      {
+                        "id": "bio_text",
+                        "type": "Text",
+                        "properties": {
+                          "text": "Software Engineer | Travel Enthusiast | Foodie",
+                          "fontSize": 16,
+                          "color": "4286144000",
+                          "textAlign": "TextAlign.center"
+                        },
+                        "children": []
+                      },
+                      {
+                        "id": "stats_row",
+                        "type": "Row",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.spaceEvenly",
+                          "padding": 16
+                        },
+                        "children": [
+                          {
+                            "id": "friends_stat",
+                            "type": "Column",
+                            "properties": {
+                              "children": [
+                                {
+                                  "id": "friends_count",
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "1.2K",
+                                    "fontSize": 20,
+                                    "fontWeight": "bold",
+                                    "color": "4278190080"
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "id": "friends_label",
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "Friends",
+                                    "fontSize": 14,
+                                    "color": "4286144000"
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "posts_stat",
+                            "type": "Column",
+                            "properties": {
+                              "children": [
+                                {
+                                  "id": "posts_count",
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "342",
+                                    "fontSize": 20,
+                                    "fontWeight": "bold",
+                                    "color": "4278190080"
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "id": "posts_label",
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "Posts",
+                                    "fontSize": 14,
+                                    "color": "4286144000"
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "photos_stat",
+                            "type": "Column",
+                            "properties": {
+                              "children": [
+                                {
+                                  "id": "photos_count",
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "1.8K",
+                                    "fontSize": 20,
+                                    "fontWeight": "bold",
+                                    "color": "4278190080"
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "id": "photos_label",
+                                  "type": "Text",
+                                  "properties": {
+                                    "text": "Photos",
+                                    "fontSize": 14,
+                                    "color": "4286144000"
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            },
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "id": "action_buttons_row",
+                        "type": "Row",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.spaceEvenly",
+                          "padding": 8
+                        },
+                        "children": [
+                          {
+                            "id": "add_story_button",
+                            "type": "ElevatedButton",
+                            "properties": {
+                              "text": "Add Story",
+                              "backgroundColor": "4283215696",
+                              "foregroundColor": "4294967295",
+                              "borderRadius": 8
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "edit_profile_button",
+                            "type": "OutlinedButton",
+                            "properties": {
+                              "text": "Edit Profile",
+                              "foregroundColor": "4283215696",
+                              "borderRadius": 8
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "FacebookNotifications",
+      "rootWidget": {
+        "id": "notifications_scaffold",
+        "type": "Scaffold",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "appBar": {
+            "id": "notifications_appbar",
+            "type": "AppBar",
+            "properties": {
+              "backgroundColor": "4283215696",
+              "foregroundColor": "4294967295",
+              "elevation": 0,
+              "title": {
+                "id": "notifications_title",
+                "type": "Text",
+                "properties": {
+                  "text": "Notifications",
+                  "fontSize": 20,
+                  "fontWeight": "bold",
+                  "color": "4294967295"
+                },
+                "children": []
+              }
+            },
+            "children": []
+          }
+        },
+        "children": [
+          {
+            "id": "notifications_list",
+            "type": "ListView",
+            "properties": {
+              "padding": 8
+            },
+            "children": [
+              {
+                "id": "notification_1",
+                "type": "Card",
+                "properties": {
+                  "elevation": 1,
+                  "margin": 4,
+                  "color": "4294967295"
+                },
+                "children": [
+                  {
+                    "id": "notification_tile_1",
+                    "type": "ListTile",
+                    "properties": {
+                      "leading": {
+                        "id": "notif_avatar_1",
+                        "type": "CircleAvatar",
+                        "properties": {
+                          "radius": 25,
+                          "backgroundColor": "4283215696",
+                          "imageUrl": "https://picsum.photos/50/50"
+                        },
+                        "children": []
+                      },
+                      "title": {
+                        "id": "notif_text_1",
+                        "type": "Text",
+                        "properties": {
+                          "text": "Sarah Wilson liked your photo",
+                          "fontSize": 16,
+                          "color": "4278190080"
+                        },
+                        "children": []
+                      },
+                      "subtitle": {
+                        "id": "notif_time_1",
+                        "type": "Text",
+                        "properties": {
+                          "text": "5 minutes ago",
+                          "fontSize": 12,
+                          "color": "4286144000"
+                        },
+                        "children": []
+                      },
+                      "trailing": {
+                        "id": "notif_image_1",
+                        "type": "Image",
+                        "properties": {
+                          "src": "https://picsum.photos/60/60",
+                          "width": 60,
+                          "height": 60,
+                          "fit": "BoxFit.cover",
+                          "borderRadius": 8
+                        },
+                        "children": []
+                      }
+                    },
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "id": "notification_2",
+                "type": "Card",
+                "properties": {
+                  "elevation": 1,
+                  "margin": 4,
+                  "color": "4294967295"
+                },
+                "children": [
+                  {
+                    "id": "notification_tile_2",
+                    "type": "ListTile",
+                    "properties": {
+                      "leading": {
+                        "id": "notif_avatar_2",
+                        "type": "CircleAvatar",
+                        "properties": {
+                          "radius": 25,
+                          "backgroundColor": "4283215696",
+                          "imageUrl": "https://picsum.photos/50/50"
+                        },
+                        "children": []
+                      },
+                      "title": {
+                        "id": "notif_text_2",
+                        "type": "Text",
+                        "properties": {
+                          "text": "Mike Johnson commented on your post",
+                          "fontSize": 16,
+                          "color": "4278190080"
+                        },
+                        "children": []
+                      },
+                      "subtitle": {
+                        "id": "notif_time_2",
+                        "type": "Text",
+                        "properties": {
+                          "text": "15 minutes ago",
+                          "fontSize": 12,
+                          "color": "4286144000"
+                        },
+                        "children": []
+                      },
+                      "trailing": {
+                        "id": "notif_image_2",
+                        "type": "Image",
+                        "properties": {
+                          "src": "https://picsum.photos/60/60",
+                          "width": 60,
+                          "height": 60,
+                          "fit": "BoxFit.cover",
+                          "borderRadius": 8
+                        },
+                        "children": []
+                      }
+                    },
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "id": "notification_3",
+                "type": "Card",
+                "properties": {
+                  "elevation": 1,
+                  "margin": 4,
+                  "color": "4294967295"
+                },
+                "children": [
+                  {
+                    "id": "notification_tile_3",
+                    "type": "ListTile",
+                    "properties": {
+                      "leading": {
+                        "id": "notif_avatar_3",
+                        "type": "CircleAvatar",
+                        "properties": {
+                          "radius": 25,
+                          "backgroundColor": "4283215696",
+                          "imageUrl": "https://picsum.photos/50/50"
+                        },
+                        "children": []
+                      },
+                      "title": {
+                        "id": "notif_text_3",
+                        "type": "Text",
+                        "properties": {
+                          "text": "Emma Davis and 3 others sent you friend requests",
+                          "fontSize": 16,
+                          "color": "4278190080"
+                        },
+                        "children": []
+                      },
+                      "subtitle": {
+                        "id": "notif_time_3",
+                        "type": "Text",
+                        "properties": {
+                          "text": "1 hour ago",
+                          "fontSize": 12,
+                          "color": "4286144000"
+                        },
+                        "children": []
+                      }
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+JSON Parse Failed. Triggering Self-Repair Loop. Error: FormatException: SyntaxError: Unexpected token '`', "```json
+{
+"... is not valid JSON
+🛠️ Using agent: AiAgentType.kimi
+🔑 API Key provided: ******

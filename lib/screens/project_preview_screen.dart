@@ -26,6 +26,8 @@ class _ProjectPreviewScreenState extends State<ProjectPreviewScreen> {
         provider.screens,
         provider.themeProperties,
         provider.themedWidgets,
+        connection: provider.activeConnection,
+        queries: provider.queries,
       );
 
       // Auto-initialize selected file if null

@@ -1,4 +1,5 @@
 import 'base_widget_generator.dart';
+import 'project_generator.dart';
 import '../models/widget_node.dart';
 import '../utils/property_converters.dart';
 
@@ -75,12 +76,21 @@ class TextGenerator extends BaseWidgetGenerator {
     
     final childIndentStr = getChildIndentStr(indent);
     
-    // Escape text content
-    final textContent = escapeString(node.properties['text'] ?? 'Text');
+    final String textExpression;
+    if (node.dataBinding != null && node.dataBinding!.containsKey('text')) {
+      final binding = node.dataBinding!['text'] as Map;
+      final field = binding['field'];
+      textExpression = ProjectGenerator.isInsideRepeatedList 
+          ? "item['$field']?.toString() ?? ''" 
+          : "data[0]['$field']?.toString() ?? ''";
+    } else {
+      final textContent = escapeString(node.properties['text'] ?? 'Text');
+      textExpression = "'$textContent'";
+    }
     
     return props.isEmpty 
-        ? '${indentStr}Text(\'$textContent\')'
-        : '${indentStr}Text(\n$childIndentStr\'$textContent\',\n$childIndentStr${props.join(',\n$childIndentStr')},\n$indentStr)';
+        ? '${indentStr}Text($textExpression)'
+        : '${indentStr}Text(\n$childIndentStr$textExpression,\n$childIndentStr${props.join(',\n$childIndentStr')},\n$indentStr)';
 
   }
   

@@ -11,6 +11,8 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onAiBuilder;
   final VoidCallback? onUndo;
   final VoidCallback? onRedo;
+  final VoidCallback? onSettings;
+  final VoidCallback? onSubmitMarketplace;
 
   const TopNavBar({
     super.key,
@@ -24,6 +26,8 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onAiBuilder,
     this.onUndo,
     this.onRedo,
+    this.onSettings,
+    this.onSubmitMarketplace,
   });
 
   @override
@@ -63,6 +67,9 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
           _buildActionIcon(Icons.undo, onUndo ?? () {}, 'Undo'),
           _buildActionIcon(Icons.redo, onRedo ?? () {}, 'Redo'),
           _buildActionIcon(Icons.visibility_outlined, onPreview, 'Live Preview Mode'),
+          if (onSubmitMarketplace != null)
+            _buildActionIcon(Icons.cloud_upload_outlined, onSubmitMarketplace!, 'Submit to Marketplace'),
+          _buildActionIcon(Icons.settings, onSettings ?? () {}, 'App Settings'),
           
           const SizedBox(width: 16),
           

@@ -1,9 +1,12 @@
 import '../models/widget_node.dart';
 import './widget_generator_registry.dart';
 import './theme_generator.dart';
+import './project_generator.dart';
 
 abstract class BaseWidgetGenerator {
   static Map<String, String> idToClassName = {};
+  static Map<String, String> idToFileName = {};
+  static Set<String> screenImports = {};
   static Map<String, dynamic> themeProps = {};
   static List<String> stateVariables = []; // Collects: "bool _isAccepted = false;"
   static List<String> disposeVariables = []; // Collects: "_controller.dispose();"
@@ -26,12 +29,101 @@ abstract class BaseWidgetGenerator {
     return '() { $body }';
   }
 
+  String generateActionFlowCode(List<dynamic>? actions, String? fallbackTargetId) {
+    if (actions == null || actions.isEmpty) {
+      if (fallbackTargetId != null) {
+        return generateNavigationCode(fallbackTargetId);
+      }
+      return '() {}';
+    }
+
+    final codeBlocks = <String>[];
+    for (var action in actions) {
+      if (action is Map<String, dynamic>) {
+        final type = action['type'];
+        if (type == 'navigate') {
+          final targetId = action['targetScreenId'];
+          if (targetId == '__back__') {
+            codeBlocks.add('Navigator.pop(context);');
+          } else {
+            final body = generateNavigationBody(targetId);
+            if (body.isNotEmpty) codeBlocks.add(body);
+          }
+        } else if (type == 'supabase_insert') {
+          final tableName = action['tableName'];
+          final payload = action['payload'] as Map<String, dynamic>? ?? {};
+          final payloadCode = _generatePayloadCode(payload);
+          codeBlocks.add('await SupabaseService.instance.insertInto${_capitalize(tableName)}($payloadCode);');
+        } else if (type == 'supabase_update') {
+          final tableName = action['tableName'];
+          final payload = action['payload'] as Map<String, dynamic>? ?? {};
+          final payloadCode = _generatePayloadCode(payload);
+          final idParamCode = ProjectGenerator.isInsideRepeatedList ? "item['id']?.toString()" : "widget.idParam";
+          codeBlocks.add('await SupabaseService.instance.update${_capitalize(tableName)}($idParamCode, $payloadCode);');
+        } else if (type == 'supabase_delete') {
+          final tableName = action['tableName'];
+          final idParamCode = ProjectGenerator.isInsideRepeatedList ? "item['id']?.toString()" : "widget.idParam";
+          codeBlocks.add('await SupabaseService.instance.deleteFrom${_capitalize(tableName)}($idParamCode);');
+        }
+      }
+    }
+
+    if (codeBlocks.isEmpty) {
+      if (fallbackTargetId != null) {
+        return generateNavigationCode(fallbackTargetId);
+      }
+      return '() {}';
+    }
+
+    return '() async {\n      ${codeBlocks.join('\n      ')}\n    }';
+  }
+
+  String _generatePayloadCode(Map<String, dynamic> payload) {
+    final mapEntries = <String>[];
+    payload.forEach((key, valObj) {
+      if (valObj is Map) {
+        final type = valObj['type'];
+        final val = valObj['value']?.toString() ?? '';
+        if (type == 'widget_state') {
+          final varName = '_controller_${val.replaceAll(RegExp(r"[^a-zA-Z0-9]"), "_")}';
+          mapEntries.add("'$key': $varName.text");
+        } else if (type == 'query_data') {
+          final dataVar = ProjectGenerator.isInsideRepeatedList ? "item" : "data[0]";
+          mapEntries.add("'$key': $dataVar['$val']");
+        } else {
+          mapEntries.add("'$key': '${escapeString(val)}'");
+        }
+      }
+    });
+    return '{${mapEntries.join(', ')}}';
+  }
+
+  String _capitalize(String s) {
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
+
+  static String currentGeneratingScreenClass = '';
+
   String generateNavigationBody(String? targetId) {
     if (targetId == null || !idToClassName.containsKey(targetId)) {
       return '';
     }
     final className = idToClassName[targetId];
-    return 'Navigator.push(context, MaterialPageRoute(builder: (context) => const $className()));';
+    if (className == currentGeneratingScreenClass) {
+      return ''; // Avoid navigating to the screen we are already on
+    }
+    final fileName = idToFileName[targetId];
+    if (fileName != null) {
+      screenImports.add(fileName);
+    }
+    
+    final idParamCode = ProjectGenerator.isInsideRepeatedList 
+        ? "item['id']?.toString()" 
+        : "null";
+        
+    return 'Navigator.push(context, MaterialPageRoute(builder: (context) => $className(idParam: $idParamCode)));';
   }
   
   String generateProperties(Map<String, dynamic> properties, {int indent = 0}) {
@@ -39,12 +131,14 @@ abstract class BaseWidgetGenerator {
     final currentIndent = getIndentString(indent);
     final nestedChildIndentStr = getChildIndentStr(indent + 1);
     final Map<String, dynamic> filteredProperties = Map.from(properties)..removeWhere((key, value) => 
-      ['navigateTo', 'id', 'children', 'pageName', 'description', 'paddingLinked'].contains(key));
+      ['navigateTo', 'actions', 'id', 'children', 'pageName', 'description', 'paddingLinked'].contains(key));
     
     filteredProperties.forEach((key, value) {
       if (value != null) {
         String formattedValue;
-        if (value is Map<String, dynamic>) {
+        if (value is WidgetNode) {
+          formattedValue = WidgetGeneratorRegistry.generateCode(value, indent: indent + 1);
+        } else if (value is Map<String, dynamic>) {
           // It's a nested WidgetNode property
           try {
             final WidgetNode nestedNode = WidgetNode.fromJson(value);
@@ -57,7 +151,9 @@ abstract class BaseWidgetGenerator {
           // It's a list of dynamic items, could be a list of WidgetNodes (e.g., actions)
           final List<String> listItems = [];
           for (var item in value) {
-            if (item is Map<String, dynamic>) {
+            if (item is WidgetNode) {
+              listItems.add(WidgetGeneratorRegistry.generateCode(item, indent: indent + 2));
+            } else if (item is Map<String, dynamic>) {
               try {
                 final WidgetNode listItemNode = WidgetNode.fromJson(item);
                 listItems.add(WidgetGeneratorRegistry.generateCode(listItemNode, indent: indent + 2));

@@ -19,9 +19,13 @@ import '../generators/project_generator.dart';
 import 'project_preview_screen.dart';
 import '../widgets/template_custom_dialog.dart';
 import 'theme_settings_screen.dart';
+import 'app_settings_screen.dart';
 import '../widgets/ai_panel.dart';
 import '../widgets/ai_prompt_dialog.dart';
 import '../widgets/widget_context_menu/widget_context_menu_actions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import '../widgets/submit_marketplace_dialog.dart';
 
 class BuilderScreen extends StatefulWidget {
   const BuilderScreen({super.key});
@@ -55,10 +59,22 @@ class _BuilderScreenState extends State<BuilderScreen> {
     final isCtrl = HardwareKeyboard.instance.isControlPressed ||
         HardwareKeyboard.instance.isMetaPressed;
 
-    // Delete / Backspace → delete selected node
+    // Delete / Backspace → delete selected node (but NOT when a text field has focus)
     if ((event.logicalKey == LogicalKeyboardKey.delete ||
             event.logicalKey == LogicalKeyboardKey.backspace) &&
         !isCtrl) {
+      // If a text input is focused, let it handle the key event
+      final primaryFocus = FocusManager.instance.primaryFocus;
+      if (primaryFocus != null) {
+        final focusContext = primaryFocus.context;
+        if (focusContext != null) {
+          // Check if the focused widget is inside an EditableText (TextField/TextFormField)
+          final editableText = focusContext.findAncestorWidgetOfExactType<EditableText>();
+          if (editableText != null) {
+            return KeyEventResult.ignored;
+          }
+        }
+      }
       final selected = provider.selectedNode;
       final root = provider.rootNode;
       if (selected != null && root != null && selected.id != root.id) {
@@ -105,6 +121,73 @@ class _BuilderScreenState extends State<BuilderScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Project saved successfully to the cloud!')),
       );
+    }
+  }
+
+  void _handleSubmitMarketplace() async {
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+    if (provider.rootNode == null) return;
+
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => const SubmitMarketplaceDialog(),
+    );
+
+    if (result != null) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator(color: Color(0xFF38BDF8))),
+      );
+
+      try {
+        final user = FirebaseAuth.instance.currentUser;
+        final creatorId = user?.uid;
+        
+        // Serialize the screens list into JSON
+        final screensJson = provider.screens.map((s) => s.toJson()).toList();
+        final queriesJson = provider.queries;
+
+        final supabaseClient = supabase.Supabase.instance.client;
+        
+        // Check if there is an active category in public.categories matching result['category']
+        final catResponse = await supabaseClient
+            .from('categories')
+            .select('id')
+            .eq('name', result['category'])
+            .maybeSingle();
+            
+        final categoryId = catResponse != null ? catResponse['id'] : null;
+
+        await supabaseClient.from('templates').insert({
+          'name': result['name'],
+          'description': result['description'],
+          'category': result['category'],
+          'category_id': categoryId,
+          'screens_json': screensJson,
+          'queries_json': queriesJson,
+          'creator_id': creatorId,
+          'status': 'pending_approval',
+          'is_premium': result['is_premium'] ?? false,
+          'thumbnail_url': result['thumbnail_url'],
+        });
+
+        if (mounted) {
+          Navigator.pop(context); // remove loader
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Template submitted successfully! Admins will review it.')),
+          );
+        }
+      } catch (e) {
+        debugPrint('Error submitting template: $e');
+        if (mounted) {
+          Navigator.pop(context); // remove loader
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.redAccent),
+          );
+        }
+      }
     }
   }
 
@@ -192,6 +275,8 @@ class _BuilderScreenState extends State<BuilderScreen> {
                           provider.themeProperties, 
                           provider.themedWidgets,
                           appName: appName,
+                          connection: provider.activeConnection,
+                          queries: provider.queries,
                         );
                         _showProjectExportDialog(context, projectFiles, appName, bundleName);
                       },
@@ -541,6 +626,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
         appBar: TopNavBar(
         onSave: _handleSave,
         onExport: _handleExport,
+        onSubmitMarketplace: _handleSubmitMarketplace,
         onAiBuilder: () {
           final willShow = !_showAiPanel;
           setState(() {
@@ -565,6 +651,12 @@ class _BuilderScreenState extends State<BuilderScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ThemeSettingsScreen()),
+          );
+        },
+        onSettings: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AppSettingsScreen()),
           );
         },
       ),

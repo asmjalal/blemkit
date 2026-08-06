@@ -238,7 +238,8 @@ class _IconPickerFieldState extends State<IconPickerField> {
 
   @override
   Widget build(BuildContext context) {
-    final currentIcon = availableIcons[widget.value] ?? Icons.widgets;
+    final bool isEmpty = widget.value.isEmpty;
+    final currentIcon = isEmpty ? Icons.do_not_disturb_alt : (availableIcons[widget.value] ?? Icons.widgets);
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -267,17 +268,23 @@ class _IconPickerFieldState extends State<IconPickerField> {
               child: Row(
                 children: [
                   widget.value.startsWith('FontAwesomeIcons.')
-                      ? FaIcon(currentIcon, color: Colors.white, size: 20)
-                      : Icon(currentIcon, color: Colors.white, size: 20),
+                      ? FaIcon(currentIcon, color: isEmpty ? Colors.white30 : Colors.white, size: 20)
+                      : Icon(currentIcon, color: isEmpty ? Colors.white30 : Colors.white, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      widget.value.replaceAll('Icons.', '').replaceAll('FontAwesomeIcons.', ''),
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      isEmpty ? 'None' : widget.value.replaceAll('Icons.', '').replaceAll('FontAwesomeIcons.', ''),
+                      style: TextStyle(color: isEmpty ? Colors.white30 : Colors.white, fontSize: 13),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const Icon(Icons.arrow_drop_down, color: Colors.white54),
+                  if (!isEmpty)
+                    GestureDetector(
+                      onTap: () => widget.onChanged(''),
+                      child: const Icon(Icons.close, color: Colors.white54, size: 18),
+                    )
+                  else
+                    const Icon(Icons.arrow_drop_down, color: Colors.white54),
                 ],
               ),
             ),

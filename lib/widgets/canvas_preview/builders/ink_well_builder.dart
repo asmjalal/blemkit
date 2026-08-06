@@ -1,3 +1,4 @@
+import 'package:designflutterkit/widgets/canvas_preview/builders/supabase_query_wrapper_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/widget_node.dart';
@@ -13,9 +14,14 @@ class InkWellBuilder extends BaseWidgetBuilder {
       onTap: () {
         if (!CanvasPreviewMode.of(context)) return;
         
+        final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+        final rowData = SupabaseRowDataContext.of(context);
+        if (rowData != null) {
+          provider.activeRowData = rowData;
+        }
+
         final navigateTo = node.properties['navigateTo'];
         if (navigateTo != null) {
-          final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
           try {
             final target = provider.screens.firstWhere((s) => s.id == navigateTo);
             provider.selectScreen(target);

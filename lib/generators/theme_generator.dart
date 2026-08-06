@@ -19,7 +19,7 @@ class ThemeGenerator {
     final fontFamily = themeProps['fontFamily'] ?? 'Outfit';
 
     // Generate text style entries
-    String _textStyleCode(String name, Map<String, dynamic>? style) {
+    String _textStyleCode(String name, Map? style) {
       if (style == null) return '';
       final fontSize = style['fontSize'] ?? 14.0;
       final fontWeight = _fontWeightToCode(style['fontWeight']);
@@ -41,7 +41,7 @@ class ThemeGenerator {
       'labelLarge',
       'bodyLarge', 'bodyMedium', 'bodySmall',
     ]) {
-      final style = themeProps[role] as Map<String, dynamic>?;
+      final style = themeProps[role] as Map?;
       if (style != null) {
         textStyles.add(_textStyleCode(role, style));
       }

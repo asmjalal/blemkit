@@ -28,13 +28,15 @@ class WidgetNode {
     final List<WidgetNode> children = [];
     if (json['children'] != null) {
       for (var childJson in json['children']) {
-        children.add(WidgetNode.fromJson(childJson as Map<String, dynamic>));
+        if (childJson is Map) {
+          children.add(WidgetNode.fromJson(Map<String, dynamic>.from(childJson)));
+        }
       }
     }
     
     final Map<String, dynamic> properties = {};
-    if (json['properties'] != null) {
-      final rawProps = json['properties'] as Map<String, dynamic>;
+    if (json['properties'] != null && json['properties'] is Map) {
+      final rawProps = Map<String, dynamic>.from(json['properties'] as Map);
       rawProps.forEach((key, value) {
         properties[key] = _normalizeProperty(value);
       });
@@ -49,13 +51,14 @@ class WidgetNode {
   }
 
   static dynamic _normalizeProperty(dynamic value) {
-    if (value is Map<String, dynamic> && value.containsKey('type')) {
-      return WidgetNode.fromJson(value);
+    if (value is Map) {
+      if (value.containsKey('type') && value.containsKey('children')) {
+        return WidgetNode.fromJson(Map<String, dynamic>.from(value));
+      }
+      // It's a map but not a widget (e.g. style config)
+      return value.map((k, v) => MapEntry(k.toString(), _normalizeProperty(v)));
     } else if (value is List) {
       return value.map((item) => _normalizeProperty(item)).toList();
-    } else if (value is Map<String, dynamic>) {
-      // It's a map but not a widget (e.g. style config)
-      return value.map((k, v) => MapEntry(k, _normalizeProperty(v)));
     }
     return value;
   }
@@ -82,5 +85,31 @@ class WidgetNode {
 
   WidgetNode copy() {
     return WidgetNode.fromJson(toJson());
+  }
+
+  Map<String, dynamic>? get backendQuery {
+    if (properties['backendQuery'] == null) return null;
+    return Map<String, dynamic>.from(properties['backendQuery'] as Map);
+  }
+
+  set backendQuery(Map<String, dynamic>? value) {
+    if (value == null) {
+      properties.remove('backendQuery');
+    } else {
+      properties['backendQuery'] = value;
+    }
+  }
+
+  Map<String, dynamic>? get dataBinding {
+    if (properties['dataBinding'] == null) return null;
+    return Map<String, dynamic>.from(properties['dataBinding'] as Map);
+  }
+
+  set dataBinding(Map<String, dynamic>? value) {
+    if (value == null) {
+      properties.remove('dataBinding');
+    } else {
+      properties['dataBinding'] = value;
+    }
   }
 }

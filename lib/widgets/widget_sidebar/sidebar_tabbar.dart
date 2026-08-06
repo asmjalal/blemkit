@@ -14,7 +14,7 @@ class SidebarTabBar extends StatelessWidget {
       {'icon': Icons.account_tree_outlined, 'label': 'Tree'},
       {'icon': Icons.layers_outlined, 'label': 'Pages'},
       {'icon': Icons.palette_outlined, 'label': 'Theme'},
-      // {'icon': Icons.storage_outlined, 'label': 'Data'},
+      {'icon': Icons.storage_outlined, 'label': 'Data'},
     ];
     return Container(
       padding: const EdgeInsets.all(12),

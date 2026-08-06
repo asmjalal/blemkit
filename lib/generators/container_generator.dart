@@ -36,8 +36,8 @@ class ContainerGenerator extends BaseWidgetGenerator {
 
     final decorationProps = <String>[];
     
-    // Color: check top-level and decoration object
-    final dynamic colorValue = node.properties['color'] ?? decorationMap?['color'];
+    // Color: check top-level, backgroundColor and decoration object
+    final dynamic colorValue = node.properties['color'] ?? node.properties['backgroundColor'] ?? decorationMap?['color'];
     if (colorValue != null) {
       decorationProps.add('color: ${formatColor(colorValue)}');
     }

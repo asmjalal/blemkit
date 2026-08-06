@@ -2,6 +2,7 @@ import 'package:designflutterkit/generators/widget_generator_registry.dart';
 
 import '../../models/widget_node.dart';
 import 'base_widget_generator.dart';
+import 'project_generator.dart';
 
 class ListTileGenerator extends BaseWidgetGenerator {
   @override
@@ -12,45 +13,97 @@ class ListTileGenerator extends BaseWidgetGenerator {
     final props = <String>[];
 
     // title: String → wrap in Text(), Map → generate as widget
-    final title = node.properties['title'];
-    if (title != null) {
-      if (title is String) {
-        props.add("${childIndent}title: Text('$title')");
-      } else if (title is Map<String, dynamic>) {
-        final titleNode = WidgetNode.fromJson(title);
-        props.add('${childIndent}title: ${WidgetGeneratorRegistry.generateCode(titleNode, indent: indent + 1)}');
+    final titleBinding = node.dataBinding?['title'];
+    if (titleBinding != null) {
+      final field = titleBinding['field'];
+      final textExpression = ProjectGenerator.isInsideRepeatedList 
+          ? "item['$field']?.toString() ?? ''" 
+          : "data[0]['$field']?.toString() ?? ''";
+      props.add("${childIndent}title: Text($textExpression)");
+    } else {
+      final title = node.properties['title'];
+      if (title != null) {
+        if (title is String) {
+          props.add("${childIndent}title: Text('$title')");
+        } else if (title is WidgetNode) {
+          props.add('${childIndent}title: ${WidgetGeneratorRegistry.generateCode(title, indent: indent + 1)}');
+        } else if (title is Map) {
+          final titleNode = WidgetNode.fromJson(Map<String, dynamic>.from(title));
+          props.add('${childIndent}title: ${WidgetGeneratorRegistry.generateCode(titleNode, indent: indent + 1)}');
+        }
       }
     }
 
     // subtitle: String → wrap in Text(), Map → generate as widget
-    final subtitle = node.properties['subtitle'];
-    if (subtitle != null) {
-      if (subtitle is String) {
-        props.add("${childIndent}subtitle: Text('$subtitle')");
-      } else if (subtitle is Map<String, dynamic>) {
-        final subtitleNode = WidgetNode.fromJson(subtitle);
-        props.add('${childIndent}subtitle: ${WidgetGeneratorRegistry.generateCode(subtitleNode, indent: indent + 1)}');
+    final subtitleBinding = node.dataBinding?['subtitle'];
+    if (subtitleBinding != null) {
+      final field = subtitleBinding['field'];
+      final textExpression = ProjectGenerator.isInsideRepeatedList 
+          ? "item['$field']?.toString() ?? ''" 
+          : "data[0]['$field']?.toString() ?? ''";
+      props.add("${childIndent}subtitle: Text($textExpression)");
+    } else {
+      final subtitle = node.properties['subtitle'];
+      if (subtitle != null) {
+        if (subtitle is String) {
+          props.add("${childIndent}subtitle: Text('$subtitle')");
+        } else if (subtitle is WidgetNode) {
+          props.add('${childIndent}subtitle: ${WidgetGeneratorRegistry.generateCode(subtitle, indent: indent + 1)}');
+        } else if (subtitle is Map) {
+          final subtitleNode = WidgetNode.fromJson(Map<String, dynamic>.from(subtitle));
+          props.add('${childIndent}subtitle: ${WidgetGeneratorRegistry.generateCode(subtitleNode, indent: indent + 1)}');
+        }
       }
     }
 
-    // leading: String (icon name) → Icon(...), Map → generate as widget
+    // leading
+    final leadingIconStr = node.properties['leadingIcon'];
+    final leadingIconColor = node.properties['leadingIconColor'];
     final leading = node.properties['leading'];
-    if (leading != null) {
-      if (leading is String && leading.startsWith('Icons.')) {
+    
+    if (leadingIconStr != null && leadingIconStr.toString().trim().isNotEmpty) {
+      String iconName = leadingIconStr.toString().trim();
+      if (!iconName.startsWith('Icons.') && !iconName.startsWith('FontAwesomeIcons.')) {
+        iconName = 'Icons.$iconName';
+      }
+      final colorStr = leadingIconColor != null ? ', color: Color($leadingIconColor)' : '';
+      props.add('${childIndent}leading: Icon($iconName$colorStr)');
+    } else if (leading != null) {
+      if (leading is String && (leading.startsWith('Icons.') || leading.startsWith('FontAwesomeIcons.'))) {
         props.add('${childIndent}leading: Icon($leading)');
-      } else if (leading is Map<String, dynamic>) {
-        final leadingNode = WidgetNode.fromJson(leading);
+      } else if (leading is WidgetNode) {
+        props.add('${childIndent}leading: ${WidgetGeneratorRegistry.generateCode(leading, indent: indent + 1)}');
+      } else if (leading is Map) {
+        final leadingNode = WidgetNode.fromJson(Map<String, dynamic>.from(leading));
         props.add('${childIndent}leading: ${WidgetGeneratorRegistry.generateCode(leadingNode, indent: indent + 1)}');
       }
     }
 
-    // trailing: String (icon name) → Icon(...), Map → generate as widget
+    // trailing
+    final trailingIconStr = node.properties['trailingIcon'];
+    final trailingIconColor = node.properties['trailingIconColor'];
     final trailing = node.properties['trailing'];
-    if (trailing != null) {
-      if (trailing is String && trailing.startsWith('Icons.')) {
+    
+    if (trailingIconStr != null && trailingIconStr.toString().trim().isNotEmpty) {
+      String iconName = trailingIconStr.toString().trim();
+      if (!iconName.startsWith('Icons.') && !iconName.startsWith('FontAwesomeIcons.')) {
+        iconName = 'Icons.$iconName';
+      }
+      final colorStr = trailingIconColor != null ? ', color: Color($trailingIconColor)' : '';
+      final trailingNavigateTo = node.properties['trailingNavigateTo'];
+      if (trailingNavigateTo != null) {
+        final navCode = generateNavigationCode(trailingNavigateTo);
+        props.add('${childIndent}trailing: IconButton(icon: Icon($iconName$colorStr), onPressed: $navCode)');
+      } else {
+        props.add('${childIndent}trailing: Icon($iconName$colorStr)');
+      }
+    } else if (trailing != null) {
+      if (trailing is String && (trailing.startsWith('Icons.') || trailing.startsWith('FontAwesomeIcons.'))) {
         props.add('${childIndent}trailing: Icon($trailing)');
-      } else if (trailing is Map<String, dynamic>) {
-        final trailingNode = WidgetNode.fromJson(trailing);
+      } else if (trailing is WidgetNode) {
+        props.add('${childIndent}trailing: ${WidgetGeneratorRegistry.generateCode(trailing, indent: indent + 1)}');
+      } else if (trailing is Map) {
+        final trailingNode = WidgetNode.fromJson(Map<String, dynamic>.from(trailing));
         props.add('${childIndent}trailing: ${WidgetGeneratorRegistry.generateCode(trailingNode, indent: indent + 1)}');
       }
     }
@@ -64,11 +117,9 @@ class ListTileGenerator extends BaseWidgetGenerator {
     }
 
     // onTap
-    if (node.properties.containsKey('navigateTo')) {
-      props.add('${childIndent}onTap: ${generateNavigationCode(node.properties['navigateTo'])}');
-    } else {
-      props.add('${childIndent}onTap: () {}');
-    }
+    final actions = node.properties['actions'];
+    final fallbackNavigateTo = node.properties['navigateTo'];
+    props.add('${childIndent}onTap: ${generateActionFlowCode(actions, fallbackNavigateTo)}');
 
     return '${indentStr}ListTile(\n${props.join(',\n')},\n$indentStr)';
   }

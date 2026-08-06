@@ -84,6 +84,19 @@ class TemplateMetadata {
 final List<TemplateMetadata> templates = [
   // E-commerce
   TemplateMetadata(
+    name: 'E-Commerce Supabase Store',
+    description: 'Full-stack retail store template integrated with Supabase products catalog, cart insertions, and orders.',
+    icon: Icons.cloud_done_outlined,
+    jsonPath: 'lib/templates/ecommerce_supabase.json',
+    screenNames: [
+      'Storefront',
+      'Product Details',
+      'Shopping Cart',
+      'Order Success'
+    ],
+    category: TemplateCategory.ecommerce,
+  ),
+  TemplateMetadata(
     name: 'E-Commerce Store',
     description: 'Sophisticated light-themed retail product shopping, item detail, and shopping cart checkout flows.',
     icon: Icons.shopping_cart,

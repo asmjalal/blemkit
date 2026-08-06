@@ -1,6 +1,7 @@
 import 'base_widget_generator.dart';
 import '../models/widget_node.dart';
 import 'widget_generator_registry.dart';
+import 'project_generator.dart';
 
 class ScaffoldGenerator extends BaseWidgetGenerator {
   @override
@@ -8,6 +9,10 @@ class ScaffoldGenerator extends BaseWidgetGenerator {
     final indentStr = getIndentString(indent);
     final childIndentStr = getChildIndentStr(indent);
     
+    // When generating a tab screen, the BottomNavigationBar belongs to
+    // the MainNavigationScreen shell — do NOT emit it here.
+    final isTabScreen = ProjectGenerator.isGeneratingTabScreen;
+
     String appBar = '';
     String body = '';
     String fab = '';
@@ -18,17 +23,27 @@ class ScaffoldGenerator extends BaseWidgetGenerator {
     // Handle AppBar from properties (primary way)
     if (node.properties['appBar'] != null) {
       final appBarData = node.properties['appBar'];
-      if (appBarData is Map<String, dynamic>) {
-        final appBarNode = WidgetNode.fromJson(appBarData);
+      WidgetNode? appBarNode;
+      if (appBarData is WidgetNode) {
+        appBarNode = appBarData;
+      } else if (appBarData is Map) {
+        appBarNode = WidgetNode.fromJson(Map<String, dynamic>.from(appBarData));
+      }
+      if (appBarNode != null) {
         appBar = '\n$childIndentStr appBar: ${WidgetGeneratorRegistry.generateCode(appBarNode, indent: indent + 1)},';
       }
     }
     
-    // Handle BottomNavigationBar from properties
-    if (node.properties['bottomNavigationBar'] != null) {
+    // Handle BottomNavigationBar from properties — only for non-tab screens
+    if (!isTabScreen && node.properties['bottomNavigationBar'] != null) {
       final bottomNavData = node.properties['bottomNavigationBar'];
-      if (bottomNavData is Map<String, dynamic>) {
-        final bottomNavNode = WidgetNode.fromJson(bottomNavData);
+      WidgetNode? bottomNavNode;
+      if (bottomNavData is WidgetNode) {
+        bottomNavNode = bottomNavData;
+      } else if (bottomNavData is Map) {
+        bottomNavNode = WidgetNode.fromJson(Map<String, dynamic>.from(bottomNavData));
+      }
+      if (bottomNavNode != null) {
         bottomNavBar = '\n$childIndentStr bottomNavigationBar: ${WidgetGeneratorRegistry.generateCode(bottomNavNode, indent: indent + 1)},';
       }
     }
@@ -36,8 +51,13 @@ class ScaffoldGenerator extends BaseWidgetGenerator {
     // Handle FloatingActionButton from properties
     if (node.properties['floatingActionButton'] != null) {
       final fabData = node.properties['floatingActionButton'];
-      if (fabData is Map<String, dynamic>) {
-        final fabNode = WidgetNode.fromJson(fabData);
+      WidgetNode? fabNode;
+      if (fabData is WidgetNode) {
+        fabNode = fabData;
+      } else if (fabData is Map) {
+        fabNode = WidgetNode.fromJson(Map<String, dynamic>.from(fabData));
+      }
+      if (fabNode != null) {
         fab = '\n$childIndentStr floatingActionButton: ${WidgetGeneratorRegistry.generateCode(fabNode, indent: indent + 1)},';
       }
     }
@@ -60,10 +80,11 @@ class ScaffoldGenerator extends BaseWidgetGenerator {
       } else if (child.type == 'EndDrawer') {
         endDrawer = '\n$childIndentStr endDrawer: ${WidgetGeneratorRegistry.generateCode(child, indent: indent + 1)},';
       } else if (child.type == 'BottomNavigationBar') {
-        // Fallback: AI sometimes places BottomNavigationBar in children — rescue it
-        if (bottomNavBar.isEmpty) {
+        // For non-tab screens: rescue BNB placed in children
+        if (!isTabScreen && bottomNavBar.isEmpty) {
           bottomNavBar = '\n$childIndentStr bottomNavigationBar: ${WidgetGeneratorRegistry.generateCode(child, indent: indent + 1)},';
         }
+        // For tab screens: skip entirely — the shell owns the nav bar
       } else {
         body = '\n$childIndentStr body: ${WidgetGeneratorRegistry.generateCode(child, indent: indent + 1)},';
       }
@@ -72,4 +93,3 @@ class ScaffoldGenerator extends BaseWidgetGenerator {
     return '${indentStr}Scaffold($backgroundColor$appBar$body$fab$drawer$endDrawer$bottomNavBar\n$indentStr)';
   }
 }
- 

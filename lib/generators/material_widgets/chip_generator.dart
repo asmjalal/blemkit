@@ -1,4 +1,5 @@
 import '../base_widget_generator.dart';
+import '../project_generator.dart';
 import '../../models/widget_node.dart';
 import '../widget_generator_registry.dart';
 
@@ -54,8 +55,21 @@ class CircleAvatarGenerator extends BaseWidgetGenerator {
       props.add('child: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1).trimLeft()}');
     }
     
-    if (node.properties['backgroundImage'] != null && node.properties['backgroundImage'].toString().isNotEmpty) {
-      props.add('backgroundImage: NetworkImage(\'${escapeString(node.properties['backgroundImage'].toString())}\')');
+    final String? imgUrlExpression;
+    if (node.dataBinding != null && node.dataBinding!.containsKey('url')) {
+      final binding = node.dataBinding!['url'] as Map;
+      final field = binding['field'];
+      imgUrlExpression = ProjectGenerator.isInsideRepeatedList 
+          ? "NetworkImage(item['$field']?.toString() ?? '')" 
+          : "NetworkImage(data[0]['$field']?.toString() ?? '')";
+    } else if (node.properties['backgroundImage'] != null && node.properties['backgroundImage'].toString().isNotEmpty) {
+      imgUrlExpression = "NetworkImage('${escapeString(node.properties['backgroundImage'].toString())}')";
+    } else {
+      imgUrlExpression = null;
+    }
+
+    if (imgUrlExpression != null) {
+      props.add('backgroundImage: $imgUrlExpression');
     }
     
     return '${indentStr}CircleAvatar(\n$childIndentStr ${props.join(',\n$childIndentStr ')}\n$indentStr)';

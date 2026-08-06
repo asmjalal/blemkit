@@ -14,9 +14,11 @@ class AppBarGenerator extends BaseWidgetGenerator {
     if (node.properties['title'] != null) {
       final title = node.properties['title'];
       if (title is String) {
-        props.add('title: Text(\'$title\')');
-      } else if (title is Map<String, dynamic>) {
-        final titleNode = WidgetNode.fromJson(title);
+        props.add("title: Text('$title')");
+      } else if (title is WidgetNode) {
+        props.add('title: ${WidgetGeneratorRegistry.generateCode(title, indent: 0)}');
+      } else if (title is Map) {
+        final titleNode = WidgetNode.fromJson(Map<String, dynamic>.from(title));
         props.add('title: ${WidgetGeneratorRegistry.generateCode(titleNode, indent: 0)}');
       }
     }
@@ -41,8 +43,10 @@ class AppBarGenerator extends BaseWidgetGenerator {
       final actions = node.properties['actions'] as List;
       if (actions.isNotEmpty) {
         final actionWidgets = actions.map((action) {
-          if (action is Map<String, dynamic>) {
-            final actionNode = WidgetNode.fromJson(action);
+          if (action is WidgetNode) {
+            return WidgetGeneratorRegistry.generateCode(action, indent: 0);
+          } else if (action is Map) {
+            final actionNode = WidgetNode.fromJson(Map<String, dynamic>.from(action));
             return WidgetGeneratorRegistry.generateCode(actionNode, indent: 0);
           }
           return 'Container()'; // fallback
@@ -52,9 +56,17 @@ class AppBarGenerator extends BaseWidgetGenerator {
     }
     
     // Handle leading
-    if (node.properties['leading'] != null && node.properties['leading'] is Map) {
-      final leadingNode = WidgetNode.fromJson(node.properties['leading']);
-      props.add('leading: ${WidgetGeneratorRegistry.generateCode(leadingNode, indent: 0)}');
+    if (node.properties['leading'] != null) {
+      final leading = node.properties['leading'];
+      WidgetNode? leadingNode;
+      if (leading is WidgetNode) {
+        leadingNode = leading;
+      } else if (leading is Map) {
+        leadingNode = WidgetNode.fromJson(Map<String, dynamic>.from(leading));
+      }
+      if (leadingNode != null) {
+        props.add('leading: ${WidgetGeneratorRegistry.generateCode(leadingNode, indent: 0)}');
+      }
     }
 
     return props.isEmpty 

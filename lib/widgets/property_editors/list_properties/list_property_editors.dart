@@ -9,6 +9,7 @@ import 'package:designflutterkit/utils/color_utils.dart';
 
 
 import '../dropdown_field.dart';
+import '../icon_picker_field.dart';
 
 List<Widget> buildListPropertyEditors(BuildContext context, WidgetNode node) {
   final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
@@ -69,33 +70,33 @@ List<Widget> buildListTilePropertyEditors(BuildContext context, WidgetNode node)
         provider.updateNodeProperties(node, properties);
       },
     ),
-    buildTextField(
-      'Leading Icon (name)',
-      _safeString(properties['leadingIcon']),
-      (value) {
-        properties['leadingIcon'] = value ?? '';
+    IconPickerField(
+      label: 'Leading Icon',
+      value: _safeString(properties['leadingIcon']),
+      onChanged: (value) {
+        properties['leadingIcon'] = value;
         provider.updateNodeProperties(node, properties);
       },
     ),
     ColorPickerField(
       label: 'Leading Icon Color',
-      color: properties['leadingIconColor'] != null ? Color(properties['leadingIconColor']) : Colors.black,
+      color: ColorUtils.parseColor(properties['leadingIconColor'], Colors.black)!,
       onColorChanged: (color) {
         properties['leadingIconColor'] = color.value;
         provider.updateNodeProperties(node, properties);
       },
     ),
-    buildTextField(
-      'Trailing Icon (name)',
-      _safeString(properties['trailingIcon']),
-      (value) {
-        properties['trailingIcon'] = value ?? '';
+    IconPickerField(
+      label: 'Trailing Icon',
+      value: _safeString(properties['trailingIcon']),
+      onChanged: (value) {
+        properties['trailingIcon'] = value;
         provider.updateNodeProperties(node, properties);
       },
     ),
     ColorPickerField(
       label: 'Trailing Icon Color',
-      color: properties['trailingIconColor'] != null ? Color(properties['trailingIconColor']) : Colors.black,
+      color: ColorUtils.parseColor(properties['trailingIconColor'], Colors.black)!,
       onColorChanged: (color) {
         properties['trailingIconColor'] = color.value;
         provider.updateNodeProperties(node, properties);
@@ -130,6 +131,28 @@ List<Widget> buildListTilePropertyEditors(BuildContext context, WidgetNode node)
             properties['navigateTo'] = target.id;
           } catch (e) {
             properties['navigateTo'] = null;
+          }
+        }
+        provider.updateNodeProperties(node, properties);
+      },
+    ),
+    const SizedBox(height: 12),
+    buildSectionHeader('Trailing Icon Navigation'),
+    buildDropdownField(
+      'Trailing Navigate To',
+      provider.screens.any((s) => s.id == properties['trailingIconNavigateTo'])
+          ? provider.screens.firstWhere((s) => s.id == properties['trailingIconNavigateTo']).properties['pageName'] as String? ?? 'Page'
+          : 'None',
+      ['None', ...provider.screens.map((s) => s.properties['pageName'] as String? ?? 'Page')],
+      (value) {
+        if (value == 'None' || value == null) {
+          properties['trailingIconNavigateTo'] = null;
+        } else {
+          try {
+            final target = provider.screens.firstWhere((s) => s.properties['pageName'] == value);
+            properties['trailingIconNavigateTo'] = target.id;
+          } catch (e) {
+            properties['trailingIconNavigateTo'] = null;
           }
         }
         provider.updateNodeProperties(node, properties);

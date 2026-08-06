@@ -142,7 +142,11 @@ class WidgetTreeEditor extends StatefulWidget {
           'title': WidgetNode(type: 'Text', properties: {'text': 'List Tile'}),
           'subtitle': WidgetNode(type: 'Text', properties: {'text': 'Subtitle'}),
           'leading': WidgetNode(type: 'Icon', properties: {'icon': 'info'}),
-          'trailing': WidgetNode(type: 'Icon', properties: {'icon': 'arrow_forward'}),
+          'trailing': WidgetNode(type: 'IconButton', properties: {
+            'icon': WidgetNode(type: 'Icon', properties: {'icon': 'arrow_forward'}),
+            'size': 24.0,
+            'color': Colors.black.value.toString(),
+          }),
         });
       case 'SlidableListTile':
         return WidgetNode(type: 'SlidableListTile', properties: {
@@ -254,7 +258,7 @@ class WidgetTreeEditor extends StatefulWidget {
 
 class _WidgetTreeEditorState extends State<WidgetTreeEditor> {
   String _search = '';
-  final Map<WidgetNode, bool> _expanded = {};
+  final Map<String, bool> _expanded = {};
   
   @override
   void initState() {
@@ -270,13 +274,13 @@ class _WidgetTreeEditorState extends State<WidgetTreeEditor> {
   
   void _initializeExpansionState(WidgetNode node) {
     // Expand the first few levels by default
-    _expanded[node] = true;
+    _expanded[node.id] = true;
     
     // Recursively expand children up to depth 3
     void expandChildren(WidgetNode parent, int depth) {
       if (depth < 3) {
         for (var child in parent.children) {
-          _expanded[child] = true;
+          _expanded[child.id] = true;
           expandChildren(child, depth + 1);
         }
       }
@@ -300,9 +304,7 @@ class _WidgetTreeEditorState extends State<WidgetTreeEditor> {
     }
   }
 
-  // This map defines which properties of a widget type should be treated as nested widgets
-  // and displayed in the widget tree.
-  static const Map<String, List<String>> _widgetPropertiesToDisplay = {
+  static const Map<String, List<String>> widgetPropertiesToDisplay = {
     'Scaffold': ['appBar', 'floatingActionButton', 'drawer', 'endDrawer', 'bottomNavigationBar'],
     'AppBar': ['leading', 'title', 'actions'],
     'FloatingActionButton': ['child'],
@@ -556,7 +558,7 @@ class _WidgetTreeEditorState extends State<WidgetTreeEditor> {
   // Helper to extract widget nodes from properties
   List<WidgetNode> _extractWidgetNodesFromProperties(WidgetNode node) {
     final List<WidgetNode> extractedNodes = [];
-    final List<String>? propertiesToDisplay = _widgetPropertiesToDisplay[node.type];
+    final List<String>? propertiesToDisplay = widgetPropertiesToDisplay[node.type];
 
     if (propertiesToDisplay != null) {
       for (final propName in propertiesToDisplay) {
@@ -594,7 +596,7 @@ class _WidgetTreeEditorState extends State<WidgetTreeEditor> {
     void Function(WidgetNode parent) onAdd,
     void Function(WidgetNode) onDelete,
     void Function(WidgetNode) onDuplicate,
-    Map<WidgetNode, bool> expanded,
+    Map<String, bool> expanded,
     String search,
     int depth,
   ) {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import 'dart:ui';
 
 import 'package:designflutterkit/widgets/widget_tree/widget_tree_editor.dart';
@@ -11,7 +12,6 @@ import '../widget_context_menu/widget_context_menu.dart';
 import '../widget_context_menu/widget_command_manager.dart';
 import '../widget_context_menu/widget_context_menu_actions.dart';
 
-
 class WidgetTreeNode extends StatefulWidget {
   final WidgetNode node;
   final WidgetNode? selectedNode;
@@ -19,9 +19,10 @@ class WidgetTreeNode extends StatefulWidget {
   final void Function(WidgetNode parent) onAdd;
   final void Function(WidgetNode) onDelete;
   final void Function(WidgetNode) onDuplicate;
-  final Map<WidgetNode, bool> expanded;
+  final Map<String, bool> expanded;
   final String search;
   final int depth;
+  final String? slotLabel;
 
   const WidgetTreeNode({
     required this.node,
@@ -33,6 +34,7 @@ class WidgetTreeNode extends StatefulWidget {
     required this.expanded,
     required this.search,
     required this.depth,
+    this.slotLabel,
   });
 
   @override
@@ -40,17 +42,20 @@ class WidgetTreeNode extends StatefulWidget {
 }
 
 class WidgetTreeNodeState extends State<WidgetTreeNode> {
-  bool get isExpanded => widget.expanded[widget.node] ?? true;
+  bool get isExpanded => widget.expanded[widget.node.id] ?? true;
   WidgetNode? _draggedNode;
 
   bool get isChildrenList => _acceptsMultipleChildren(widget.node.type);
   bool get isChildSlot => !isChildrenList;
+  bool get hasSlotMap => _slotMapForType(widget.node.type).isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
     final isSelected = widget.selectedNode == widget.node;
     final hasChildren = widget.node.children.isNotEmpty;
-    final matchesSearch = widget.search.isEmpty || widget.node.type.toLowerCase().contains(widget.search) || (widget.node.properties['text']?.toString().toLowerCase().contains(widget.search) ?? false);
+    final matchesSearch = widget.search.isEmpty ||
+        widget.node.type.toLowerCase().contains(widget.search) ||
+        (widget.node.properties['text']?.toString().toLowerCase().contains(widget.search) ?? false);
     if (!matchesSearch) return const SizedBox.shrink();
 
     final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
@@ -58,7 +63,7 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
     List<Widget> childrenWidgets = [];
     if (isChildrenList) {
       for (int i = 0; i < widget.node.children.length; i++) {
-        // Drop target before
+        // Drop target before each child
         childrenWidgets.add(_DropTarget(
           onAccept: (dragged) {
             if (dragged != widget.node.children[i] && !_isDescendant(dragged, widget.node.children[i])) {
@@ -76,7 +81,7 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
           },
           canAccept: (dragged) => dragged != widget.node.children[i] && !_isDescendant(dragged, widget.node.children[i]),
         ));
-        // The child node
+        // The child node itself
         childrenWidgets.add(WidgetTreeNode(
           node: widget.node.children[i],
           selectedNode: widget.selectedNode,
@@ -89,7 +94,7 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
           depth: widget.depth + 1,
         ));
       }
-      // Drop target at end
+      // Drop target at the end of the list
       childrenWidgets.add(_DropTarget(
         onAccept: (dragged) {
           if (!_isDescendant(dragged, widget.node)) {
@@ -100,12 +105,12 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
         canAccept: (dragged) => !_isDescendant(dragged, widget.node),
       ));
     } else if (widget.node.children.isNotEmpty) {
-      // Only one child allowed (child slot)
+      // Single child slot (e.g., widgets that accept exactly one child)
       childrenWidgets.add(_DropTarget(
         onAccept: (dragged) {
           if (!_isDescendant(dragged, widget.node)) {
-            provider.removeNode(widget.node.children.first);
-            provider.addChild(widget.node, dragged);
+            widget.node.properties[widget.node.children.first.type] = dragged;
+            provider.notifyListeners();
             provider.selectNode(dragged);
           }
         },
@@ -122,8 +127,57 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
           depth: widget.depth + 1,
         ),
       ));
-    } else if (isChildSlot) {
-      // Empty child slot
+    } else if (hasSlotMap) {
+      // Handle named slots for widgets like ListTile, AppBar, etc.
+      final slotMap = _slotMapForType(widget.node.type);
+      slotMap.forEach((slotKey, slotLabel) {
+        final prop = widget.node.properties[slotKey];
+        if (prop is WidgetNode) {
+          // Existing widget in slot – render it with a drop target.
+          childrenWidgets.add(_DropTarget(
+            onAccept: (dragged) {
+              if (!_isDescendant(dragged, widget.node)) {
+                widget.node.properties[slotKey] = dragged;
+                provider.notifyListeners();
+                provider.selectNode(dragged);
+              }
+            },
+            canAccept: (dragged) => !_isDescendant(dragged, widget.node),
+            child: WidgetTreeNode(
+              node: prop,
+              selectedNode: widget.selectedNode,
+              onSelect: widget.onSelect,
+              onAdd: widget.onAdd,
+              onDelete: widget.onDelete,
+              onDuplicate: widget.onDuplicate,
+              expanded: widget.expanded,
+              search: widget.search,
+              depth: widget.depth + 1,
+              slotLabel: slotLabel,
+            ),
+          ));
+        } else {
+          // Empty/primitive slot – render placeholder node and allow dropping a widget.
+          childrenWidgets.add(_DropTarget(
+            onAccept: (dragged) {
+              if (!_isDescendant(dragged, widget.node)) {
+                widget.node.properties[slotKey] = dragged;
+                provider.notifyListeners();
+                provider.selectNode(dragged);
+              }
+            },
+            canAccept: (dragged) => !_isDescendant(dragged, widget.node),
+            child: WidgetTreeNodePlaceholder(
+              slotKey: slotKey,
+              slotLabel: slotLabel,
+              parentNode: widget.node,
+              depth: widget.depth + 1,
+            ),
+          ));
+        }
+      });
+    } else {
+      // Fallback generic slot handling for widgets without a slot map.
       childrenWidgets.add(_DropTarget(
         onAccept: (dragged) {
           if (!_isDescendant(dragged, widget.node)) {
@@ -161,11 +215,9 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
           child: Listener(
             onPointerDown: (event) {
               if (event.kind == PointerDeviceKind.mouse && event.buttons == 2) {
-                // Prevent browser context menu
-                // (No-op: Flutter web suppresses it if onSecondaryTapDown is handled)
+                // Right‑click suppression (handled elsewhere)
               }
             },
-            onPointerSignal: (event) {},
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
               onEnter: (_) => provider.setHoveredNode(widget.node),
@@ -179,7 +231,6 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
                     widgetId: widget.node.id,
                     onAction: (action) {
                       final root = provider.rootNode!;
-                      
                       if (action.startsWith('wrap_')) {
                         final wrapperType = action.substring('wrap_'.length);
                         provider.commandManager.executeAction(
@@ -192,7 +243,6 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
                         );
                         return;
                       }
-
                       switch (action) {
                         case 'duplicate':
                           widget.onDuplicate(widget.node);
@@ -208,7 +258,6 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
                         case 'redo':
                           provider.commandManager.redo();
                           break;
-                        // Add more cases for wrap, remove, etc.
                       }
                     },
                     canDelete: widget.node.type != 'Scaffold',
@@ -234,14 +283,14 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
                       ),
                       child: Row(
                         children: [
-                          if (isChildrenList && widget.node.children.isNotEmpty)
+                          if ((isChildrenList && widget.node.children.isNotEmpty) || hasSlotMap)
                             SizedBox(
                               width: 32,
                               child: IconButton(
                                 icon: Icon(isExpanded ? Icons.expand_more : Icons.chevron_right, size: 18),
                                 onPressed: () {
                                   setState(() {
-                                    widget.expanded[widget.node] = !isExpanded;
+                                    widget.expanded[widget.node.id] = !isExpanded;
                                   });
                                 },
                                 padding: EdgeInsets.zero,
@@ -255,7 +304,7 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
                           Expanded(
                             child: Text(
                               _widgetLabel(widget.node),
-                              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -290,25 +339,36 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
             ),
           ),
         ),
-        // Only show children if expanded
         if (isExpanded) ...childrenWidgets,
       ],
     );
   }
 
   bool _acceptsMultipleChildren(String type) {
-    // Widgets that can have multiple children
-    return [
-      'Row', 'Column', 'Stack', 'Wrap', 'ListView', 'GridView',
-      'SingleChildScrollView', 'Scaffold', 'AppBar', 'BottomNavigationBar',
-      'Form', 'CustomScrollView', 'ReorderableListView', 'PageView',
-      'TabBarView', 'ExpansionTile', 'Drawer', 'Card', 'Container',
-      'Center', 'Padding', 'Expanded', 'Flexible', 'SizedBox',
-      'Positioned', 'Align', 'InkWell', 'GestureDetector',
-      'ElevatedButton', 'TextButton', 'OutlinedButton', 'IconButton',
-      'FloatingActionButton', 'ListTile', 'Chip', 'CircleAvatar',
-      'Tooltip', 'AlertDialog', 'BottomSheet'
-    ].contains(type);
+    const multiple = [
+      'Row', 'Column', 'Stack', 'Wrap', 'ListView', 'GridView', 'SingleChildScrollView',
+      'Scaffold', 'AppBar', 'BottomNavigationBar', 'Form', 'CustomScrollView',
+      'ReorderableListView', 'PageView', 'TabBarView', 'ExpansionTile', 'Drawer',
+      'Card', 'Container', 'Center', 'Padding', 'Expanded', 'Flexible', 'SizedBox',
+      'Positioned', 'Align', 'InkWell', 'GestureDetector', 'ElevatedButton', 'TextButton',
+      'OutlinedButton', 'IconButton', 'FloatingActionButton', 'Chip',
+      'CircleAvatar', 'Tooltip', 'AlertDialog', 'BottomSheet',
+    ];
+    return multiple.contains(type);
+  }
+
+  Map<String, String> _slotMapForType(String type) {
+    switch (type) {
+      case 'ListTile':
+        return {
+          'leading': 'Leading',
+          'title': 'Title',
+          'subtitle': 'Subtitle',
+          'trailing': 'Trailing',
+        };
+      default:
+        return {};
+    }
   }
 
   WidgetNode? _findParent(WidgetNode? root, WidgetNode child) {
@@ -383,7 +443,14 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
   }
 
   String _widgetLabel(WidgetNode node) {
-    // Show more informative labels for different widget types
+    final baseLabel = _widgetBaseLabel(node);
+    if (widget.slotLabel != null) {
+      return '${widget.slotLabel}: $baseLabel';
+    }
+    return baseLabel;
+  }
+
+  String _widgetBaseLabel(WidgetNode node) {
     switch (node.type) {
       case 'Text':
         if (node.properties['text'] != null) {
@@ -440,7 +507,6 @@ class WidgetTreeNodeState extends State<WidgetTreeNode> {
   }
 }
 
-
 class _DropTarget extends StatelessWidget {
   final void Function(WidgetNode) onAccept;
   final bool Function(WidgetNode) canAccept;
@@ -463,6 +529,97 @@ class _DropTarget extends StatelessWidget {
               ),
             if (child != null) child!,
           ],
+        );
+      },
+    );
+  }
+}
+
+class WidgetTreeNodePlaceholder extends StatelessWidget {
+  final String slotKey;
+  final String slotLabel;
+  final WidgetNode parentNode;
+  final int depth;
+
+  const WidgetTreeNodePlaceholder({
+    Key? key,
+    required this.slotKey,
+    required this.slotLabel,
+    required this.parentNode,
+    required this.depth,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          _showAddWidgetToSlotDialog(context);
+        },
+        child: Container(
+          margin: EdgeInsets.only(left: depth * 20.0, top: 2, bottom: 2, right: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white10,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: Colors.white24, style: BorderStyle.solid),
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 32), // space for expand arrow
+              const Icon(Icons.add_circle_outline, size: 16, color: Colors.white30),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '$slotLabel: (Empty)',
+                  style: const TextStyle(color: Colors.white30, fontSize: 13, fontStyle: FontStyle.italic),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAddWidgetToSlotDialog(BuildContext context) {
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+    final categories = [
+      {'type': 'Text', 'icon': Icons.text_fields},
+      {'type': 'Icon', 'icon': Icons.star},
+      {'type': 'IconButton', 'icon': Icons.add_circle_outline},
+      {'type': 'CircleAvatar', 'icon': Icons.account_circle},
+      {'type': 'Chip', 'icon': Icons.tag},
+    ];
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: Text('Add Widget to $slotLabel', style: const TextStyle(color: Colors.white)),
+          content: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final widgetInfo in categories)
+                ElevatedButton.icon(
+                  icon: Icon(widgetInfo['icon'] as IconData),
+                  label: Text(widgetInfo['type'] as String),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.indigo.shade600,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    final newNode = WidgetTreeEditor.createWidgetNodeWithDefaults(widgetInfo['type'] as String);
+                    final properties = Map<String, dynamic>.from(parentNode.properties);
+                    properties[slotKey] = newNode;
+                    provider.updateNodeProperties(parentNode, properties);
+                    Navigator.of(context).pop();
+                  },
+                ),
+            ],
+          ),
         );
       },
     );

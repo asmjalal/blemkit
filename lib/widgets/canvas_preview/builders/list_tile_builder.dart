@@ -1,3 +1,4 @@
+import 'package:designflutterkit/widgets/canvas_preview/builders/supabase_query_wrapper_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../models/widget_node.dart';
@@ -43,17 +44,84 @@ class ListTileBuilder extends BaseWidgetBuilder {
       fallback: null,
     );
 
+    // Resolve leading
+    final leadingIconStr = node.properties['leadingIcon'];
+    Color? leadingColor = parseColor(node.properties['leadingIconColor'], context);
+    Widget? finalLeading;
+    
+    if (leadingIconStr != null && leadingIconStr.toString().trim().isNotEmpty) {
+      String iconName = leadingIconStr.toString().trim();
+      if (!iconName.startsWith('Icons.') && !iconName.startsWith('FontAwesomeIcons.')) {
+        iconName = 'Icons.$iconName';
+      }
+      final iconData = parseIconData(iconName);
+      if (iconName.startsWith('FontAwesomeIcons.')) {
+         finalLeading = FaIcon(iconData, color: leadingColor);
+      } else {
+         finalLeading = Icon(iconData as IconData?, color: leadingColor);
+      }
+    } else {
+       finalLeading = _resolveSlot(context, node.properties['leading'], hoveredNode);
+    }
+
+    // Resolve trailing
+    final trailingIconStr = node.properties['trailingIcon'];
+    Color? trailingColor = parseColor(node.properties['trailingIconColor'], context);
+    Widget? finalTrailing;
+    
+    if (trailingIconStr != null && trailingIconStr.toString().trim().isNotEmpty) {
+      String iconName = trailingIconStr.toString().trim();
+      if (!iconName.startsWith('Icons.') && !iconName.startsWith('FontAwesomeIcons.')) {
+        iconName = 'Icons.$iconName';
+      }
+      final iconData = parseIconData(iconName);
+      Widget iconWidget;
+      if (iconName.startsWith('FontAwesomeIcons.')) {
+         iconWidget = FaIcon(iconData, color: trailingColor);
+      } else {
+         iconWidget = Icon(iconData as IconData?, color: trailingColor);
+      }
+
+      final trailingNavigateTo = node.properties['trailingNavigateTo'];
+      if (trailingNavigateTo != null) {
+        finalTrailing = IconButton(
+          icon: iconWidget,
+          onPressed: () {
+            if (!CanvasPreviewMode.of(context)) return;
+            final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+            final rowData = SupabaseRowDataContext.of(context);
+            if (rowData != null) {
+              provider.activeRowData = rowData;
+            }
+            try {
+              final target = provider.screens.firstWhere((s) => s.id == trailingNavigateTo);
+              provider.selectScreen(target);
+            } catch (_) {}
+          },
+        );
+      } else {
+        finalTrailing = iconWidget;
+      }
+    } else {
+       finalTrailing = _resolveSlot(context, node.properties['trailing'], hoveredNode);
+    }
+
     return ListTile(
-      leading: _resolveSlot(context, node.properties['leading'], hoveredNode),
+      leading: finalLeading,
       title: titleWidget,
       subtitle: subtitleWidget,
-      trailing: _resolveSlot(context, node.properties['trailing'], hoveredNode),
+      trailing: finalTrailing,
       onTap: () {
         if (!CanvasPreviewMode.of(context)) return;
         
+        final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+        final rowData = SupabaseRowDataContext.of(context);
+        if (rowData != null) {
+          provider.activeRowData = rowData;
+        }
+
         final navigateTo = node.properties['navigateTo'];
         if (navigateTo != null) {
-          final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
           try {
             final target = provider.screens.firstWhere((s) => s.id == navigateTo);
             provider.selectScreen(target);

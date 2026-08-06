@@ -14,8 +14,9 @@ class ContainerBuilder extends BaseWidgetBuilder {
             ? node.properties['decoration'] as Map<String, dynamic>
             : null;
 
-    // Color: prefer flat 'color', fall back to decoration.color
+    // Color: prefer flat 'color', fall back to 'backgroundColor', then decoration.color
     final Color? parsedColor = parseColor(node.properties['color'], context) ??
+        parseColor(node.properties['backgroundColor'], context) ??
         parseColor(decorationMap?['color'], context);
 
     // BorderRadius: prefer flat 'borderRadius', fall back to decoration.borderRadius

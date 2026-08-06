@@ -5,11 +5,44 @@ import '../models/widget_node.dart';
 enum AiAgentType {
   openai,
   deepseek,
+  kimi,
+  gemini,
+}
+
+extension AiAgentTypeExtension on AiAgentType {
+  String get nameString {
+    switch (this) {
+      case AiAgentType.openai:
+        return 'openai';
+      case AiAgentType.deepseek:
+        return 'deepseek';
+      case AiAgentType.kimi:
+        return 'kimi';
+      case AiAgentType.gemini:
+        return 'gemini';
+    }
+  }
+
+  static AiAgentType fromString(String str) {
+    switch (str.toLowerCase()) {
+      case 'openai':
+        return AiAgentType.openai;
+      case 'kimi':
+        return AiAgentType.kimi;
+      case 'gemini':
+        return AiAgentType.gemini;
+      case 'deepseek':
+      default:
+        return AiAgentType.deepseek;
+    }
+  }
 }
 
 class AiGenerationService {
   static const String _openAiEndpoint = 'https://api.openai.com/v1/chat/completions';
   static const String _deepseekEndpoint = 'https://api.deepseek.com/chat/completions';
+  static const String _kimiEndpoint = 'https://openrouter.ai/api/v1/chat/completions';
+  static const String _geminiEndpoint = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 
   static Future<List<WidgetNode>> generateUi({
     required String prompt,
@@ -20,9 +53,20 @@ class AiGenerationService {
     int retryCount = 0,
     String? lastError,
   }) async {
-    final String endpoint = agentType == AiAgentType.openai ? _openAiEndpoint : _deepseekEndpoint;
-    final String model =
-        agentType == AiAgentType.openai ? 'gpt-4o' : 'deepseek-v4-flash';
+    final String endpoint = agentType == AiAgentType.openai
+        ? _openAiEndpoint
+        : agentType == AiAgentType.kimi
+            ? _kimiEndpoint
+            : agentType == AiAgentType.gemini
+                ? _geminiEndpoint
+                : _deepseekEndpoint;
+    final String model = agentType == AiAgentType.openai
+        ? 'gpt-4o'
+        : agentType == AiAgentType.kimi
+            ? 'moonshotai/kimi-k2'
+            : agentType == AiAgentType.gemini
+                ? 'gemini-2.5-flash'
+                : 'deepseek-v4-flash';
 
     final String systemPrompt = '''
 You are an expert Flutter UI generator for the SynappKit platform. Reply with a single valid JSON object only — no markdown fences, no explanations.
@@ -59,19 +103,37 @@ BottomNavigationBar:   currentIndex:0  type:"fixed"  backgroundColor:<color>  se
 Text:                  text:"..."  fontSize:<number>  color:<color>  fontWeight:<fontWeight>  textAlign:"TextAlign.center|left|right"  maxLines:<number>  overflow:"TextOverflow.ellipsis"
 Container:             backgroundColor:<color>  width:<number>|"double.infinity"  height:<number>  padding:<edgeinsets>  margin:<edgeinsets>  borderRadius:<number>  gradient:"linear"  shadowColor:<color>  shadowBlurRadius:<number>
 Image:                 src:<url>  width:<number>  height:<number>  fit:<boxFit>  borderRadius:<number>
-Icon / IconButton:     icon:<icon>  color:<color>  size:<number>
+Icon:                  icon:<icon>  color:<color>  size:<number>
+IconButton:            icon:<Icon-node>|string  color:<color>  size:<number>  navigateTo:"<screen_id>"  actions:[<action>,...]
 CircleAvatar:          backgroundColor:<color>  radius:<number>  imageUrl:<url>
 Card:                  elevation:<number>  color:<color>  borderRadius:<number>  margin:<edgeinsets>
-ElevatedButton|TextButton|OutlinedButton|MaterialButton: text:"..."  backgroundColor:<color>  foregroundColor:<color>  width:<number>  height:<number>  borderRadius:<number>
+ElevatedButton|TextButton|OutlinedButton: text:"..."  backgroundColor:<color>  foregroundColor:<color>  width:<number>  height:<number>  borderRadius:<number>  navigateTo:"<screen_id>"  actions:[<action>,...]
+MaterialButton:        text:"..."  color:<color>  textColor:<color>  disabledColor:<color>  splashColor:<color>  highlightColor:<color>  padding:<edgeinsets>  elevation:<number>  minWidth:<number>  height:<number>  borderRadius:<number>  navigateTo:"<screen_id>"  actions:[<action>,...]
+ListTile:              title:<Text-node>|string  subtitle:<Text-node>|string  leading:<node>  trailing:<node>  navigateTo:"<screen_id>"  actions:[<action>,...]  selected:bool  tileColor:<color>
 TextField:             hintText:"..."  labelText:"..."  filled:bool  fillColor:<color>  prefixIcon:<icon>  suffixIcon:<icon>  obscureText:bool  border:"OutlineInputBorder|none"
 ListView|SingleChildScrollView: scrollDirection:"Axis.vertical|horizontal"  padding:<edgeinsets>
 GridView:              crossAxisCount:<number>  mainAxisSpacing:<number>  crossAxisSpacing:<number>  childAspectRatio:<number>
 Positioned:            top:<number>  bottom:<number>  left:<number>  right:<number>  width:<number>  height:<number>
 Divider:               color:<color>  thickness:<number>  height:<number>
 SizedBox:              width:<number>  height:<number>
-Expanded|Flexible:     flex:<number>
+Expanded:              flex:<number>
+Flexible:              flex:<number>  fit:"loose|tight"
+FittedBox:             fit:<boxFit>  alignment:"Alignment.center|topLeft|topRight|..."
 Padding:               padding:<edgeinsets>
 Row|Column:            mainAxisAlignment:<mainAxis>  crossAxisAlignment:<crossAxis>  mainAxisSize:"MainAxisSize.min|max"
+
+[ACTIONS]
+Interactive widgets can contain actions under properties.
+- "navigateTo": String (ID of the target screen, or "__back__" to pop back).
+- "actions": List of Action Objects:
+  1. Navigate: {"type": "navigate", "targetScreenId": "<screen_id>"}
+  2. Supabase Insert: {"type": "supabase_insert", "tableName": "<table_name>", "payload": {"<column>": {"type": "widget_state|query_data|static", "value": "<input_widget_id_or_field_name>"}}}
+  3. Supabase Update: {"type": "supabase_update", "tableName": "<table_name>", "payload": {"<column>": {"type": "widget_state|query_data|static", "value": "<input_widget_id_or_field_name>"}}}
+  4. Supabase Delete: {"type": "supabase_delete", "tableName": "<table_name>"}
+
+[DATA BINDING]
+Widgets inside dynamic database lists can bind properties to query columns under properties:
+- "dataBinding": {"title": {"field": "<column>"}, "subtitle": {"field": "<column>"}}
 
 [CRITICAL RULES]
 1. BottomNavigationBar MUST be in Scaffold "bottomNavigationBar" property — NEVER in children.
@@ -83,9 +145,11 @@ Row|Column:            mainAxisAlignment:<mainAxis>  crossAxisAlignment:<crossAx
 7. Do NOT use widget types outside [WIDGET LIST].
 8. For long screens wrap Column in SingleChildScrollView as the Scaffold body.
 9. AppBar "title" is a nested Text node object, not a plain string.
-10. OUTPUT RAW JSON ONLY — no markdown, no code fences, no text before or after.
-11. CRITICAL: Your JSON MUST BE COMPLETELY MINIFIED. Do NOT use newlines, indentation, or spaces for formatting. Every token counts.
+10. You MUST wrap your JSON output in a standard Markdown code block (```json ... ```). Do not include any other text.
+11. CRITICAL: DO NOT manually minify the JSON. Use standard indentation. Forced minification causes syntax errors. 
 12. CRITICAL: LIMIT your output to a MAXIMUM of 3 core screens. Do not generate overly repetitive lists or deeply nested unnecessary hierarchies.
+13. CRITICAL SYNTAX RULE: Every child node MUST be placed INSIDE the "children": [...] array. NEVER place a child object directly after "properties": {...}. The only allowed keys in a node are "id", "type", "properties", and "children".
+14. CRITICAL SYNTAX RULE: Ensure all string values are properly closed with double quotes, and all keys are properly quoted.
 ''';
 
     final List<Map<String, dynamic>> contextMessages = [];
@@ -114,14 +178,26 @@ Row|Column:            mainAxisAlignment:<mainAxis>  crossAxisAlignment:<crossAx
       'messages': contextMessages,
       'temperature': 0.2,
       'max_tokens': 8192,
-      // OpenAI + DeepSeek V4 — valid JSON object, fewer markdown / repair retries.
-      'response_format': {'type': 'json_object'},
     };
+
+    // OpenRouter/Kimi and some OpenAI models may have issues with structured-outputs.
+    // Apply it specifically for DeepSeek as requested.
+    if (agentType == AiAgentType.deepseek || agentType == AiAgentType.gemini) {
+      body['response_format'] = {'type': 'json_object'};
+    }
 
     // DeepSeek V4 defaults to thinking mode (extra reasoning tokens → much slower).
     if (agentType == AiAgentType.deepseek) {
       body['thinking'] = {'type': 'disabled'};
     }
+
+    // Validate API key before making request
+    if (apiKey.isEmpty) {
+      throw Exception('API key is required for ${agentType.nameString} agent.');
+    }
+
+    print('🛠️ Using agent: $agentType');
+    print('🔑 API Key provided: ${apiKey.isNotEmpty ? '******' : 'EMPTY'}');
 
     final response = await http.post(
       Uri.parse(endpoint),
@@ -131,20 +207,18 @@ Row|Column:            mainAxisAlignment:<mainAxis>  crossAxisAlignment:<crossAx
       },
       body: jsonEncode(body));
 
+    if (response.statusCode == 401) {
+      // Authentication failure – provide clear guidance
+      throw Exception('401 Unauthorized: Invalid API key for ${agentType.nameString}. Please verify your key in the AI Prompt dialog.');
+    }
 
-    if (response.statusCode == 200) {
+      if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
       String content = jsonResponse['choices'][0]['message']['content'];
+      print('🔍 RAW AI OUTPUT:\n$content');
       
-      // Clean up markdown markers if the AI ignored the instruction
-      content = content.replaceAll('```json', '').replaceAll('```', '').trim();
-      
-      // Fix invalid JSON escape sequences generated by LLMs.
-      // JSON only allows escaping: ", \, /, b, f, n, r, t, u
-      // Any backslash followed by a character NOT in this list is an invalid escape.
-      content = content.replaceAllMapped(RegExp(r'\\([^"\\/bfnrtu])'), (match) {
-        return match.group(1)!;
-      });
+      // We must repair the JSON BEFORE attempting to parse it!
+      content = repairJson(content);
       
       List<WidgetNode> generatedScreens = [];
       
@@ -206,5 +280,131 @@ Row|Column:            mainAxisAlignment:<mainAxis>  crossAxisAlignment:<crossAx
     for (var child in node.children) {
       _ensureUniqueIds(child, existingIds);
     }
+  }
+
+  static String repairJson(String json) {
+    int firstBrace = json.indexOf('{');
+    int lastBrace = json.lastIndexOf('}');
+    if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
+      json = json.substring(firstBrace, lastBrace + 1);
+    } else {
+      int firstBracket = json.indexOf('[');
+      int lastBracket = json.lastIndexOf(']');
+      if (firstBracket != -1 && lastBracket != -1 && lastBracket > firstBracket) {
+        json = json.substring(firstBracket, lastBracket + 1);
+      }
+    }
+
+    json = json.replaceAll('```json', '').replaceAll('```', '').trim();
+
+    // Removed global newline escaping as it breaks formatted JSON outside of strings
+    // JSON parsers natively support whitespace newlines.
+    json = json.replaceAll('\r', '');
+    // Fix Kimi-specific structural errors
+    json = json.replaceAll('":"":"', '":"'); // fixes "type":"":"BottomNavigationBar" -> "type":"BottomNavigationBar"
+    json = json.replaceAll('type":"":', 'type":');
+    
+    json = json.replaceAllMapped(
+      RegExp(r'("icon"\s*:\s*"[^",]+),(\s*"label")'),
+      (m) => '${m.group(1)}",${m.group(2)}',
+    );
+    json = json.replaceAllMapped(
+      RegExp(r'("icon"\s*:\s*"[^",]+),(\s*"navigateTo")'),
+      (m) => '${m.group(1)}",${m.group(2)}',
+    );
+    
+    // Fix missing leading quote on properties like `,color":"` -> `,"color":"`
+    json = json.replaceAllMapped(
+      RegExp(r',([a-zA-Z0-9_]+)":'),
+      (m) => ',"${m.group(1)}":',
+    );
+    // Fix double open brace like `"properties":{"{` -> `"properties":{`
+    json = json.replaceAll('":{"{', '":{');
+
+    json = json.replaceAllMapped(RegExp("'([^']*)'"), (m) => '"${m.group(1)}"');
+
+    json = json.replaceAllMapped(RegExp(r'"\s+("[^\"]+"\s*:)'), (match) {
+      return '", ${match.group(1)}';
+    });
+    json = json.replaceAllMapped(RegExp(r'(\d+|true|false|null)\s+("[^\"]+"\s*:)'), (match) {
+      return '${match.group(1)}, ${match.group(2)}';
+    });
+
+    json = _escapeUnescapedQuotes(json);
+
+    json = json.replaceAll(RegExp(r',\s*}'), '}');
+    json = json.replaceAll(RegExp(r',\s*\]'), ']');
+
+    // Insert missing commas between adjacent JSON objects or arrays
+    json = json.replaceAll(RegExp(r'}\s*{'), '},{');
+    json = json.replaceAll(RegExp(r'\]\s*\{'), '],{');
+    json = json.replaceAll(RegExp(r'}\s*\['), '},{');
+
+    json = json.replaceAllMapped(RegExp(r'\\([^"\\/bfnrtu])'), (match) {
+      return '\\\\${match.group(1)}';
+    });
+
+    return json;
+  }
+
+  static String _escapeUnescapedQuotes(String json) {
+    final int len = json.length;
+    final StringBuffer result = StringBuffer();
+    bool inString = false;
+    
+    for (int i = 0; i < len; i++) {
+      final String c = json[i];
+      
+      if (!inString) {
+        if (c == '"') {
+          inString = true;
+          result.write(c);
+        } else {
+          result.write(c);
+        }
+      } else {
+        if (c == '\\') {
+          result.write(c);
+          if (i + 1 < len) {
+            result.write(json[i + 1]);
+            i++;
+          }
+        } else if (c == '"') {
+          // Look ahead to find the next non-whitespace character
+          int nextIdx = i + 1;
+          while (nextIdx < len && _isWhitespace(json[nextIdx])) {
+            nextIdx++;
+          }
+          
+          if (nextIdx < len) {
+            final String nextChar = json[nextIdx];
+            // Valid delimiters that can follow a closing quote of a string in JSON:
+            // - ':' (if it was a key)
+            // - ',' (if it is followed by next property or item)
+            // - '}' (end of object)
+            // - ']' (end of array)
+            if (nextChar == ':' || nextChar == ',' || nextChar == '}' || nextChar == ']') {
+              inString = false;
+              result.write(c);
+            } else {
+              // It's an unescaped quote inside the string! Escape it.
+              result.write('\\"');
+            }
+          } else {
+            // End of JSON reached, this quote closes the string
+            inString = false;
+            result.write(c);
+          }
+        } else {
+          result.write(c);
+        }
+      }
+    }
+    
+    return result.toString();
+  }
+
+  static bool _isWhitespace(String char) {
+    return char == ' ' || char == '\t' || char == '\n' || char == '\r';
   }
 }

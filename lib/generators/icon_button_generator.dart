@@ -13,8 +13,10 @@ class IconButtonGenerator extends BaseWidgetGenerator {
     // Handle icon property (can be nested Icon widget)
     if (node.properties['icon'] != null) {
       final iconData = node.properties['icon'];
-      if (iconData is Map<String, dynamic>) {
-        final iconNode = WidgetNode.fromJson(iconData);
+      if (iconData is WidgetNode) {
+        props.add('icon: ${WidgetGeneratorRegistry.generateCode(iconData, indent: 0)}');
+      } else if (iconData is Map) {
+        final iconNode = WidgetNode.fromJson(Map<String, dynamic>.from(iconData));
         props.add('icon: ${WidgetGeneratorRegistry.generateCode(iconNode, indent: 0)}');
       } else if (iconData is String) {
         props.add('icon: Icon($iconData)');
@@ -23,9 +25,10 @@ class IconButtonGenerator extends BaseWidgetGenerator {
       props.add('icon: const Icon(Icons.help)'); // Default fallback
     }
 
-    // Handle onPressed
-    if (node.properties.containsKey('navigateTo')) {
-      props.add('onPressed: ${generateNavigationCode(node.properties['navigateTo'])}');
+    final actions = node.properties['actions'] as List<dynamic>?;
+    final fallbackNavigateTo = node.properties['navigateTo'];
+    if (actions != null || fallbackNavigateTo != null || node.properties['onPressed'] != null) {
+      props.add('onPressed: ${generateActionFlowCode(actions, fallbackNavigateTo)}');
     } else {
       props.add('onPressed: () {}'); // Always provide onPressed
     }

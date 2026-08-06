@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import '../../../models/widget_node.dart';
 import '../selection_wrapper.dart';
 import '../selection_preferred_size_wrapper.dart';
+import '../canvas_preview_mode.dart';
 import 'base_widget_builder.dart';
+import 'supabase_query_wrapper_builder.dart';
+import '../../../providers/widget_tree_provider.dart';
+import 'package:provider/provider.dart';
 import 'clip_r_rect_builder.dart';
 import 'scaffold_builder.dart' as wb;
 import 'container_builder.dart' as wb;
@@ -96,6 +100,8 @@ import 'auto_complete_builder.dart' as wb;
 import 'toggle_buttons_builder.dart' as wb;
 import 'segmented_button_builder.dart' as wb;
 import 'navigation_rail_builder.dart' as wb;
+import 'circular_progress_indicator_builder.dart' as wb;
+import 'linear_progress_indicator_builder.dart' as wb;
 
 class WidgetBuilderFactory {
   static final WidgetBuilderFactory _instance = WidgetBuilderFactory._internal();
@@ -208,6 +214,8 @@ class WidgetBuilderFactory {
     _builders['ToggleButtons'] = wb.ToggleButtonsBuilder();
     _builders['SegmentedButton'] = wb.SegmentedButtonBuilder();
     _builders['NavigationRail'] = wb.NavigationRailBuilder();
+    _builders['CircularProgressIndicator'] = wb.CircularProgressIndicatorBuilder();
+    _builders['LinearProgressIndicator'] = wb.LinearProgressIndicatorBuilder();
     print('WidgetBuilderFactory: Initialization complete. Registered ${_builders.length} builders.');
   }
 
@@ -222,10 +230,195 @@ class WidgetBuilderFactory {
     );
   }
 
+  static WidgetNode _resolveBoundProperties(BuildContext context, WidgetNode node) {
+    if (node.dataBinding == null || node.dataBinding!.isEmpty) {
+      return node;
+    }
+
+    final resolvedProps = Map<String, dynamic>.from(node.properties);
+    final rowData = SupabaseRowDataContext.of(context);
+
+    node.dataBinding!.forEach((propKey, bindingVal) {
+      if (bindingVal is Map) {
+        final field = bindingVal['field'] as String?;
+        final queryId = bindingVal['queryId'] as String?;
+        if (field == null || field.isEmpty) return;
+
+        if (rowData != null && rowData.containsKey(field)) {
+          resolvedProps[propKey] = rowData[field]?.toString();
+        } else if (queryId != null) {
+          final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+          final results = provider.queryResults[queryId];
+          if (results != null && results.isNotEmpty) {
+            final rowIndex = bindingVal['rowIndex'] as int? ?? 0;
+            if (rowIndex < results.length) {
+              final rowVal = results[rowIndex][field];
+              resolvedProps[propKey] = rowVal?.toString();
+            }
+          }
+        }
+      }
+    });
+
+    return WidgetNode(
+      id: node.id,
+      type: node.type,
+      children: node.children,
+      properties: resolvedProps,
+    );
+  }
+
+  static Axis? _parseAxis(dynamic value) {
+    if (value == null) return null;
+    if (value is String) {
+      if (value == 'Axis.horizontal' || value == 'horizontal') return Axis.horizontal;
+      if (value == 'Axis.vertical' || value == 'vertical') return Axis.vertical;
+    }
+    return null;
+  }
+
+  static EdgeInsets? _parseEdgeInsets(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return EdgeInsets.all(value.toDouble());
+    if (value is Map) {
+      return EdgeInsets.only(
+        left: (value['left'] as num?)?.toDouble() ?? 0.0,
+        top: (value['top'] as num?)?.toDouble() ?? 0.0,
+        right: (value['right'] as num?)?.toDouble() ?? 0.0,
+        bottom: (value['bottom'] as num?)?.toDouble() ?? 0.0,
+      );
+    }
+    return null;
+  }
+
+  static MainAxisAlignment? _parseMainAxisAlignment(dynamic value) {
+    if (value == null) return null;
+    if (value is String) {
+      switch (value) {
+        case 'MainAxisAlignment.start': return MainAxisAlignment.start;
+        case 'MainAxisAlignment.end': return MainAxisAlignment.end;
+        case 'MainAxisAlignment.center': return MainAxisAlignment.center;
+        case 'MainAxisAlignment.spaceBetween': return MainAxisAlignment.spaceBetween;
+        case 'MainAxisAlignment.spaceAround': return MainAxisAlignment.spaceAround;
+        case 'MainAxisAlignment.spaceEvenly': return MainAxisAlignment.spaceEvenly;
+      }
+    }
+    return null;
+  }
+
+  static CrossAxisAlignment? _parseCrossAxisAlignment(dynamic value) {
+    if (value == null) return null;
+    if (value is String) {
+      switch (value) {
+        case 'CrossAxisAlignment.start': return CrossAxisAlignment.start;
+        case 'CrossAxisAlignment.end': return CrossAxisAlignment.end;
+        case 'CrossAxisAlignment.center': return CrossAxisAlignment.center;
+        case 'CrossAxisAlignment.stretch': return CrossAxisAlignment.stretch;
+        case 'CrossAxisAlignment.baseline': return CrossAxisAlignment.baseline;
+      }
+    }
+    return null;
+  }
+
   static Widget buildWidget(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
     if (_builders.isEmpty) initialize();
-    
-    print('WidgetBuilderFactory: Attempting to build widget of type: ${node.type}');
+
+    final resolvedNode = _resolveBoundProperties(context, node);
+
+    if (resolvedNode.backendQuery != null) {
+      return SupabaseQueryWrapper(
+        node: resolvedNode,
+        hoveredNode: hoveredNode,
+        builder: (context, data) {
+          final rowData = data.isNotEmpty ? data.first : <String, dynamic>{};
+
+          // ListView and GridView: list pattern — repeat children.first as a template for each row
+          if (['ListView', 'GridView'].contains(resolvedNode.type) && resolvedNode.children.isNotEmpty) {
+            final templateChild = resolvedNode.children.first;
+            final childrenWidgets = data.map((rowData) {
+              return SupabaseRowDataContext(
+                rowData: rowData,
+                child: Builder(
+                  builder: (childContext) => buildWidget(childContext, templateChild, hoveredNode),
+                ),
+              );
+            }).toList();
+
+            Widget containerWidget;
+            if (resolvedNode.type == 'ListView') {
+              containerWidget = ListView(
+                scrollDirection: _parseAxis(resolvedNode.properties['scrollDirection']) ?? Axis.vertical,
+                padding: _parseEdgeInsets(resolvedNode.properties['padding']),
+                shrinkWrap: resolvedNode.properties['shrinkWrap'] ?? true,
+                children: childrenWidgets,
+              );
+            } else {
+              final crossAxisCount = resolvedNode.properties['crossAxisCount'] as int? ?? 2;
+              containerWidget = GridView.count(
+                crossAxisCount: crossAxisCount,
+                scrollDirection: _parseAxis(resolvedNode.properties['scrollDirection']) ?? Axis.vertical,
+                padding: _parseEdgeInsets(resolvedNode.properties['padding']),
+                shrinkWrap: resolvedNode.properties['shrinkWrap'] ?? true,
+                crossAxisSpacing: (resolvedNode.properties['crossAxisSpacing'] as num?)?.toDouble() ?? 8.0,
+                mainAxisSpacing: (resolvedNode.properties['mainAxisSpacing'] as num?)?.toDouble() ?? 8.0,
+                children: childrenWidgets,
+              );
+            }
+
+            return WidgetSelectionWrapper(
+              node: resolvedNode,
+              hoveredNode: hoveredNode,
+              child: containerWidget,
+            );
+          }
+
+          // Column and Row: detail pattern — inject the first row's data as context
+          // and render ALL children normally so each bound child can resolve its field.
+          if (['Column', 'Row'].contains(resolvedNode.type)) {
+            final allChildren = resolvedNode.children.map((child) {
+              return SupabaseRowDataContext(
+                rowData: rowData,
+                child: Builder(
+                  builder: (childContext) => buildWidget(childContext, child, hoveredNode),
+                ),
+              );
+            }).toList();
+
+            Widget containerWidget;
+            if (resolvedNode.type == 'Column') {
+              containerWidget = Column(
+                mainAxisAlignment: _parseMainAxisAlignment(resolvedNode.properties['mainAxisAlignment']) ?? MainAxisAlignment.start,
+                crossAxisAlignment: _parseCrossAxisAlignment(resolvedNode.properties['crossAxisAlignment']) ?? CrossAxisAlignment.start,
+                children: allChildren,
+              );
+            } else {
+              containerWidget = Row(
+                mainAxisAlignment: _parseMainAxisAlignment(resolvedNode.properties['mainAxisAlignment']) ?? MainAxisAlignment.start,
+                crossAxisAlignment: _parseCrossAxisAlignment(resolvedNode.properties['crossAxisAlignment']) ?? CrossAxisAlignment.start,
+                children: allChildren,
+              );
+            }
+
+            return WidgetSelectionWrapper(
+              node: resolvedNode,
+              hoveredNode: hoveredNode,
+              child: containerWidget,
+            );
+          }
+
+          // All other widgets: provide first row's data to context
+          return SupabaseRowDataContext(
+            rowData: rowData,
+            child: _buildInnerWidget(context, resolvedNode, hoveredNode),
+          );
+        },
+      );
+    }
+
+    return _buildInnerWidget(context, resolvedNode, hoveredNode);
+  }
+
+  static Widget _buildInnerWidget(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
     final builder = _builders[node.type];
     
     Widget widget;
@@ -240,14 +433,73 @@ class WidgetBuilderFactory {
       );
     }
 
-    // Don't wrap "parent-data" widgets as they must be direct children of their layout parents
-    // (e.g., Expanded/Flexible must be children of Column/Row, Positioned must be child of Stack)
     if (node.type == 'Expanded' || 
         node.type == 'Flexible' || 
         node.type == 'Positioned' ||
         node.type == 'TableCell' ||
         node.type == 'Spacer') {
       return widget;
+    }
+
+    final bool hasActions = (node.properties['actions'] is List && (node.properties['actions'] as List).isNotEmpty) || 
+                            node.properties['navigateTo'] != null;
+    final bool isNativelyActionable = [
+      'ElevatedButton', 'TextButton', 'OutlinedButton', 'Button',
+      'IconButton', 'FloatingActionButton', 'FAB', 'MaterialButton',
+      'InkWell', 'GestureDetector', 'ListTile', 'Checkbox', 'Radio', 'Switch', 'Slider'
+    ].contains(node.type);
+    final bool isExcludedFromActionWrapping = [
+      'Scaffold', 'AppBar', 'Drawer', 'EndDrawer', 'AlertDialog', 'Dialog', 'BottomSheet',
+      'Expanded', 'Flexible', 'Positioned', 'Spacer',
+      'ListView', 'GridView', 'SingleChildScrollView', 'CustomScrollView', 'ReorderableListView'
+    ].contains(node.type);
+
+    if (hasActions && !isNativelyActionable && !isExcludedFromActionWrapping) {
+      widget = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (!CanvasPreviewMode.of(context)) return;
+          final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+          
+          final rowData = SupabaseRowDataContext.of(context);
+          if (rowData != null) {
+            provider.activeRowData = rowData;
+          }
+
+          final navigateTo = node.properties['navigateTo'];
+          if (navigateTo != null) {
+            try {
+              final target = provider.screens.firstWhere((s) => s.id == navigateTo);
+              provider.selectScreen(target);
+            } catch (_) {}
+            return;
+          }
+
+          final actions = node.properties['actions'];
+          if (actions is List) {
+            for (var action in actions) {
+              if (action is Map<String, dynamic>) {
+                final type = action['type'];
+                if (type == 'navigate') {
+                  final targetScreenId = action['targetScreenId'];
+                  if (targetScreenId == '__back__') {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
+                  } else if (targetScreenId != null) {
+                    try {
+                      final target = provider.screens.firstWhere((s) => s.id == targetScreenId);
+                      provider.selectScreen(target);
+                    } catch (_) {}
+                  }
+                  break;
+                }
+              }
+            }
+          }
+        },
+        child: widget,
+      );
     }
 
     if (node.type == 'AppBar' && widget is PreferredSizeWidget) {

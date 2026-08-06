@@ -86,7 +86,13 @@ import 'auto_complete_generator.dart';
 import 'toggle_buttons_generator.dart';
 import 'segmented_button_generator.dart';
 import 'navigation_rail_generator.dart';
+import 'flexible_generator.dart';
+import 'fitted_box_generator.dart';
+import 'material_button_generator.dart';
+import 'circular_progress_indicator_generator.dart';
+import 'linear_progress_indicator_generator.dart';
 import '../models/widget_node.dart';
+import 'project_generator.dart';
 
 class WidgetGeneratorRegistry {
   static final Map<String, BaseWidgetGenerator> _generators = {
@@ -184,12 +190,153 @@ class WidgetGeneratorRegistry {
     'ToggleButtons': ToggleButtonsGenerator(),
     'SegmentedButton': SegmentedButtonGenerator(),
     'NavigationRail': NavigationRailGenerator(),
+    'Flexible': FlexibleGenerator(),
+    'FittedBox': FittedBoxGenerator(),
+    'MaterialButton': MaterialButtonGenerator(),
+    'CircularProgressIndicator': CircularProgressIndicatorGenerator(),
+    'LinearProgressIndicator': LinearProgressIndicatorGenerator(),
   };
 
   static String generateCode(WidgetNode node, {int indent = 0}) {
+    final indentStr = '  ' * indent;
+    final childIndentStr = '  ' * (indent + 1);
+
+    if (node.backendQuery != null && ProjectGenerator.activeQueries.isNotEmpty) {
+      final queryId = node.backendQuery!['queryId'] as String;
+      final query = ProjectGenerator.activeQueries.where((q) => q.id == queryId).firstOrNull;
+
+      if (query != null) {
+        final rawMethodName = query.name.replaceAll(RegExp(r'[^a-zA-Z0-9]'), ' ').split(' ').map((s) => s.isNotEmpty ? s[0].toUpperCase() + s.substring(1) : '').join('');
+        final methodName = rawMethodName.isNotEmpty ? rawMethodName[0].toLowerCase() + rawMethodName.substring(1) : 'fetchData';
+
+        final methodParams = <String>[];
+        for (final f in query.filters) {
+          final valStr = f.value?.toString() ?? '';
+          final isDynamic = f.value == null || 
+                            valStr.isEmpty || 
+                            valStr == 'idParam' || 
+                            valStr == 'widget.idParam' ||
+                            (valStr.startsWith('{{') && valStr.endsWith('}}')) ||
+                            f.column == 'id' || 
+                            f.column.endsWith('_id');
+          if (isDynamic) {
+            final paramName = '${f.column}Param';
+            methodParams.add('$paramName: widget.idParam');
+          }
+        }
+        final methodArgs = methodParams.isNotEmpty ? methodParams.join(', ') : '';
+
+        final isStream = query.enableRealtime;
+        final builderType = isStream ? 'StreamBuilder' : 'FutureBuilder';
+        final connectionField = isStream 
+            ? 'stream: SupabaseService.instance.stream$rawMethodName($methodArgs)' 
+            : 'future: SupabaseService.instance.$methodName($methodArgs)';
+
+        final wasInsideRepeated = ProjectGenerator.isInsideRepeatedList;
+        ProjectGenerator.isInsideRepeatedList = true;
+
+        String innerContainerCode = '';
+        if (node.children.isNotEmpty) {
+          final templateChild = node.children.first;
+          final templateChildCode = generateCode(templateChild, indent: indent + 4).trimLeft();
+
+          if (node.type == 'ListView') {
+            innerContainerCode = '''${indentStr}ListView.builder(
+$childIndentStr  itemCount: data.length,
+$childIndentStr  shrinkWrap: true,
+$childIndentStr  itemBuilder: (context, index) {
+$childIndentStr    final item = data[index];
+$childIndentStr    return $templateChildCode;
+$childIndentStr  },
+$childIndentStr)''';
+          } else if (node.type == 'GridView') {
+            innerContainerCode = '''${indentStr}GridView.builder(
+$childIndentStr  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+$childIndentStr    crossAxisCount: 2,
+$childIndentStr    crossAxisSpacing: 8,
+$childIndentStr    mainAxisSpacing: 8,
+$childIndentStr  ),
+$childIndentStr  itemCount: data.length,
+$childIndentStr  shrinkWrap: true,
+$childIndentStr  itemBuilder: (context, index) {
+$childIndentStr    final item = data[index];
+$childIndentStr    return $templateChildCode;
+$childIndentStr  },
+$childIndentStr)''';
+          } else if (node.type == 'Column' || node.type == 'Row') {
+            ProjectGenerator.isInsideRepeatedList = false;
+            final childrenCodes = node.children.map((c) => generateCode(c, indent: indent + 4)).join(',\n');
+            innerContainerCode = '''${indentStr}${node.type}(
+$childIndentStr children: [
+${childrenCodes}
+$childIndentStr ],
+$indentStr)''';
+          } else {
+            ProjectGenerator.isInsideRepeatedList = false;
+            final generator = _generators[node.type];
+            final normalCode = generator != null 
+                ? generator.generateCode(node, indent: indent + 2).trimLeft()
+                : '// Unknown widget type: ${node.type}';
+            innerContainerCode = '${indentStr}$normalCode';
+          }
+        } else {
+          ProjectGenerator.isInsideRepeatedList = false;
+          final generator = _generators[node.type];
+          final normalCode = generator != null 
+              ? generator.generateCode(node, indent: indent + 2).trimLeft()
+              : '// Unknown widget type: ${node.type}';
+          innerContainerCode = '${indentStr}$normalCode';
+        }
+
+        ProjectGenerator.isInsideRepeatedList = wasInsideRepeated;
+
+        return '''$indentStr$builderType<List<Map<String, dynamic>>>(
+$childIndentStr$connectionField,
+$childIndentStr  builder: (context, snapshot) {
+$childIndentStr  if (snapshot.connectionState == ConnectionState.waiting) {
+$childIndentStr    return const Center(child: CircularProgressIndicator());
+$childIndentStr  }
+$childIndentStr  if (snapshot.hasError) {
+$childIndentStr    return Center(child: Text('Error: \${snapshot.error}'));
+$childIndentStr  }
+$childIndentStr  final data = snapshot.data ?? [];
+$childIndentStr  if (data.isEmpty) {
+$childIndentStr    return const Center(child: Text('No data found'));
+$childIndentStr  }
+$childIndentStr  return ${innerContainerCode.trimLeft()};
+$childIndentStr},
+$indentStr)''';
+      }
+    }
+
     final generator = _generators[node.type];
     if (generator != null) {
-      return generator.generateCode(node, indent: indent);
+      var code = generator.generateCode(node, indent: indent);
+
+      final bool hasActions = (node.properties['actions'] is List && (node.properties['actions'] as List).isNotEmpty) || 
+                              node.properties['navigateTo'] != null;
+      final bool isNativelyActionable = [
+        'ElevatedButton', 'TextButton', 'OutlinedButton', 'Button',
+        'IconButton', 'FloatingActionButton', 'FAB', 'MaterialButton',
+        'InkWell', 'GestureDetector', 'ListTile', 'Checkbox', 'Radio', 'Switch', 'Slider'
+      ].contains(node.type);
+      final bool isExcludedFromActionWrapping = [
+        'Scaffold', 'AppBar', 'Drawer', 'EndDrawer', 'AlertDialog', 'Dialog', 'BottomSheet',
+        'Expanded', 'Flexible', 'Positioned', 'Spacer',
+        'ListView', 'GridView', 'SingleChildScrollView', 'CustomScrollView', 'ReorderableListView'
+      ].contains(node.type);
+
+      if (hasActions && !isNativelyActionable && !isExcludedFromActionWrapping) {
+        final fallbackNavigateTo = node.properties['navigateTo'];
+        final actions = node.properties['actions'];
+        final actionCode = generator.generateActionFlowCode(actions as List?, fallbackNavigateTo?.toString());
+        final cleanCode = code.trimLeft();
+        code = '${indentStr}GestureDetector(\n'
+               '${childIndentStr}onTap: $actionCode,\n'
+               '${childIndentStr}child: $cleanCode,\n'
+               '$indentStr)';
+      }
+      return code;
     }
     return '${'  ' * indent}// Unknown widget type: ${node.type}';
   }

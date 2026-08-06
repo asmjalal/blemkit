@@ -18,6 +18,7 @@ class AiPromptDialog extends StatefulWidget {
 class _AiPromptDialogState extends State<AiPromptDialog> {
   final TextEditingController _promptController = TextEditingController();
   final TextEditingController _apiKeyController = TextEditingController();
+  final Map<String, String> _apiKeysMap = {};
   
   bool _isLoading = false;
   bool _isFetchingKeys = true;
@@ -37,11 +38,15 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
         if (doc.exists) {
           final data = doc.data();
           if (data != null && data['apiKeys'] != null) {
-            String initialAgentStr = data['selectedAi'] ?? 'deepseek';
-            _selectedAgent = initialAgentStr == 'openai' ? AiAgentType.openai : AiAgentType.deepseek;
-            
             final keys = data['apiKeys'];
-            _apiKeyController.text = keys[initialAgentStr] ?? '';
+            if (keys is Map) {
+              keys.forEach((key, val) {
+                _apiKeysMap[key.toString()] = val.toString();
+              });
+            }
+            String initialAgentStr = data['selectedAi'] ?? 'deepseek';
+            _selectedAgent = AiAgentTypeExtension.fromString(initialAgentStr);
+            _apiKeyController.text = _apiKeysMap[_selectedAgent.nameString] ?? '';
           }
         }
       } catch (e) {
@@ -57,12 +62,24 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        final String agentStr = _selectedAgent == AiAgentType.openai ? 'openai' : 'deepseek';
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'selectedAi': agentStr,
-          'apiKeys': {
-            agentStr: _apiKeyController.text.trim(),
+        final String agentStr = _selectedAgent.nameString;
+        final String apiKey = _apiKeyController.text.trim();
+        _apiKeysMap[agentStr] = apiKey;
+        // Fetch existing apiKeys map to merge
+        final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+        final docSnap = await docRef.get();
+        Map<String, dynamic> existingKeys = {};
+        if (docSnap.exists) {
+          final data = docSnap.data();
+          if (data != null && data['apiKeys'] is Map) {
+            existingKeys = Map<String, dynamic>.from(data['apiKeys'] as Map);
           }
+        }
+        // Update the map with the new key
+        existingKeys[agentStr] = apiKey;
+        await docRef.set({
+          'selectedAi': agentStr,
+          'apiKeys': existingKeys,
         }, SetOptions(merge: true));
       } catch (e) {
         debugPrint('Error saving key: $e');
@@ -171,11 +188,21 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
                     items: const [
                       DropdownMenuItem(value: AiAgentType.deepseek, child: Text('DeepSeek Chat')),
                       DropdownMenuItem(value: AiAgentType.openai, child: Text('OpenAI GPT-4o')),
+                      DropdownMenuItem(value: AiAgentType.kimi, child: Text('Kimi K2')),
+                      DropdownMenuItem(value: AiAgentType.gemini, child: Text('Google Gemini')),
                     ],
-                    onChanged: (val) {
+                    onChanged: (val) async {
                       if (val != null) {
-                        setState(() => _selectedAgent = val);
-                        _fetchUserKeys(); // Refetch the specific key for the newly selected model
+                        // Preserve current key for the previous agent
+                        _apiKeysMap[_selectedAgent.nameString] = _apiKeyController.text.trim();
+                        setState(() {
+                          _selectedAgent = val;
+                          _apiKeyController.text = _apiKeysMap[val.nameString] ?? '';
+                        });
+                        // Save only if the new API key is not empty
+                        if (_apiKeyController.text.trim().isNotEmpty) {
+                          await _saveKey();
+                        }
                       }
                     },
                   ),

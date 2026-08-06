@@ -1,0 +1,788 @@
+[
+  {
+    "id": "sa_home",
+    "type": "Scaffold",
+    "properties": {
+      "backgroundColor": "4294506744",
+      "pageName": "Storefront",
+      "appBar": {
+        "id": "sa_home_ab",
+        "type": "AppBar",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "elevation": 0.0,
+          "title": {
+            "id": "sa_home_ab_title",
+            "type": "Text",
+            "properties": {
+              "text": "Supabase Premium Shop",
+              "fontSize": 18.0,
+              "color": "4279179050",
+              "fontWeight": "bold"
+            },
+            "children": []
+          },
+          "actions": [
+            {
+              "id": "sa_home_cart",
+              "type": "IconButton",
+              "properties": {
+                "icon": "Icons.shopping_cart_outlined",
+                "color": "4279179050",
+                "size": 24.0,
+                "navigateTo": "sa_cart"
+              },
+              "children": []
+            }
+          ]
+        }
+      }
+    },
+    "children": [
+      {
+        "id": "sa_home_scsv",
+        "type": "SingleChildScrollView",
+        "properties": {
+          "scrollDirection": "Axis.vertical"
+        },
+        "children": [
+          {
+            "id": "sa_home_col",
+            "type": "Column",
+            "properties": {
+              "mainAxisAlignment": "MainAxisAlignment.start",
+              "crossAxisAlignment": "CrossAxisAlignment.start"
+            },
+            "children": [
+              {
+                "id": "sa_banner",
+                "type": "Container",
+                "properties": {
+                  "height": 130.0,
+                  "margin": {
+                    "left": 16.0,
+                    "top": 16.0,
+                    "right": 16.0,
+                    "bottom": 16.0
+                  },
+                  "borderRadius": 12.0,
+                  "color": "4283385573"
+                },
+                "children": [
+                  {
+                    "id": "sa_banner_pad",
+                    "type": "Padding",
+                    "properties": {
+                      "padding": {
+                        "left": 20.0,
+                        "top": 20.0,
+                        "right": 20.0,
+                        "bottom": 20.0
+                      }
+                    },
+                    "children": [
+                      {
+                        "id": "sa_banner_col",
+                        "type": "Column",
+                        "properties": {
+                          "mainAxisAlignment": "MainAxisAlignment.center",
+                          "crossAxisAlignment": "CrossAxisAlignment.start"
+                        },
+                        "children": [
+                          {
+                            "id": "sa_banner_t1",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Live Supabase Database",
+                              "fontSize": 18.0,
+                              "color": "4294967295",
+                              "fontWeight": "bold"
+                            },
+                            "children": []
+                          },
+                          {
+                            "id": "sa_banner_t2",
+                            "type": "Text",
+                            "properties": {
+                              "text": "Products are fetched live from your backend table",
+                              "fontSize": 12.0,
+                              "color": "4294967295"
+                            },
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "sa_products_title_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": {
+                    "left": 16.0,
+                    "top": 0.0,
+                    "right": 16.0,
+                    "bottom": 12.0
+                  }
+                },
+                "children": [
+                  {
+                    "id": "sa_products_title",
+                    "type": "Text",
+                    "properties": {
+                      "text": "Featured Products",
+                      "fontSize": 16.0,
+                      "fontWeight": "bold",
+                      "color": "4279179050"
+                    },
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "id": "sa_grid_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": {
+                    "left": 16.0,
+                    "top": 0.0,
+                    "right": 16.0,
+                    "bottom": 16.0
+                  }
+                },
+                "children": [
+                  {
+                    "id": "sa_grid",
+                    "type": "GridView",
+                    "properties": {
+                      "crossAxisCount": 2,
+                      "crossAxisSpacing": 12.0,
+                      "mainAxisSpacing": 12.0,
+                      "childAspectRatio": 0.75,
+                      "backendQuery": {
+                        "queryId": "fetch_products"
+                      }
+                    },
+                    "children": [
+                      {
+                        "id": "sa_product_inkwell",
+                        "type": "InkWell",
+                        "properties": {
+                          "navigateTo": "sa_detail"
+                        },
+                        "children": [
+                          {
+                            "id": "sa_product_card",
+                            "type": "Card",
+                            "properties": {
+                              "color": "4294967295",
+                              "borderRadius": 8.0,
+                              "elevation": 0.0
+                            },
+                            "children": [
+                              {
+                                "id": "sa_product_col",
+                                "type": "Column",
+                                "properties": {
+                                  "mainAxisAlignment": "MainAxisAlignment.start",
+                                  "crossAxisAlignment": "CrossAxisAlignment.start"
+                                },
+                                "children": [
+                                  {
+                                    "id": "sa_product_img",
+                                    "type": "Image",
+                                    "properties": {
+                                      "src": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400",
+                                      "height": 110.0,
+                                      "width": 200.0,
+                                      "fit": "BoxFit.cover"
+                                    },
+                                    "dataBinding": {
+                                      "src": {
+                                        "field": "image_url"
+                                      }
+                                    },
+                                    "children": []
+                                  },
+                                  {
+                                    "id": "sa_product_details_pad",
+                                    "type": "Padding",
+                                    "properties": {
+                                      "padding": {
+                                        "left": 8.0,
+                                        "top": 8.0,
+                                        "right": 8.0,
+                                        "bottom": 8.0
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "id": "sa_product_info_col",
+                                        "type": "Column",
+                                        "properties": {
+                                          "mainAxisAlignment": "MainAxisAlignment.start",
+                                          "crossAxisAlignment": "CrossAxisAlignment.start"
+                                        },
+                                        "children": [
+                                          {
+                                            "id": "sa_product_name",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "Product Name",
+                                              "fontSize": 13.0,
+                                              "fontWeight": "bold",
+                                              "color": "4279179050",
+                                              "maxLines": 1,
+                                              "overflow": "TextOverflow.ellipsis"
+                                            },
+                                            "dataBinding": {
+                                              "text": {
+                                                "field": "name"
+                                              }
+                                            },
+                                            "children": []
+                                          },
+                                          {
+                                            "id": "sa_product_price",
+                                            "type": "Text",
+                                            "properties": {
+                                              "text": "$0.00",
+                                              "fontSize": 12.0,
+                                              "fontWeight": "bold",
+                                              "color": "4283385573"
+                                            },
+                                            "dataBinding": {
+                                              "text": {
+                                                "field": "price"
+                                              }
+                                            },
+                                            "children": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sa_detail",
+    "type": "Scaffold",
+    "properties": {
+      "backgroundColor": "4294967295",
+      "pageName": "Product Details",
+      "appBar": {
+        "id": "sa_detail_ab",
+        "type": "AppBar",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "elevation": 0.0,
+          "title": {
+            "id": "sa_detail_ab_title",
+            "type": "Text",
+            "properties": {
+              "text": "Product Details",
+              "fontSize": 18.0,
+              "color": "4279179050",
+              "fontWeight": "bold"
+            },
+            "children": []
+          }
+        }
+      }
+    },
+    "children": [
+      {
+        "id": "sa_detail_body",
+        "type": "Column",
+        "properties": {
+          "mainAxisAlignment": "MainAxisAlignment.start",
+          "crossAxisAlignment": "CrossAxisAlignment.start",
+          "backendQuery": {
+            "queryId": "fetch_product_details"
+          }
+        },
+        "children": [
+          {
+            "id": "sa_detail_img",
+            "type": "Image",
+            "properties": {
+              "src": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400",
+              "height": 240.0,
+              "width": 380.0,
+              "fit": "BoxFit.cover"
+            },
+            "dataBinding": {
+              "src": {
+                "field": "image_url"
+              }
+            },
+            "children": []
+          },
+          {
+            "id": "sa_detail_content_pad",
+            "type": "Padding",
+            "properties": {
+              "padding": {
+                "left": 16.0,
+                "top": 16.0,
+                "right": 16.0,
+                "bottom": 16.0
+              }
+            },
+            "children": [
+              {
+                "id": "sa_detail_col",
+                "type": "Column",
+                "properties": {
+                  "mainAxisAlignment": "MainAxisAlignment.start",
+                  "crossAxisAlignment": "CrossAxisAlignment.start"
+                },
+                "children": [
+                  {
+                    "id": "sa_detail_name",
+                    "type": "Text",
+                    "properties": {
+                      "text": "Product Title",
+                      "fontSize": 20.0,
+                      "fontWeight": "bold",
+                      "color": "4279179050"
+                    },
+                    "dataBinding": {
+                      "text": {
+                        "field": "name"
+                      }
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_detail_price",
+                    "type": "Text",
+                    "properties": {
+                      "text": "$0.00",
+                      "fontSize": 18.0,
+                      "fontWeight": "bold",
+                      "color": "4283385573"
+                    },
+                    "dataBinding": {
+                      "text": {
+                        "field": "price"
+                      }
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_detail_desc_title",
+                    "type": "Text",
+                    "properties": {
+                      "text": "Description",
+                      "fontSize": 14.0,
+                      "fontWeight": "bold",
+                      "color": "4279179050"
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_detail_desc",
+                    "type": "Text",
+                    "properties": {
+                      "text": "Product description will be fetched live from your table.",
+                      "fontSize": 13.0,
+                      "color": "4284963515"
+                    },
+                    "dataBinding": {
+                      "text": {
+                        "field": "description"
+                      }
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_detail_sp",
+                    "type": "SizedBox",
+                    "properties": {
+                      "height": 40.0
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_detail_btn",
+                    "type": "ElevatedButton",
+                    "properties": {
+                      "text": "Add to Cart",
+                      "backgroundColor": "4283385573",
+                      "foregroundColor": "4294967295",
+                      "height": 50.0,
+                      "borderRadius": 8.0,
+                      "actions": [
+                        {
+                          "type": "supabase_insert",
+                          "tableName": "cart",
+                          "payload": {
+                            "product_id": {
+                              "type": "query_data",
+                              "value": "id"
+                            },
+                            "name": {
+                              "type": "query_data",
+                              "value": "name"
+                            },
+                            "price": {
+                              "type": "query_data",
+                              "value": "price"
+                            },
+                            "image_url": {
+                              "type": "query_data",
+                              "value": "image_url"
+                            },
+                            "quantity": {
+                              "type": "static",
+                              "value": "1"
+                            }
+                          }
+                        },
+                        {
+                          "type": "navigate",
+                          "targetScreenId": "sa_cart"
+                        }
+                      ]
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sa_cart",
+    "type": "Scaffold",
+    "properties": {
+      "backgroundColor": "4294506744",
+      "pageName": "Shopping Cart",
+      "appBar": {
+        "id": "sa_cart_ab",
+        "type": "AppBar",
+        "properties": {
+          "backgroundColor": "4294967295",
+          "elevation": 0.0,
+          "title": {
+            "id": "sa_cart_ab_title",
+            "type": "Text",
+            "properties": {
+              "text": "My Cart",
+              "fontSize": 18.0,
+              "color": "4279179050",
+              "fontWeight": "bold"
+            },
+            "children": []
+          }
+        }
+      }
+    },
+    "children": [
+      {
+        "id": "sa_cart_col",
+        "type": "Column",
+        "properties": {
+          "mainAxisAlignment": "MainAxisAlignment.start",
+          "crossAxisAlignment": "CrossAxisAlignment.stretch"
+        },
+        "children": [
+          {
+            "id": "sa_cart_list",
+            "type": "ListView",
+            "properties": {
+              "padding": 16.0,
+              "backendQuery": {
+                "queryId": "fetch_cart"
+              }
+            },
+            "children": [
+              {
+                "id": "sa_cart_item",
+                "type": "ListTile",
+                "properties": {
+                  "title": "Cart Product Title",
+                  "subtitle": "$0.00",
+                  "tileColor": "4294967295",
+                  "leading": {
+                    "id": "sa_cart_item_img",
+                    "type": "Image",
+                    "properties": {
+                      "src": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400",
+                      "width": 50.0,
+                      "height": 50.0,
+                      "fit": "BoxFit.cover"
+                    },
+                    "dataBinding": {
+                      "src": {
+                        "field": "image_url"
+                      }
+                    },
+                    "children": []
+                  },
+                  "trailing": {
+                    "id": "sa_cart_item_del",
+                    "type": "IconButton",
+                    "properties": {
+                      "icon": "Icons.delete_outline",
+                      "color": "4294198070",
+                      "size": 22.0,
+                      "actions": [
+                        {
+                          "type": "supabase_delete",
+                          "tableName": "cart"
+                        }
+                      ]
+                    },
+                    "children": []
+                  }
+                },
+                "dataBinding": {
+                  "title": {
+                    "field": "name"
+                  },
+                  "subtitle": {
+                    "field": "price"
+                  }
+                },
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "sa_checkout_card",
+            "type": "Card",
+            "properties": {
+              "color": "4294967295",
+              "margin": 16.0,
+              "elevation": 2.0,
+              "borderRadius": 12.0
+            },
+            "children": [
+              {
+                "id": "sa_checkout_pad",
+                "type": "Padding",
+                "properties": {
+                  "padding": 16.0
+                },
+                "children": [
+                  {
+                    "id": "sa_checkout_col",
+                    "type": "Column",
+                    "properties": {
+                      "mainAxisAlignment": "MainAxisAlignment.start",
+                      "crossAxisAlignment": "CrossAxisAlignment.stretch"
+                    },
+                    "children": [
+                      {
+                        "id": "sa_checkout_btn",
+                        "type": "ElevatedButton",
+                        "properties": {
+                          "text": "Place Order",
+                          "backgroundColor": "4283385573",
+                          "foregroundColor": "4294967295",
+                          "height": 50.0,
+                          "borderRadius": 8.0,
+                          "actions": [
+                            {
+                              "type": "supabase_insert",
+                              "tableName": "orders",
+                              "payload": {
+                                "total_amount": {
+                                  "type": "static",
+                                  "value": "299.00"
+                                },
+                                "status": {
+                                  "type": "static",
+                                  "value": "Pending"
+                                }
+                              }
+                            },
+                            {
+                              "type": "navigate",
+                              "targetScreenId": "sa_order_success"
+                            }
+                          ]
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sa_order_success",
+    "type": "Scaffold",
+    "properties": {
+      "backgroundColor": "4294967295",
+      "pageName": "Order Success"
+    },
+    "children": [
+      {
+        "id": "sa_success_center",
+        "type": "Center",
+        "properties": {},
+        "children": [
+          {
+            "id": "sa_success_pad",
+            "type": "Padding",
+            "properties": {
+              "padding": 24.0
+            },
+            "children": [
+              {
+                "id": "sa_success_col",
+                "type": "Column",
+                "properties": {
+                  "mainAxisAlignment": "MainAxisAlignment.center",
+                  "crossAxisAlignment": "CrossAxisAlignment.center"
+                },
+                "children": [
+                  {
+                    "id": "sa_success_icon",
+                    "type": "Icon",
+                    "properties": {
+                      "icon": "Icons.check_circle_outline",
+                      "color": "4278222848",
+                      "size": 80.0
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_success_sp1",
+                    "type": "SizedBox",
+                    "properties": {
+                      "height": 24.0
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_success_t1",
+                    "type": "Text",
+                    "properties": {
+                      "text": "Order Placed!",
+                      "fontSize": 22.0,
+                      "fontWeight": "bold",
+                      "color": "4279179050"
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_success_sp2",
+                    "type": "SizedBox",
+                    "properties": {
+                      "height": 8.0
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_success_t2",
+                    "type": "Text",
+                    "properties": {
+                      "text": "Your order has been inserted into the Supabase database successfully.",
+                      "fontSize": 14.0,
+                      "color": "4284963515",
+                      "textAlign": "TextAlign.center"
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_success_sp3",
+                    "type": "SizedBox",
+                    "properties": {
+                      "height": 32.0
+                    },
+                    "children": []
+                  },
+                  {
+                    "id": "sa_success_btn",
+                    "type": "ElevatedButton",
+                    "properties": {
+                      "text": "Back to Storefront",
+                      "backgroundColor": "4283385573",
+                      "foregroundColor": "4294967295",
+                      "height": 45.0,
+                      "borderRadius": 8.0,
+                      "navigateTo": "sa_home"
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "__settings__",
+    "type": "Scaffold",
+    "properties": {
+      "pageName": "__settings__",
+      "activeConnection": null,
+      "queries": [
+        {
+          "id": "fetch_products",
+          "name": "Fetch Products",
+          "tableName": "products",
+          "queryType": "select",
+          "selectColumns": "*",
+          "orderBy": "created_at",
+          "ascending": false,
+          "enableRealtime": false
+        },
+        {
+          "id": "fetch_product_details",
+          "name": "Fetch Product Details",
+          "tableName": "products",
+          "queryType": "select",
+          "selectColumns": "*",
+          "filters": [
+            {
+              "column": "id",
+              "operator": "eq",
+              "value": "idParam"
+            }
+          ],
+          "enableRealtime": false
+        },
+        {
+          "id": "fetch_cart",
+          "name": "Fetch Cart",
+          "tableName": "cart",
+          "queryType": "select",
+          "selectColumns": "*",
+          "enableRealtime": true
+        }
+      ]
+    },
+    "children": []
+  }
+]

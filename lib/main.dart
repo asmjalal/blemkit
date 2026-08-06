@@ -32,7 +32,7 @@ void main() async {
   try {
     await supabase.Supabase.initialize(
       url: 'https://yqrdwakbgywgzffcrquv.supabase.co',
-      anonKey: 'sb_publishable_TRsLIE9_DTvXTMZBfswgTQ_XfGmsFi2',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxcmR3YWtiZ3l3Z3pmZmNycXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzM4NzIsImV4cCI6MjA5NDU0OTg3Mn0.IT1l_iR-8JlV7E7elAZHejKcRHELfQSH6a6IdXlZKPk',
     );
   } catch (e) {
     debugPrint('Supabase initialization warning: $e');

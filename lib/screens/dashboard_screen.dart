@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'templates_screen.dart';
 import '../widgets/template_preview_dialog.dart';
+import 'submissions_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -21,6 +22,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Map<String, dynamic>> _projects = [];
   bool _isLoading = true;
   int _selectedIndex = 0; // 0 = Projects, 1 = Templates
+
+  bool get _isAdmin {
+    final user = FirebaseAuth.instance.currentUser;
+    return user?.email != null && 
+        (user!.email!.endsWith('@synappkit.com') || user.email == 'admin@gmail.com');
+  }
 
   @override
   void initState() {
@@ -263,7 +270,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _buildSidebar(),
           Expanded(
-            child: _selectedIndex == 0 ? _buildMainContent() : const TemplatesScreen(),
+            child: _selectedIndex == 0
+                ? _buildMainContent()
+                : _selectedIndex == 1
+                    ? const TemplatesScreen()
+                    : _selectedIndex == 3
+                        ? const SubmissionsScreen()
+                        : const Center(child: Text('Settings (Coming Soon)', style: TextStyle(color: Colors.white54))),
           ),
         ],
       ),
@@ -290,6 +303,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 _buildNavItem(icon: Icons.folder_copy_outlined, label: 'Projects', index: 0),
                 _buildNavItem(icon: Icons.inventory_2_outlined, label: 'Templates', index: 1),
+                if (_isAdmin)
+                  _buildNavItem(icon: Icons.rate_review_outlined, label: 'Submissions', index: 3),
                 _buildNavItem(icon: Icons.settings_applications_sharp, label: 'Settings', index: 2),
               ],
             ),

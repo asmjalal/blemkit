@@ -1,6 +1,7 @@
 import '../base_widget_generator.dart';
 import '../../models/widget_node.dart';
 import '../widget_generator_registry.dart';
+import '../project_generator.dart';
 
 class BottomNavigationBarGenerator extends BaseWidgetGenerator {
   @override
@@ -10,14 +11,17 @@ class BottomNavigationBarGenerator extends BaseWidgetGenerator {
     
     // Handle navigation
     String onTapCode = '(index) {}';
-    if (node.properties['items'] != null && node.properties['items'] is List) {
+    if (ProjectGenerator.generatingNavigationShell) {
+      // In the shell, delegate to the shell's state manager
+      onTapCode = '_onTabTapped';
+    } else if (node.properties['items'] != null && node.properties['items'] is List) {
       final items = node.properties['items'] as List;
       final navCalls = <String>[];
       bool hasNav = false;
       for (int i = 0; i < items.length; i++) {
         final item = items[i];
-        if (item is Map<String, dynamic> && item.containsKey('navigateTo')) {
-          final navBody = generateNavigationBody(item['navigateTo']);
+        if (item is Map && item.containsKey('navigateTo')) {
+          final navBody = generateNavigationBody(item['navigateTo']?.toString());
           if (navBody.isNotEmpty) {
             navCalls.add('case $i: $navBody break;');
             hasNav = true;
@@ -30,7 +34,10 @@ class BottomNavigationBarGenerator extends BaseWidgetGenerator {
     }
     
     final props = <String>[];
-    props.add('currentIndex: ${node.properties['currentIndex'] ?? 0}');
+    final currentIndexCode = ProjectGenerator.generatingNavigationShell
+        ? '_currentIndex'
+        : '${node.properties['currentIndex'] ?? 0}';
+    props.add('currentIndex: $currentIndexCode');
     props.add('onTap: $onTapCode');
     
     if (node.properties['type'] != null) {
@@ -59,23 +66,27 @@ class BottomNavigationBarGenerator extends BaseWidgetGenerator {
     if (node.properties['items'] != null && node.properties['items'] is List) {
       final items = node.properties['items'] as List;
       for (final item in items) {
-        if (item is Map<String, dynamic>) {
+        if (item is Map) {
+          final itemMap = Map<String, dynamic>.from(item);
           String iconCode = 'Icon(Icons.home)'; // default
           String label = 'Item'; // default
           
           // Handle icon
-          if (item['icon'] != null) {
-            if (item['icon'] is Map<String, dynamic>) {
-              final iconNode = WidgetNode.fromJson(item['icon']);
+          final iconData = itemMap['icon'];
+          if (iconData != null) {
+            if (iconData is WidgetNode) {
+              iconCode = WidgetGeneratorRegistry.generateCode(iconData, indent: 0);
+            } else if (iconData is Map) {
+              final iconNode = WidgetNode.fromJson(Map<String, dynamic>.from(iconData));
               iconCode = WidgetGeneratorRegistry.generateCode(iconNode, indent: 0);
-            } else if (item['icon'] is String) {
-              iconCode = 'Icon(${item['icon']})';
+            } else if (iconData is String) {
+              iconCode = 'Icon($iconData)';
             }
           }
           
           // Handle label
-          if (item['label'] != null) {
-            label = item['label'].toString();
+          if (itemMap['label'] != null) {
+            label = itemMap['label'].toString();
           }
           
           itemsList.add('BottomNavigationBarItem(icon: $iconCode, label: \'$label\')');

@@ -9,7 +9,11 @@ class OutlinedButtonGenerator extends BaseWidgetGenerator {
     final childIndentStr = getChildIndentStr(indent);
     
     final props = <String>[];
-    if (node.properties['onPressed'] != null) {
+    final actions = node.properties['actions'] as List<dynamic>?;
+    final fallbackNavigateTo = node.properties['navigateTo'];
+    if (actions != null || fallbackNavigateTo != null || node.properties['onPressed'] != null) {
+      props.add('onPressed: ${generateActionFlowCode(actions, fallbackNavigateTo)}');
+    } else {
       props.add('onPressed: () {}');
     }
     if (node.properties['style'] != null) {

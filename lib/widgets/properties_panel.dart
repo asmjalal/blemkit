@@ -2,6 +2,7 @@ import 'package:designflutterkit/widgets/property_editors/edge_insets_editor.dar
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import '../models/supabase_connection_model.dart';
 import '../providers/widget_tree_provider.dart';
 import '../models/widget_node.dart';
 import 'property_editors/container_properties/container_property_editors.dart';
@@ -32,6 +33,7 @@ import 'property_editors/clip_r_rect_properties.dart';
 import 'property_editors/circle_avatar_properties/circle_avatar_property_editors.dart';
 import '../utils/color_utils.dart';
 import 'property_editors/color_picker_field.dart';
+import 'property_editors/action_flow_editor.dart';
 
 class PropertiesPanel extends StatelessWidget {
    PropertiesPanel({super.key});
@@ -50,44 +52,115 @@ class PropertiesPanel extends StatelessWidget {
           );
         }
 
-        return Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        final bool isActionable = ![
+          'Scaffold', 'AppBar', 'Drawer', 'EndDrawer', 'AlertDialog', 'Dialog', 'BottomSheet',
+          'Expanded', 'Flexible', 'Positioned', 'Spacer',
+          'ListView', 'GridView', 'SingleChildScrollView', 'CustomScrollView', 'ReorderableListView'
+        ].contains(selectedNode.type);
+
+        final header = Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.white.withOpacity(0.05)),
+          ),
+          child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      '${selectedNode.type} Properties',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(Icons.info_outline, size: 14, color: Colors.white.withOpacity(0.3)),
-                    const Spacer(),
-                    const Icon(Icons.expand_more, size: 18, color: Colors.white38),
-                  ],
+              Text(
+                '${selectedNode.type}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 8),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                  children: _buildPropertyEditors(context, selectedNode),
-                ),
-              ),
+              const SizedBox(width: 8),
+              Icon(Icons.info_outline, size: 14, color: Colors.white.withOpacity(0.3)),
+              const Spacer(),
+              const Icon(Icons.expand_more, size: 18, color: Colors.white38),
             ],
+          ),
+        );
+
+        final propertiesList = ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          children: _buildPropertyEditors(context, selectedNode),
+        );
+
+        if (!isActionable) {
+          return Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                header,
+                const SizedBox(height: 16),
+                Expanded(child: propertiesList),
+              ],
+            ),
+          );
+        }
+
+        return DefaultTabController(
+          length: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                header,
+                const SizedBox(height: 12),
+                Container(
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: TabBar(
+                    indicator: BoxDecoration(
+                      color: const Color(0xFF334155),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white54,
+                    labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    tabs: const [
+                      Tab(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.diamond_outlined, size: 14),
+                            SizedBox(width: 6),
+                            Text('Properties'),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.bolt, size: 16),
+                            SizedBox(width: 4),
+                            Text('Actions'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      propertiesList,
+                      ActionFlowEditor(node: selectedNode),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -411,15 +484,105 @@ class PropertiesPanel extends StatelessWidget {
   }
 
   Widget _buildDataBindingSection(BuildContext context, WidgetNode node) {
-    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
-    final binding = node.properties['dataBinding'] as Map<String, dynamic>? ?? {};
+    final provider = Provider.of<WidgetTreeProvider>(context);
+    final activeConnection = provider.activeConnection;
+
+    if (activeConnection == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.link, size: 16, color: Color(0xFF0FADD5)),
+              const SizedBox(width: 8),
+              Text(
+                'DATA BINDING',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.indigo.shade400,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Card(
+            color: Color(0xFF1E293B),
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Text(
+                'No database connected. Please connect a Supabase project in the Data Sources tab to enable backend data binding.',
+                style: TextStyle(fontSize: 12, color: Colors.white54),
+              ),
+            ),
+          )
+        ],
+      );
+    }
+
+    final hasQueries = provider.queries.isNotEmpty;
+    if (!hasQueries) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.link, size: 16, color: Color(0xFF0FADD5)),
+              const SizedBox(width: 8),
+              Text(
+                'DATA BINDING',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.indigo.shade400,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Card(
+            color: Color(0xFF1E293B),
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Text(
+                'No queries defined. Create a backend query under the Data Sources tab first.',
+                style: TextStyle(fontSize: 12, color: Colors.white54),
+              ),
+            ),
+          )
+        ],
+      );
+    }
+
+    // Determine if widget is a container that supports query attachments
+    final isContainer = ['ListView', 'GridView', 'Column', 'Row', 'Container'].contains(node.type);
+    final attachedQuery = node.backendQuery;
+
+    // Determine bindable properties for this specific node
+    final bindableProps = <String, String>{}; // Map of propertyKey -> Label
+    if (node.type == 'Text') {
+      bindableProps['text'] = 'Text Content';
+    } else if (node.type == 'Image' || node.type == 'CircleImage') {
+      bindableProps['src'] = 'Image Source URL';
+    } else if (node.type == 'CircleAvatar') {
+      bindableProps['url'] = 'Avatar Image URL';
+    } else if (node.type == 'ListTile' ||
+               node.type == 'CheckboxListTile' ||
+               node.type == 'SwitchListTile' ||
+               node.type == 'RadioListTile' ||
+               node.type == 'SlidableListTile') {
+      bindableProps['title'] = 'Title Text';
+      bindableProps['subtitle'] = 'Subtitle Text';
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Icon(Icons.link, size: 16, color: Color(0xFF0fadd5)),
+            const Icon(Icons.link, size: 16, color: Color(0xFF0FADD5)),
             const SizedBox(width: 8),
             Text(
               'DATA BINDING',
@@ -433,55 +596,188 @@ class PropertiesPanel extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        const Text(
-          'Bind properties to API response fields.',
-          style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
-        ),
-        const SizedBox(height: 16),
-        _buildBindingField(
-          context: context,
-          label: 'Data Source Field',
-          hint: 'e.g. users[0].name',
-          value: binding['field'] ?? '',
-          onChanged: (val) {
-            final Map<String, dynamic> newBinding = {...binding, 'field': val};
-            final Map<String, dynamic> newProps = {...node.properties, 'dataBinding': newBinding};
-            provider.updateNodeProperties(node, newProps);
-          },
-        ),
-      ],
-    );
-  }
 
-  Widget _buildBindingField({
-    required BuildContext context,
-    required String label,
-    required String hint,
-    required String value,
-    required ValueChanged<String> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF94A3B8),
+        // 1. Query Attachment (for containers)
+        if (isContainer) ...[
+          const Text('Attach Backend Query', style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          DropdownButtonFormField<String>(
+            value: attachedQuery?['queryId'],
+            dropdownColor: const Color(0xFF1E293B),
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+            decoration: InputDecoration(
+              isDense: true,
+              filled: true,
+              fillColor: const Color(0xFF181A20),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide.none),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            ),
+            items: [
+              const DropdownMenuItem<String>(
+                value: null,
+                child: Text('No Query Attached', style: TextStyle(color: Colors.white30)),
+              ),
+              ...provider.queries.map((q) => DropdownMenuItem<String>(
+                    value: q.id,
+                    child: Text(q.name, style: const TextStyle(color: Colors.white)),
+                  )),
+            ],
+            onChanged: (val) {
+              if (val == null) {
+                node.backendQuery = null;
+              } else {
+                node.backendQuery = {
+                  'queryId': val,
+                  'variableName': 'itemsList',
+                };
+              }
+              provider.notify();
+            },
           ),
-        ),
-        const SizedBox(height: 6),
-        TextField(
-          controller: TextEditingController(text: value)..selection = TextSelection.fromPosition(TextPosition(offset: value.length)),
-          decoration: InputDecoration(
-            hintText: hint,
-            isDense: true,
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          ),
-          onChanged: onChanged,
-        ),
+          const SizedBox(height: 16),
+        ],
+
+        // 2. Property Binding (Text, Image, etc.)
+        if (bindableProps.isNotEmpty) ...[
+          const Text('Property Bindings', style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          ...bindableProps.entries.map((entry) {
+            final propKey = entry.key;
+            final propLabel = entry.value;
+            final boundConfig = node.dataBinding?[propKey];
+
+            return Card(
+              color: const Color(0xFF1E293B),
+              margin: const EdgeInsets.only(bottom: 10),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(propLabel, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                        const Spacer(),
+                        if (boundConfig != null)
+                          IconButton(
+                            icon: const Icon(Icons.link_off, color: Colors.redAccent, size: 16),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              final currentBindings = node.dataBinding ?? {};
+                              currentBindings.remove(propKey);
+                              node.dataBinding = currentBindings.isEmpty ? null : currentBindings;
+                              provider.notify();
+                            },
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    // Choose Query Dropdown
+                    DropdownButtonFormField<String>(
+                      value: boundConfig?['queryId'],
+                      dropdownColor: const Color(0xFF1E293B),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      decoration: InputDecoration(
+                        labelText: 'Source Query',
+                        labelStyle: const TextStyle(color: Colors.white54, fontSize: 11),
+                        isDense: true,
+                        filled: true,
+                        fillColor: const Color(0xFF181A20),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
+                      ),
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null,
+                          child: Text('Unbound / Static', style: TextStyle(color: Colors.white24)),
+                        ),
+                        ...provider.queries.map((q) => DropdownMenuItem<String>(
+                              value: q.id,
+                              child: Text(q.name, style: const TextStyle(color: Colors.white)),
+                            )),
+                      ],
+                      onChanged: (qId) {
+                        if (qId == null) {
+                          final currentBindings = node.dataBinding ?? {};
+                          currentBindings.remove(propKey);
+                          node.dataBinding = currentBindings.isEmpty ? null : currentBindings;
+                        } else {
+                          final currentBindings = node.dataBinding ?? {};
+                          currentBindings[propKey] = {
+                            'source': 'backendQuery',
+                            'queryId': qId,
+                            'field': currentBindings[propKey]?['field'] ?? '',
+                            'rowIndex': 0,
+                          };
+                          node.dataBinding = currentBindings;
+                        }
+                        provider.notify();
+                      },
+                    ),
+                    
+                    if (boundConfig?['queryId'] != null) ...[
+                      const SizedBox(height: 8),
+                      // Choose Column Dropdown
+                      Builder(
+                        builder: (context) {
+                          final qId = boundConfig['queryId'] as String;
+                          final queryObj = provider.queries.where((q) => q.id == qId).firstOrNull;
+                          if (queryObj == null) return const SizedBox();
+
+                          final tableSchema = activeConnection.tables.firstWhere(
+                            (t) => t.name == queryObj.tableName,
+                            orElse: () => SupabaseTable(name: '', columns: []),
+                          );
+                          final cols = tableSchema.columns.map((c) => c.name).toList();
+
+                          return DropdownButtonFormField<String>(
+                            value: cols.contains(boundConfig['field']) ? boundConfig['field'] : null,
+                            dropdownColor: const Color(0xFF1E293B),
+                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                            decoration: InputDecoration(
+                              labelText: 'Column / Field',
+                              labelStyle: const TextStyle(color: Colors.white54, fontSize: 11),
+                              isDense: true,
+                              filled: true,
+                              fillColor: const Color(0xFF181A20),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
+                            ),
+                            items: cols.map((colName) => DropdownMenuItem<String>(
+                                  value: colName,
+                                  child: Text(colName, style: const TextStyle(color: Colors.white)),
+                                )).toList(),
+                            onChanged: (fieldVal) {
+                              if (fieldVal != null) {
+                                final currentBindings = node.dataBinding ?? {};
+                                currentBindings[propKey] = {
+                                  ...currentBindings[propKey] as Map,
+                                  'field': fieldVal,
+                                };
+                                node.dataBinding = currentBindings;
+                                provider.notify();
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ]
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ] else if (!isContainer) ...[
+          const Card(
+            color: Color(0xFF1E293B),
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Text(
+                'This widget does not have bindable properties (e.g. Text Content or Image URL). Try selecting a Text or Image widget.',
+                style: TextStyle(fontSize: 12, color: Colors.white54),
+              ),
+            ),
+          )
+        ]
       ],
     );
   }

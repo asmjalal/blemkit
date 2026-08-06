@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'base_widget_generator.dart';
+import 'project_generator.dart';
 import '../models/widget_node.dart';
 
 class ImageGenerator extends BaseWidgetGenerator {
@@ -8,7 +9,6 @@ class ImageGenerator extends BaseWidgetGenerator {
   String generateCode(WidgetNode node, {int indent = 0}) {
     final indentStr = getIndentString(indent);
     final rawUrl = node.properties['src']?.toString() ?? '';
-    final urlLiteral = jsonEncode(rawUrl);
 
     final named = <String>[];
     if (node.properties['width'] != null) {
@@ -19,7 +19,18 @@ class ImageGenerator extends BaseWidgetGenerator {
     }
     named.add('fit: BoxFit.cover');
 
+    final String urlExpression;
+    if (node.dataBinding != null && node.dataBinding!.containsKey('src')) {
+      final binding = node.dataBinding!['src'] as Map;
+      final field = binding['field'];
+      urlExpression = ProjectGenerator.isInsideRepeatedList 
+          ? "item['$field']?.toString() ?? ''" 
+          : "data[0]['$field']?.toString() ?? ''";
+    } else {
+      urlExpression = "'${escapeString(rawUrl)}'";
+    }
+
     final namedStr = named.isEmpty ? '' : ', ${named.join(', ')}';
-    return '${indentStr}Image.network($urlLiteral$namedStr)';
+    return '${indentStr}Image.network($urlExpression$namedStr)';
   }
 } 

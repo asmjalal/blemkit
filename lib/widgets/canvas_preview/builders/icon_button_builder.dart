@@ -6,6 +6,7 @@ import 'widget_builder_factory.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
 import '../canvas_preview_mode.dart';
+import 'supabase_query_wrapper_builder.dart';
 
 class IconButtonBuilder extends BaseWidgetBuilder {
   @override
@@ -40,9 +41,14 @@ class IconButtonBuilder extends BaseWidgetBuilder {
       onPressed: () {
         if (!CanvasPreviewMode.of(context)) return;
         
+        final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+        final rowData = SupabaseRowDataContext.of(context);
+        if (rowData != null) {
+          provider.activeRowData = rowData;
+        }
+
         final navigateTo = node.properties['navigateTo'];
         if (navigateTo != null) {
-          final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
           try {
             final target = provider.screens.firstWhere((s) => s.id == navigateTo);
             provider.selectScreen(target);

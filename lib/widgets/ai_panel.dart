@@ -21,6 +21,7 @@ class _AiPanelState extends State<AiPanel> {
   final TextEditingController _promptController = TextEditingController();
   final TextEditingController _apiKeyController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final Map<String, String> _apiKeysMap = {};
   
   bool _isLoading = false;
   bool _isFetchingKeys = true;
@@ -43,15 +44,19 @@ class _AiPanelState extends State<AiPanel> {
         if (doc.exists) {
           final data = doc.data();
           if (data != null && data['apiKeys'] != null) {
-            String initialAgentStr = data['selectedAi'] ?? 'deepseek';
-            _selectedAgent = initialAgentStr == 'openai' ? AiAgentType.openai : AiAgentType.deepseek;
-            
             final keys = data['apiKeys'];
-            _apiKeyController.text = keys[initialAgentStr] ?? '';
+            if (keys is Map) {
+              keys.forEach((key, val) {
+                _apiKeysMap[key.toString()] = val.toString();
+              });
+            }
+            String initialAgentStr = data['selectedAi'] ?? 'deepseek';
+            _selectedAgent = AiAgentTypeExtension.fromString(initialAgentStr);
+            _apiKeyController.text = _apiKeysMap[_selectedAgent.nameString] ?? '';
           }
         }
       } catch (e) {
-        debugPrint('Error fetching keys: \$e');
+        debugPrint('Error fetching keys: $e');
       }
     }
     if (mounted) {
@@ -63,15 +68,26 @@ class _AiPanelState extends State<AiPanel> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        final String agentStr = _selectedAgent == AiAgentType.openai ? 'openai' : 'deepseek';
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'selectedAi': agentStr,
-          'apiKeys': {
-            agentStr: _apiKeyController.text.trim(),
+        final String agentStr = _selectedAgent.nameString;
+        final String apiKey = _apiKeyController.text.trim();
+        _apiKeysMap[agentStr] = apiKey;
+        // Merge with existing keys
+        final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+        final docSnap = await docRef.get();
+        Map<String, dynamic> existingKeys = {};
+        if (docSnap.exists) {
+          final data = docSnap.data();
+          if (data != null && data['apiKeys'] is Map) {
+            existingKeys = Map<String, dynamic>.from(data['apiKeys'] as Map);
           }
+        }
+        existingKeys[agentStr] = apiKey;
+        await docRef.set({
+          'selectedAi': agentStr,
+          'apiKeys': existingKeys,
         }, SetOptions(merge: true));
       } catch (e) {
-        debugPrint('Error saving key: \$e');
+        debugPrint('Error saving key: $e');
       }
     }
   }
@@ -143,7 +159,7 @@ class _AiPanelState extends State<AiPanel> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _messages.add({'role': 'assistant', 'content': 'Error: \${e.toString()}'});
+          _messages.add({'role': 'assistant', 'content': 'Error: ${e.toString()}'});
         });
         _scrollToBottom();
       }
@@ -219,11 +235,17 @@ class _AiPanelState extends State<AiPanel> {
                             items: const [
                               DropdownMenuItem(value: AiAgentType.deepseek, child: Text('DeepSeek Chat')),
                               DropdownMenuItem(value: AiAgentType.openai, child: Text('OpenAI GPT-4o')),
+                              DropdownMenuItem(value: AiAgentType.kimi, child: Text('Kimi K2')),
+                              DropdownMenuItem(value: AiAgentType.gemini, child: Text('Google Gemini')),
                             ],
-                            onChanged: (val) {
+                            onChanged: (val) async {
                               if (val != null) {
-                                setState(() => _selectedAgent = val);
-                                _fetchUserKeys();
+                                setState(() {
+                                  _apiKeysMap[_selectedAgent.nameString] = _apiKeyController.text.trim();
+                                  _selectedAgent = val;
+                                  _apiKeyController.text = _apiKeysMap[val.nameString] ?? '';
+                                });
+                                await _saveKey();
                               }
                             },
                           ),

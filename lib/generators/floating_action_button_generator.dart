@@ -17,9 +17,11 @@ class FloatingActionButtonGenerator extends BaseWidgetGenerator {
     }
 
     // Ensure onPressed is handled
-    if (node.properties.containsKey('navigateTo')) {
-      props.add('onPressed: ${generateNavigationCode(node.properties['navigateTo'])}');
-    } else if (!node.properties.containsKey('onPressed')) {
+    final actions = node.properties['actions'] as List<dynamic>?;
+    final fallbackNavigateTo = node.properties['navigateTo'];
+    if (actions != null || fallbackNavigateTo != null || node.properties['onPressed'] != null) {
+      props.add('onPressed: ${generateActionFlowCode(actions, fallbackNavigateTo)}');
+    } else {
       props.add('onPressed: () {}');
     }
 
