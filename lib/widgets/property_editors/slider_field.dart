@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../ui/editor_theme.dart';
 
 Widget buildSliderField(
   String label,
@@ -15,7 +16,7 @@ Widget buildSliderField(
           width: 70,
           child: Text(
             label,
-            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.w500),
+            style: const TextStyle(color: EditorColors.textMuted, fontSize: 11, fontWeight: FontWeight.w500),
           ),
         ),
         Expanded(
@@ -24,7 +25,7 @@ Widget buildSliderField(
               trackHeight: 2,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-              activeTrackColor: const Color(0xFF0fadd5),
+              activeTrackColor: EditorColors.accent,
               inactiveTrackColor: Colors.white.withOpacity(0.05),
               thumbColor: Colors.white,
             ),
@@ -41,7 +42,7 @@ Widget buildSliderField(
           width: 45,
           height: 28,
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: EditorColors.surface,
             borderRadius: BorderRadius.circular(4),
             border: Border.all(color: Colors.white.withOpacity(0.1)),
           ),

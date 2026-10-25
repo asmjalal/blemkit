@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../widgets/template_preview_dialog.dart';
 
@@ -47,7 +48,7 @@ class _SubmissionsScreenState extends State<SubmissionsScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator(color: Color(0xFF38BDF8))),
+      builder: (_) => const Center(child: CircularProgressIndicator(color: EditorColors.accent)),
     );
 
     try {
@@ -74,7 +75,7 @@ class _SubmissionsScreenState extends State<SubmissionsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: EditorColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Reject Submission', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         content: const Text(
@@ -103,7 +104,7 @@ class _SubmissionsScreenState extends State<SubmissionsScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator(color: Color(0xFF38BDF8))),
+        builder: (_) => const Center(child: CircularProgressIndicator(color: EditorColors.accent)),
       );
 
       try {
@@ -164,7 +165,7 @@ class _SubmissionsScreenState extends State<SubmissionsScreen> {
         // Submissions List/Grid
         Expanded(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator(color: Color(0xFF38BDF8)))
+              ? const Center(child: CircularProgressIndicator(color: EditorColors.accent))
               : _submissions.isEmpty
                   ? _buildEmptyState()
                   : _buildSubmissionsGrid(),
@@ -181,7 +182,7 @@ class _SubmissionsScreenState extends State<SubmissionsScreen> {
           Container(
             padding: const EdgeInsets.all(28),
             decoration: const BoxDecoration(
-              color: Color(0xFF1E293B),
+              color: EditorColors.surfaceRaised,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.rate_review_outlined, size: 54, color: Colors.white30),
@@ -215,9 +216,9 @@ class _SubmissionsScreenState extends State<SubmissionsScreen> {
         final item = _submissions[index];
         return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
+            color: EditorColors.surfaceRaised,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF1E3A6E)),
+            border: Border.all(color: EditorColors.border),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,7 +229,7 @@ class _SubmissionsScreenState extends State<SubmissionsScreen> {
                 child: Container(
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF0F172A),
+                    color: EditorColors.surface,
                     borderRadius: BorderRadius.vertical(top: Radius.circular(11)),
                   ),
                   child: item['thumbnail_url'] != null
@@ -279,7 +280,7 @@ class _SubmissionsScreenState extends State<SubmissionsScreen> {
                       const SizedBox(height: 4),
                       Text(
                         item['category'] ?? 'General',
-                        style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 11, fontWeight: FontWeight.bold),
+                        style: const TextStyle(color: EditorColors.accent, fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Expanded(
@@ -298,7 +299,7 @@ class _SubmissionsScreenState extends State<SubmissionsScreen> {
                               onPressed: () => TemplatePreviewDialog.show(context, item, () {}),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.white70,
-                                side: const BorderSide(color: Color(0xFF1E3A6E)),
+                                side: const BorderSide(color: EditorColors.border),
                                 padding: EdgeInsets.zero,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                               ),

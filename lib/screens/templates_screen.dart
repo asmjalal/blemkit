@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:provider/provider.dart';
 import '../providers/widget_tree_provider.dart';
-import '../models/widget_node.dart';
-import '../widgets/template_custom_dialog.dart';
 import '../widgets/template_preview_dialog.dart';
 import 'builder_screen.dart';
 
@@ -161,9 +160,9 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
                 width: 240,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: EditorColors.surfaceRaised,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFF1E3A6E)),
+                  border: Border.all(color: EditorColors.border),
                 ),
                 child: TextField(
                   style: const TextStyle(color: Colors.white, fontSize: 13),
@@ -206,10 +205,10 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF38BDF8).withOpacity(0.15) : const Color(0xFF1E293B),
+                      color: isSelected ? EditorColors.accent.withOpacity(0.15) : EditorColors.surfaceRaised,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: isSelected ? const Color(0xFF38BDF8) : const Color(0xFF1E3A6E),
+                        color: isSelected ? EditorColors.accent : EditorColors.border,
                       ),
                     ),
                     child: Row(
@@ -217,7 +216,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
                         Text(
                           cat,
                           style: TextStyle(
-                            color: isSelected ? const Color(0xFF38BDF8) : Colors.white70,
+                            color: isSelected ? EditorColors.accent : Colors.white70,
                             fontSize: 12,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                           ),
@@ -226,7 +225,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF38BDF8) : const Color(0xFF0F172A),
+                            color: isSelected ? EditorColors.accent : EditorColors.surface,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -251,7 +250,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
         // Template Grid
         Expanded(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator(color: Color(0xFF38BDF8)))
+              ? const Center(child: CircularProgressIndicator(color: EditorColors.accent))
               : _filteredTemplates.isEmpty
                   ? const Center(child: Text("No templates found.", style: TextStyle(color: Colors.white54)))
                   : LayoutBuilder(
@@ -312,10 +311,10 @@ class _TemplateCardState extends State<_TemplateCard> {
         curve: Curves.easeOutCubic,
         transform: Matrix4.identity()..translate(0.0, _isHovered ? -4.0 : 0.0),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: EditorColors.surfaceRaised,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _isHovered ? const Color(0xFF38BDF8).withOpacity(0.5) : const Color(0xFF1E3A6E),
+            color: _isHovered ? EditorColors.accent.withOpacity(0.5) : EditorColors.border,
             width: 1,
           ),
           boxShadow: [
@@ -330,7 +329,7 @@ class _TemplateCardState extends State<_TemplateCard> {
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF0F172A),
+                  color: EditorColors.surface,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(11)),
                 ),
                 child: widget.template['thumbnail_url'] != null
@@ -369,11 +368,11 @@ class _TemplateCardState extends State<_TemplateCard> {
                           child: ElevatedButton(
                             onPressed: widget.onUse,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _isHovered ? const Color(0xFF38BDF8) : const Color(0xFF0F172A),
-                              foregroundColor: _isHovered ? Colors.black : const Color(0xFF38BDF8),
+                              backgroundColor: _isHovered ? EditorColors.accent : EditorColors.surface,
+                              foregroundColor: _isHovered ? Colors.black : EditorColors.accent,
                               elevation: 0,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                              side: BorderSide(color: _isHovered ? Colors.transparent : const Color(0xFF1E3A6E)),
+                              side: BorderSide(color: _isHovered ? Colors.transparent : EditorColors.border),
                             ),
                             child: const Text('Use Template', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                           ),
@@ -388,7 +387,7 @@ class _TemplateCardState extends State<_TemplateCard> {
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.zero,
                             foregroundColor: Colors.white70,
-                            side: const BorderSide(color: Color(0xFF1E3A6E)),
+                            side: const BorderSide(color: EditorColors.border),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                           ),
                           child: const Icon(Icons.remove_red_eye_outlined, size: 16),

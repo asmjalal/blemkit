@@ -11,6 +11,21 @@ class WidgetTreeEditor extends StatefulWidget {
   final void Function(String type)? onWidgetAdd;
   const WidgetTreeEditor({super.key, this.onWidgetAdd});
 
+  /// Node for a palette entry, including dynamic ones
+  /// (`ThemedWidget:<id>`, `Component:<id>`, `CustomWidget:<name>`).
+  static WidgetNode createFromPaletteType(String type) {
+    if (type.startsWith('ThemedWidget:')) {
+      return WidgetNode(type: 'ThemedWidget', properties: {'themedWidgetId': type.substring('ThemedWidget:'.length)});
+    }
+    if (type.startsWith('Component:')) {
+      return WidgetNode(type: 'ComponentInstance', properties: {'componentId': type.substring('Component:'.length), 'args': {}});
+    }
+    if (type.startsWith('CustomWidget:')) {
+      return WidgetNode(type: 'CustomWidget', properties: {'name': type.substring('CustomWidget:'.length), 'height': 80.0});
+    }
+    return createWidgetNodeWithDefaults(type);
+  }
+
   static WidgetNode createWidgetNodeWithDefaults(String type) {
     switch (type) {
       case 'Container':
@@ -116,9 +131,9 @@ class WidgetTreeEditor extends StatefulWidget {
           'fontWeight': 'normal',
         });
       case 'CircleImage':
-        return WidgetNode(type: 'CircleImage', properties: {
-          'src': '',
-          'radius': 50.0,
+        return WidgetNode(type: 'Avatar', properties: {
+          'src': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+          'radius': 40.0,
         });
       case 'Icon':
         return WidgetNode(type: 'Icon', properties: {
@@ -171,9 +186,9 @@ class WidgetTreeEditor extends StatefulWidget {
           'elevation': 16.0,
         });
       case 'DropDown':
-        return WidgetNode(type: 'DropDown', properties: {
+        return WidgetNode(type: 'DropdownButton', properties: {
           'hint': 'Select an option',
-          'items': [],
+          'items': ['Option 1', 'Option 2', 'Option 3'],
         });
       case 'Checkbox':
         return WidgetNode(type: 'Checkbox', properties: {
@@ -196,14 +211,14 @@ class WidgetTreeEditor extends StatefulWidget {
           'value': false,
         });
       case 'RadioButton':
-        return WidgetNode(type: 'RadioButton', properties: {
-          'value': false,
-          'label': 'Radio Button',
+        return WidgetNode(type: 'RadioGroup', properties: {
+          'options': ['Option A', 'Option B'],
+          'value': 'Option A',
         });
       case 'PinCode':
         return WidgetNode(type: 'PinCode', properties: {
           'length': 4,
-          'obscureText': true,
+          'obscureText': false,
         });
       case 'Slider':
         return WidgetNode(type: 'Slider', properties: {
@@ -247,6 +262,89 @@ class WidgetTreeEditor extends StatefulWidget {
           'right': 0.0,
           'bottom': 0.0,
         });
+      case 'TabBar':
+        return WidgetNode(type: 'TabBar', children: [
+          WidgetNode(type: 'Text', properties: {'text': 'Overview'}),
+          WidgetNode(type: 'Text', properties: {'text': 'Details'}),
+        ]);
+      case 'TabBarView':
+        return WidgetNode(type: 'TabBarView', children: [
+          WidgetNode(type: 'Center', children: [WidgetNode(type: 'Text', properties: {'text': 'Overview tab'})]),
+          WidgetNode(type: 'Center', children: [WidgetNode(type: 'Text', properties: {'text': 'Details tab'})]),
+        ]);
+      case 'RatingBar':
+        return WidgetNode(type: 'RatingBar', properties: {'rating': 3.0, 'itemCount': 5, 'itemSize': 28.0, 'color': '0xFFFFB300'});
+      case 'CounterButton':
+        return WidgetNode(type: 'CounterButton', properties: {'value': 1, 'min': 0, 'max': 10});
+      case 'ChoiceChips':
+        return WidgetNode(type: 'ChoiceChips', properties: {'options': ['Small', 'Medium', 'Large'], 'selected': ['Medium']});
+      case 'CheckboxGroup':
+        return WidgetNode(type: 'CheckboxGroup', properties: {'options': ['Email', 'SMS', 'Push'], 'selected': ['Email']});
+      case 'CreditCardForm':
+        return WidgetNode(type: 'CreditCardForm', properties: {'cardColor': '0xFF312E81'});
+      case 'Signature':
+        return WidgetNode(type: 'Signature', properties: {'height': 160.0});
+      case 'DataTable':
+        return WidgetNode(type: 'DataTable', properties: {
+          'columns': ['Order', 'Status', 'Total'],
+          'rows': [
+            ['#1024', 'Shipped', '\$42.00'],
+            ['#1025', 'Pending', '\$18.50'],
+          ],
+        });
+      case 'PlacePicker':
+        return WidgetNode(type: 'PlacePicker', properties: {
+          'hintText': 'Search address',
+          'suggestions': ['1 Infinite Loop, Cupertino', '1600 Amphitheatre Pkwy, Mountain View', '350 Fifth Avenue, New York'],
+        });
+      case 'LoadingOverlay':
+        return WidgetNode(type: 'LoadingOverlay', properties: {'isLoading': true}, children: [
+          WidgetNode(type: 'Container', properties: {'height': 120.0, 'color': '0xFFF1F5F9'}),
+        ]);
+      case 'Flex':
+        return WidgetNode(type: 'Flex', properties: {'direction': 'horizontal', 'mainAxisAlignment': 'MainAxisAlignment.spaceBetween'});
+      case 'Hero':
+        return WidgetNode(type: 'Hero', properties: {'tag': 'hero-${DateTime.now().millisecondsSinceEpoch}'}, children: [
+          WidgetNode(type: 'Image', properties: {'src': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400', 'width': 120.0, 'height': 120.0}),
+        ]);
+      case 'AnimatedContainer':
+        return WidgetNode(type: 'AnimatedContainer', properties: {'width': 120.0, 'height': 80.0, 'color': '0xFF6366F1', 'borderRadius': 12.0, 'durationMs': 300});
+      case 'AnimatedOpacity':
+        return WidgetNode(type: 'AnimatedOpacity', properties: {'opacity': 1.0, 'durationMs': 300}, children: [
+          WidgetNode(type: 'Text', properties: {'text': 'Fades when opacity changes'}),
+        ]);
+      case 'AnimatedSwitcher':
+        return WidgetNode(type: 'AnimatedSwitcher', properties: {'durationMs': 300}, children: [
+          WidgetNode(type: 'Text', properties: {'text': 'Animated switcher'}),
+        ]);
+      case 'FadeTransition':
+        // Entrance animations are a property of any widget; this preset adds one.
+        return WidgetNode(type: 'Container', properties: {
+          'padding': {'left': 16.0, 'top': 16.0, 'right': 16.0, 'bottom': 16.0},
+          'animation': {'type': 'fade', 'durationMs': 600, 'delayMs': 0},
+        }, children: [
+          WidgetNode(type: 'Text', properties: {'text': 'Fades in on page load'}),
+        ]);
+      case 'Dialog':
+      case 'AlertDialog':
+        return WidgetNode(type: 'AlertDialog', properties: {'title': 'Dialog title', 'content': 'Dialog message'});
+      case 'NetworkImage':
+        return WidgetNode(type: 'Image', properties: {
+          'src': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600',
+          'width': 240.0,
+          'height': 140.0,
+          'fit': 'cover',
+        });
+      case 'FormValidation':
+        return WidgetNode(type: 'Form', children: [
+          WidgetNode(type: 'Column', properties: {'crossAxisAlignment': 'CrossAxisAlignment.stretch'}, children: [
+            WidgetNode(type: 'TextField', properties: {'labelText': 'Email', 'hintText': 'you@example.com', 'border': 'OutlineInputBorder'}),
+            WidgetNode(type: 'SizedBox', properties: {'height': 12.0}),
+            WidgetNode(type: 'TextField', properties: {'labelText': 'Password', 'obscureText': true, 'border': 'OutlineInputBorder'}),
+            WidgetNode(type: 'SizedBox', properties: {'height': 16.0}),
+            WidgetNode(type: 'ElevatedButton', properties: {'text': 'Submit'}),
+          ]),
+        ]);
       default:
         return WidgetNode(type: type);
     }

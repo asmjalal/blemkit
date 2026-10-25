@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../ui/editor_theme.dart';
 
 Widget buildSectionHeader(String text) {
   return Padding(
@@ -8,7 +9,7 @@ Widget buildSectionHeader(String text) {
       style: const TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w700,
-        color: Color(0xFF94A3B8), // Slate 400
+        color: EditorColors.textMuted, // Slate 400
         letterSpacing: 1.1,
       ),
     ),

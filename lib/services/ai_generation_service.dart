@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/widget_node.dart';
+import '../app_config.dart';
+import 'claude_client.dart';
 
 enum AiAgentType {
+  claude,
   openai,
   deepseek,
   kimi,
@@ -12,6 +15,8 @@ enum AiAgentType {
 extension AiAgentTypeExtension on AiAgentType {
   String get nameString {
     switch (this) {
+      case AiAgentType.claude:
+        return 'claude';
       case AiAgentType.openai:
         return 'openai';
       case AiAgentType.deepseek:
@@ -25,6 +30,8 @@ extension AiAgentTypeExtension on AiAgentType {
 
   static AiAgentType fromString(String str) {
     switch (str.toLowerCase()) {
+      case 'claude':
+        return AiAgentType.claude;
       case 'openai':
         return AiAgentType.openai;
       case 'kimi':
@@ -52,6 +59,9 @@ class AiGenerationService {
     List<Map<String, String>> previousMessages = const [],
     int retryCount = 0,
     String? lastError,
+    String? imageBase64,
+    String? imageMediaType,
+    bool editSelectedWidget = false,
   }) async {
     final String endpoint = agentType == AiAgentType.openai
         ? _openAiEndpoint
@@ -145,15 +155,29 @@ Widgets inside dynamic database lists can bind properties to query columns under
 7. Do NOT use widget types outside [WIDGET LIST].
 8. For long screens wrap Column in SingleChildScrollView as the Scaffold body.
 9. AppBar "title" is a nested Text node object, not a plain string.
-10. You MUST wrap your JSON output in a standard Markdown code block (```json ... ```). Do not include any other text.
+10. Output only the JSON object. Do not add explanations before or after it.
 11. CRITICAL: DO NOT manually minify the JSON. Use standard indentation. Forced minification causes syntax errors. 
 12. CRITICAL: LIMIT your output to a MAXIMUM of 3 core screens. Do not generate overly repetitive lists or deeply nested unnecessary hierarchies.
 13. CRITICAL SYNTAX RULE: Every child node MUST be placed INSIDE the "children": [...] array. NEVER place a child object directly after "properties": {...}. The only allowed keys in a node are "id", "type", "properties", and "children".
 14. CRITICAL SYNTAX RULE: Ensure all string values are properly closed with double quotes, and all keys are properly quoted.
+
+[MORE WIDGETS]
+RatingBar(rating, itemCount, color), PinCode(length, obscureText), CounterButton(value, min, max), ChoiceChips(options:[...], selected:[...], multiSelect),
+CheckboxGroup(options, selected), RadioGroup(options, value), DataTable(columns:[...], rows:[[...]]), CreditCardForm(cardColor), Signature(height),
+PlacePicker(hintText, suggestions), SlidableListTile(title, subtitle, actionLabel), LoadingOverlay(isLoading) with one child, AnimatedContainer, Hero(tag) with one child.
+
+[LOGIC PROPERTIES] (optional, any widget)
+- "animation": {"type": "fade|slideUp|slideLeft|scale|fadeScale", "durationMs": 400, "delayMs": 0}  entrance animation
+- "visibility": {"hideOn": ["phone"|"tablet"|"desktop"]}
+- More action types: {"type":"showSnackbar","message":{"source":"literal","value":"Saved"}}, {"type":"showDialog","title":{...},"message":{...}},
+  {"type":"navigateBack"}, {"type":"launchUrl","url":{"source":"literal","value":"https://..."}}, {"type":"copyToClipboard","text":{...}}
 ''';
+    final String scopeNote = editSelectedWidget
+        ? '\n[SCOPE]\nCURRENT JSON is ONE widget, not a page. Return exactly one widget node object ({"id","type","properties","children"}) that replaces it. Do not return "screens" and do not wrap it in a Scaffold.\n'
+        : '';
 
     final List<Map<String, dynamic>> contextMessages = [];
-    contextMessages.add({'role': 'system', 'content': systemPrompt});
+    contextMessages.add({'role': 'system', 'content': systemPrompt + scopeNote});
     
     for (var msg in previousMessages) {
       contextMessages.add({
@@ -166,110 +190,148 @@ Widgets inside dynamic database lists can bind properties to query columns under
     if (currentJson != null) {
       finalPrompt = 'CURRENT JSON STATE:\n$currentJson\n\nUSER REQUEST: $prompt';
     }
+    if (imageBase64 != null) {
+      finalPrompt = 'Recreate the UI in the attached screenshot as closely as possible.\n\n$finalPrompt';
+    }
 
     if (retryCount > 0 && lastError != null) {
       finalPrompt = 'REPAIR ATTEMPT $retryCount.\nERROR: $lastError\n\nUSER REQUEST: $prompt';
     }
 
-    contextMessages.add({'role': 'user', 'content': finalPrompt});
-
-    final Map<String, dynamic> body = {
-      'model': model,
-      'messages': contextMessages,
-      'temperature': 0.2,
-      'max_tokens': 8192,
-    };
-
-    // OpenRouter/Kimi and some OpenAI models may have issues with structured-outputs.
-    // Apply it specifically for DeepSeek as requested.
-    if (agentType == AiAgentType.deepseek || agentType == AiAgentType.gemini) {
-      body['response_format'] = {'type': 'json_object'};
-    }
-
-    // DeepSeek V4 defaults to thinking mode (extra reasoning tokens → much slower).
-    if (agentType == AiAgentType.deepseek) {
-      body['thinking'] = {'type': 'disabled'};
-    }
-
-    // Validate API key before making request
-    if (apiKey.isEmpty) {
+    if (apiKey.isEmpty && AppConfig.aiProxyUrl.isEmpty) {
       throw Exception('API key is required for ${agentType.nameString} agent.');
     }
 
-    print('🛠️ Using agent: $agentType');
-    print('🔑 API Key provided: ${apiKey.isNotEmpty ? '******' : 'EMPTY'}');
-
-    final response = await http.post(
-      Uri.parse(endpoint),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode(body));
-
-    if (response.statusCode == 401) {
-      // Authentication failure – provide clear guidance
-      throw Exception('401 Unauthorized: Invalid API key for ${agentType.nameString}. Please verify your key in the AI Prompt dialog.');
-    }
-
-      if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-      String content = jsonResponse['choices'][0]['message']['content'];
-      print('🔍 RAW AI OUTPUT:\n$content');
-      
-      // We must repair the JSON BEFORE attempting to parse it!
-      content = repairJson(content);
-      
-      List<WidgetNode> generatedScreens = [];
-      
-      try {
-        final dynamic parsedJson = jsonDecode(content);
-        
-        if (parsedJson is Map<String, dynamic> && parsedJson.containsKey('screens')) {
-          final screensList = parsedJson['screens'] as List;
-          for (var screenData in screensList) {
-            final rootNodeData = screenData['rootWidget'];
-            if (rootNodeData != null) {
-              final node = WidgetNode.fromJson(rootNodeData);
-              if (screenData['name'] != null) {
-                node.properties['pageName'] = screenData['name'];
-              }
-              _ensureUniqueIds(node, <String>{});
-              generatedScreens.add(node);
-            }
-          }
-          if (generatedScreens.isNotEmpty) return generatedScreens;
-        }
-        
-        // Fallback for single node returned
-        if (parsedJson is Map<String, dynamic> && parsedJson.containsKey('type')) {
-          final node = WidgetNode.fromJson(parsedJson);
-          _ensureUniqueIds(node, <String>{});
-          return [node];
-        } else if (parsedJson is List && parsedJson.isNotEmpty) {
-          final node = WidgetNode.fromJson(parsedJson.first);
-          _ensureUniqueIds(node, <String>{});
-          return [node];
-        }
-        throw Exception('Unexpected JSON format returned by AI. Missing "screens" array or valid root widget.');
-      } catch (e) {
-        if (retryCount < 1) {
-          print('JSON Parse Failed. Triggering Self-Repair Loop. Error: $e');
-          return generateUi(
-            prompt: prompt,
-            apiKey: apiKey,
-            agentType: agentType,
-            currentJson: currentJson,
-            previousMessages: previousMessages,
-            retryCount: retryCount + 1,
-            lastError: e.toString(),
-          );
-        }
-        rethrow;
-      }
+    String content;
+    if (agentType == AiAgentType.claude) {
+      final body = ClaudeClient.buildBody(
+        system: systemPrompt + scopeNote,
+        history: previousMessages,
+        prompt: finalPrompt,
+        imageBase64: imageBase64,
+        imageMediaType: imageMediaType,
+      );
+      content = AppConfig.aiProxyUrl.isEmpty
+          ? await ClaudeClient.complete(apiKey: apiKey, body: body)
+          : await _viaProxy('claude', body, (status, text) => ClaudeClient.parseResponse(status, text));
     } else {
-      throw Exception('AI Generation failed: ${response.statusCode} - ${response.body}');
+      contextMessages.add({
+        'role': 'user',
+        'content': imageBase64 == null
+            ? finalPrompt
+            : [
+                {'type': 'text', 'text': finalPrompt},
+                {'type': 'image_url', 'image_url': {'url': 'data:${imageMediaType ?? 'image/png'};base64,$imageBase64'}},
+              ],
+      });
+
+      final Map<String, dynamic> body = {
+        'model': model,
+        'messages': contextMessages,
+        'temperature': 0.2,
+        'max_tokens': 8192,
+      };
+
+      // OpenRouter/Kimi and some OpenAI models may have issues with structured-outputs.
+      // Apply it specifically for DeepSeek as requested.
+      if (agentType == AiAgentType.deepseek || agentType == AiAgentType.gemini) {
+        body['response_format'] = {'type': 'json_object'};
+      }
+
+      // DeepSeek V4 defaults to thinking mode (extra reasoning tokens → much slower).
+      if (agentType == AiAgentType.deepseek) {
+        body['thinking'] = {'type': 'disabled'};
+      }
+
+      String parseOpenAi(int status, String text) {
+        if (status == 401) {
+          throw Exception('401 Unauthorized: Invalid API key for ${agentType.nameString}. Please verify your key in the AI panel.');
+        }
+        if (status != 200) throw Exception('AI Generation failed: $status - $text');
+        return jsonDecode(text)['choices'][0]['message']['content'] as String;
+      }
+
+      if (AppConfig.aiProxyUrl.isNotEmpty) {
+        content = await _viaProxy(agentType.nameString, {...body, 'endpoint': endpoint}, parseOpenAi);
+      } else {
+        final response = await http.post(
+          Uri.parse(endpoint),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $apiKey',
+          },
+          body: jsonEncode(body),
+        );
+        content = parseOpenAi(response.statusCode, response.body);
+      }
     }
+
+    print('🔍 RAW AI OUTPUT:\n$content');
+    
+    // We must repair the JSON BEFORE attempting to parse it!
+    content = repairJson(content);
+    
+    List<WidgetNode> generatedScreens = [];
+    
+    try {
+      final dynamic parsedJson = jsonDecode(content);
+      
+      if (parsedJson is Map<String, dynamic> && parsedJson.containsKey('screens')) {
+        final screensList = parsedJson['screens'] as List;
+        for (var screenData in screensList) {
+          final rootNodeData = screenData['rootWidget'];
+          if (rootNodeData != null) {
+            final node = WidgetNode.fromJson(rootNodeData);
+            if (screenData['name'] != null) {
+              node.properties['pageName'] = screenData['name'];
+            }
+            _ensureUniqueIds(node, <String>{});
+            generatedScreens.add(node);
+          }
+        }
+        if (generatedScreens.isNotEmpty) return generatedScreens;
+      }
+      
+      // Fallback for single node returned
+      if (parsedJson is Map<String, dynamic> && parsedJson.containsKey('type')) {
+        final node = WidgetNode.fromJson(parsedJson);
+        _ensureUniqueIds(node, <String>{});
+        return [node];
+      } else if (parsedJson is List && parsedJson.isNotEmpty) {
+        final node = WidgetNode.fromJson(parsedJson.first);
+        _ensureUniqueIds(node, <String>{});
+        return [node];
+      }
+      throw Exception('Unexpected JSON format returned by AI. Missing "screens" array or valid root widget.');
+    } catch (e) {
+      if (retryCount < 1) {
+        print('JSON Parse Failed. Triggering Self-Repair Loop. Error: $e');
+        return generateUi(
+          prompt: prompt,
+          apiKey: apiKey,
+          agentType: agentType,
+          currentJson: currentJson,
+          previousMessages: previousMessages,
+          retryCount: retryCount + 1,
+          lastError: e.toString(),
+          imageBase64: imageBase64,
+          imageMediaType: imageMediaType,
+          editSelectedWidget: editSelectedWidget,
+        );
+      }
+      rethrow;
+    }
+  }
+
+  /// Sends the request through the AI proxy (a Supabase Edge Function that
+  /// holds provider keys server-side, see supabase/functions/ai-proxy).
+  static Future<String> _viaProxy(String provider, Map<String, dynamic> body, String Function(int, String) parse) async {
+    final response = await http.post(
+      Uri.parse(AppConfig.aiProxyUrl),
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ${AppConfig.supabaseAnonKey}'},
+      body: jsonEncode({'provider': provider, 'body': body}),
+    );
+    return parse(response.statusCode, response.body);
   }
 
   static void _ensureUniqueIds(WidgetNode node, Set<String> existingIds) {

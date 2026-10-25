@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../ui/editor_theme.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class IconPickerField extends StatefulWidget {
@@ -137,7 +138,7 @@ class _IconPickerFieldState extends State<IconPickerField> {
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.blue.withValues(alpha: 0.2) : const Color(0xFF0F172A),
+                        color: isSelected ? Colors.blue.withValues(alpha: 0.2) : EditorColors.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: isSelected ? Border.all(color: Colors.blue) : Border.all(color: Colors.transparent),
                       ),
@@ -161,7 +162,7 @@ class _IconPickerFieldState extends State<IconPickerField> {
             }
 
             return Dialog(
-              backgroundColor: const Color(0xFF1E293B),
+              backgroundColor: EditorColors.surfaceRaised,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: DefaultTabController(
                 length: 2,
@@ -193,7 +194,7 @@ class _IconPickerFieldState extends State<IconPickerField> {
                           hintStyle: const TextStyle(color: Colors.white54),
                           prefixIcon: const Icon(Icons.search, color: Colors.white54),
                           filled: true,
-                          fillColor: const Color(0xFF0F172A),
+                          fillColor: EditorColors.surface,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -261,9 +262,9 @@ class _IconPickerFieldState extends State<IconPickerField> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
+                color: EditorColors.surfaceRaised,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF334155)),
+                border: Border.all(color: EditorColors.borderStrong),
               ),
               child: Row(
                 children: [

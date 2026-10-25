@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:provider/provider.dart';
 import '../models/backend_query_model.dart';
 import '../models/supabase_connection_model.dart';
@@ -134,7 +135,7 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
 
     if (activeConnection == null) {
       return const AlertDialog(
-        backgroundColor: Color(0xFF0F172A),
+        backgroundColor: EditorColors.surface,
         title: Text('Error', style: TextStyle(color: Colors.white)),
         content: Text('Please connect a data source before creating a query.', style: TextStyle(color: Colors.white70)),
       );
@@ -148,7 +149,7 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
     final columns = currentTableSchema?.columns.map((c) => c.name).toList() ?? [];
 
     return Dialog(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: EditorColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.7,
@@ -199,7 +200,7 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                               hintText: 'e.g. Fetch Active Users',
                               hintStyle: const TextStyle(color: Colors.white30),
                               filled: true,
-                              fillColor: const Color(0xFF1E293B),
+                              fillColor: EditorColors.surfaceRaised,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide.none,
@@ -219,13 +220,13 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                           // Table Selector Dropdown
                           DropdownButtonFormField<String>(
                             value: _selectedTable,
-                            dropdownColor: const Color(0xFF1E293B),
+                            dropdownColor: EditorColors.surfaceRaised,
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: 'Select Table',
                               labelStyle: const TextStyle(color: Colors.white70),
                               filled: true,
-                              fillColor: const Color(0xFF1E293B),
+                              fillColor: EditorColors.surfaceRaised,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide.none,
@@ -261,11 +262,11 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                                 return FilterChip(
                                   label: Text(colName),
                                   selected: isSelected,
-                                  selectedColor: const Color(0xFF0FADD5).withOpacity(0.3),
-                                  checkmarkColor: const Color(0xFF0FADD5),
-                                  backgroundColor: const Color(0xFF1E293B),
+                                  selectedColor: EditorColors.accent.withOpacity(0.3),
+                                  checkmarkColor: EditorColors.accent,
+                                  backgroundColor: EditorColors.surfaceRaised,
                                   labelStyle: TextStyle(
-                                    color: isSelected ? const Color(0xFF0FADD5) : Colors.white70,
+                                    color: isSelected ? EditorColors.accent : Colors.white70,
                                     fontSize: 12,
                                   ),
                                   onSelected: (selected) {
@@ -288,8 +289,8 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                               children: [
                                 const Text('Filters (WHERE)', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 14)),
                                 TextButton.icon(
-                                  icon: const Icon(Icons.add, size: 16, color: Color(0xFF0FADD5)),
-                                  label: const Text('Add Filter', style: TextStyle(color: Color(0xFF0FADD5), fontSize: 12)),
+                                  icon: const Icon(Icons.add, size: 16, color: EditorColors.accent),
+                                  label: const Text('Add Filter', style: TextStyle(color: EditorColors.accent, fontSize: 12)),
                                   onPressed: _addFilter,
                                 )
                               ],
@@ -314,13 +315,13 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                                       Expanded(
                                         child: DropdownButtonFormField<String>(
                                           value: filter.column.isEmpty ? null : filter.column,
-                                          dropdownColor: const Color(0xFF1E293B),
+                                          dropdownColor: EditorColors.surfaceRaised,
                                           style: const TextStyle(color: Colors.white, fontSize: 12),
                                           decoration: const InputDecoration(
                                             isDense: true,
                                             contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                             filled: true,
-                                            fillColor: Color(0xFF1E293B),
+                                            fillColor: EditorColors.surfaceRaised,
                                             border: OutlineInputBorder(borderSide: BorderSide.none),
                                           ),
                                           items: columns.map((c) {
@@ -347,13 +348,13 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                                         width: 80,
                                         child: DropdownButtonFormField<String>(
                                           value: filter.operator,
-                                          dropdownColor: const Color(0xFF1E293B),
+                                          dropdownColor: EditorColors.surfaceRaised,
                                           style: const TextStyle(color: Colors.white, fontSize: 12),
                                           decoration: const InputDecoration(
                                             isDense: true,
                                             contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                             filled: true,
-                                            fillColor: Color(0xFF1E293B),
+                                            fillColor: EditorColors.surfaceRaised,
                                             border: OutlineInputBorder(borderSide: BorderSide.none),
                                           ),
                                           items: ['eq', 'neq', 'gt', 'lt', 'gte', 'lte', 'like', 'ilike', 'is', 'in']
@@ -386,7 +387,7 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                                             hintText: 'value',
                                             hintStyle: TextStyle(color: Colors.white24),
                                             filled: true,
-                                            fillColor: Color(0xFF1E293B),
+                                            fillColor: EditorColors.surfaceRaised,
                                             border: OutlineInputBorder(borderSide: BorderSide.none),
                                           ),
                                           onChanged: (val) {
@@ -422,13 +423,13 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                                 Expanded(
                                   child: DropdownButtonFormField<String>(
                                     value: _orderBy,
-                                    dropdownColor: const Color(0xFF1E293B),
+                                    dropdownColor: EditorColors.surfaceRaised,
                                     style: const TextStyle(color: Colors.white, fontSize: 12),
                                     decoration: InputDecoration(
                                       labelText: 'Order By',
                                       labelStyle: const TextStyle(color: Colors.white70),
                                       filled: true,
-                                      fillColor: const Color(0xFF1E293B),
+                                      fillColor: EditorColors.surfaceRaised,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8),
                                         borderSide: BorderSide.none,
@@ -454,7 +455,7 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                                   IconButton(
                                     icon: Icon(
                                       _ascending ? Icons.arrow_upward : Icons.arrow_downward,
-                                      color: const Color(0xFF0FADD5),
+                                      color: EditorColors.accent,
                                     ),
                                     tooltip: _ascending ? 'Ascending' : 'Descending',
                                     onPressed: () => setState(() => _ascending = !_ascending),
@@ -474,7 +475,7 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                                       hintText: 'Unlimited',
                                       hintStyle: const TextStyle(color: Colors.white24),
                                       filled: true,
-                                      fillColor: const Color(0xFF1E293B),
+                                      fillColor: EditorColors.surfaceRaised,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8),
                                         borderSide: BorderSide.none,
@@ -537,12 +538,12 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                               width: double.infinity,
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF181A20),
+                                color: EditorColors.background,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: Colors.white10),
                               ),
                               child: _isTesting
-                                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF0FADD5)))
+                                  ? const Center(child: CircularProgressIndicator(color: EditorColors.accent))
                                   : _testResult == null
                                       ? const Center(
                                           child: Text(
@@ -588,7 +589,7 @@ class _BackendQueryDialogState extends State<BackendQueryDialog> {
                   const SizedBox(width: 12),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0FADD5),
+                      backgroundColor: EditorColors.accent,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),

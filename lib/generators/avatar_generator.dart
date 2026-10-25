@@ -1,7 +1,6 @@
 import 'base_widget_generator.dart';
 import '../models/widget_node.dart';
 import 'widget_generator_registry.dart';
-import '../utils/property_converters.dart';
 
 class AvatarGenerator extends BaseWidgetGenerator {
   @override
@@ -24,7 +23,7 @@ class AvatarGenerator extends BaseWidgetGenerator {
     
     final src = node.properties['src']?.toString();
     if (src != null && src.isNotEmpty) {
-      props.add("backgroundImage: NetworkImage('$src')");
+      props.add("backgroundImage: NetworkImage(${dartString(src)})");
     }
     
     final childCode = node.children.isNotEmpty

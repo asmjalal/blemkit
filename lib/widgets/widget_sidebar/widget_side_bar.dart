@@ -3,6 +3,10 @@ import 'package:designflutterkit/widgets/widget_sidebar/recently_used_section.da
 import 'package:designflutterkit/widgets/widget_sidebar/sidebar_tabbar.dart';
 import 'package:designflutterkit/widgets/widget_sidebar/widget_category_section.dart';
 import 'package:flutter/material.dart';
+import 'palette_browser.dart';
+import '../../ui/editor_widgets.dart';
+import '../../models/project_logic.dart';
+import '../../ui/editor_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -21,6 +25,137 @@ class WidgetSidebar extends StatefulWidget {
   final void Function(String type)? onWidgetAdd;
   const WidgetSidebar({super.key, required this.selectedTab, required this.onTabSelected, this.onWidgetAdd});
 
+  /// Built-in palette, grouped by category. Each entry needs a canvas builder,
+  /// a generator and defaults (see test/generators/palette_widgets_test.dart).
+  static const List<Map<String, dynamic>> paletteCategories = [
+    {
+      'name': 'Layout Elements',
+      'widgets': [
+        {'type': 'Row', 'icon': Icons.view_column},
+        {'type': 'Column', 'icon': Icons.view_agenda},
+        {'type': 'Container', 'icon': Icons.crop_square},
+        {'type': 'ListView', 'icon': Icons.list},
+        {'type': 'GridView', 'icon': Icons.grid_on},
+        {'type': 'ExpansionTile', 'icon': Icons.expand_more},
+        {'type': 'Stack', 'icon': Icons.layers},
+        {'type': 'Card', 'icon': Icons.credit_card},
+        {'type': 'Divider', 'icon': Icons.horizontal_rule},
+        {'type': 'VerticalDivider', 'icon': Icons.vertical_align_center},
+        {'type': 'TabBar', 'icon': Icons.tab},
+        {'type': 'PageView', 'icon': Icons.view_carousel},
+        {'type': 'Carousel', 'icon': Icons.view_carousel},
+        {'type': 'Expandable', 'icon': Icons.expand},
+        {'type': 'Wrap', 'icon': Icons.wrap_text},
+        {'type': 'DataTable', 'icon': Icons.table_chart},
+        {'type': 'Flex', 'icon': Icons.line_weight},
+        {'type': 'SizedBox', 'icon': Icons.space_bar},
+        {'type': 'Padding', 'icon': Icons.padding},
+        {'type': 'Center', 'icon': Icons.center_focus_strong},
+        {'type': 'Align', 'icon': Icons.align_horizontal_center},
+        {'type': 'Spacer', 'icon': Icons.space_dashboard},
+        {'type': 'Expanded', 'icon': Icons.open_in_full},
+        {'type': 'Flexible', 'icon': Icons.fit_screen},
+        {'type': 'SingleChildScrollView', 'icon': Icons.swap_vert},
+        {'type': 'SafeArea', 'icon': Icons.security},
+        {'type': 'Positioned', 'icon': Icons.place},
+        {'type': 'AspectRatio', 'icon': Icons.aspect_ratio},
+        {'type': 'ConstrainedBox', 'icon': Icons.crop_free},
+        {'type': 'IntrinsicHeight', 'icon': Icons.height},
+        {'type': 'IntrinsicWidth', 'icon': Icons.width_full},
+      ],
+    },
+    {
+      'name': 'Base Elements',
+      'widgets': [
+        {'type': 'Text', 'icon': Icons.text_fields},
+        {'type': 'RichText', 'icon': Icons.description},
+        {'type': 'Image', 'icon': Icons.image},
+        {'type': 'CircleImage', 'icon': Icons.account_circle},
+        {'type': 'Icon', 'icon': Icons.settings},
+        {'type': 'Button', 'icon': Icons.smart_button},
+        {'type': 'IconButton', 'icon': Icons.add_circle_outline},
+        {'type': 'ListTile', 'icon': Icons.list_alt},
+        {'type': 'SlidableListTile', 'icon': Icons.swipe},
+        {'type': 'SelectableText', 'icon': Icons.text_snippet},
+        {'type': 'SvgImage', 'icon': Icons.image_search},
+        {'type': 'NetworkImage', 'icon': Icons.cloud_download},
+        {'type': 'Avatar', 'icon': Icons.account_circle},
+        {'type': 'Badge', 'icon': Icons.badge},
+        {'type': 'Chip', 'icon': Icons.label},
+        {'type': 'Tooltip', 'icon': Icons.info},
+      ],
+    },
+    {
+      'name': 'Page Elements',
+      'widgets': [
+        {'type': 'AppBar', 'icon': Icons.space_bar},
+        {'type': 'FAB', 'icon': Icons.add_circle},
+        {'type': 'Drawer', 'icon': Icons.menu},
+        {'type': 'EndDrawer', 'icon': Icons.menu_open},
+        {'type': 'BottomNavigationBar', 'icon': Icons.navigation},
+        {'type': 'NavigationRail', 'icon': Icons.view_sidebar},
+        {'type': 'BottomSheet', 'icon': Icons.keyboard_arrow_up},
+        {'type': 'TabBarView', 'icon': Icons.tab},
+        {'type': 'Scaffold', 'icon': Icons.dashboard},
+      ],
+    },
+    {
+      'name': 'Form Elements',
+      'widgets': [
+        {'type': 'TextField', 'icon': Icons.edit},
+        {'type': 'DropDown', 'icon': Icons.arrow_drop_down_circle},
+        {'type': 'Checkbox', 'icon': Icons.check_box},
+        {'type': 'CheckboxListTile', 'icon': Icons.checklist},
+        {'type': 'Switch', 'icon': Icons.toggle_on},
+        {'type': 'SwitchListTile', 'icon': Icons.toggle_off},
+        {'type': 'RadioButton', 'icon': Icons.radio_button_checked},
+        {'type': 'PinCode', 'icon': Icons.password},
+        {'type': 'Slider', 'icon': Icons.tune},
+        {'type': 'RatingBar', 'icon': Icons.star},
+        {'type': 'CreditCardForm', 'icon': Icons.credit_card},
+        {'type': 'CounterButton', 'icon': Icons.exposure_plus_2},
+        {'type': 'ChoiceChips', 'icon': Icons.check_box_outline_blank},
+        {'type': 'PlacePicker', 'icon': Icons.place},
+        {'type': 'FormValidation', 'icon': Icons.verified_user},
+        {'type': 'CheckboxGroup', 'icon': Icons.checklist_rtl},
+        {'type': 'Signature', 'icon': Icons.edit_attributes},
+        {'type': 'DatePicker', 'icon': Icons.calendar_today},
+        {'type': 'TimePicker', 'icon': Icons.access_time},
+        {'type': 'RangeSlider', 'icon': Icons.tune},
+        {'type': 'SearchField', 'icon': Icons.search},
+        {'type': 'AutoComplete', 'icon': Icons.auto_fix_high},
+        {'type': 'ToggleButtons', 'icon': Icons.toggle_on},
+        {'type': 'SegmentedButton', 'icon': Icons.view_week},
+      ],
+    },
+    {
+      'name': 'Feedback & State',
+      'widgets': [
+        {'type': 'CircularProgressIndicator', 'icon': Icons.refresh},
+        {'type': 'LinearProgressIndicator', 'icon': Icons.trending_flat},
+        {'type': 'SnackBar', 'icon': Icons.message},
+        {'type': 'Dialog', 'icon': Icons.chat},
+        {'type': 'AlertDialog', 'icon': Icons.warning},
+        {'type': 'LoadingOverlay', 'icon': Icons.hourglass_empty},
+      ]
+    },
+    {
+      'name': 'Animation',
+      'widgets': [
+        {'type': 'AnimatedContainer', 'icon': Icons.animation},
+        {'type': 'Hero', 'icon': Icons.flight},
+        {'type': 'AnimatedOpacity', 'icon': Icons.opacity},
+        {'type': 'AnimatedSwitcher', 'icon': Icons.swap_horiz},
+        {'type': 'FadeTransition', 'icon': Icons.blur_on},
+      ]
+    },
+  ];
+
+  static List<String> get paletteTypes => [
+        for (final category in paletteCategories)
+          for (final widget in category['widgets'] as List) widget['type'] as String,
+      ];
+
   @override
   State<WidgetSidebar> createState() => _WidgetSidebarState();
 }
@@ -28,6 +163,7 @@ class WidgetSidebar extends StatefulWidget {
 class _WidgetSidebarState extends State<WidgetSidebar> {
   int selectedCategory = 0;
   String search = '';
+  final List<String> _recent = ['Text', 'Container', 'Column', 'Row', 'Image', 'ElevatedButton'];
   List<Map<String, dynamic>> recentlyUsed = [
     {'icon': Icons.text_fields, 'label': 'Text'},
     {'icon': Icons.crop_square, 'label': 'Container'},
@@ -53,127 +189,23 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
             'data': w,
           }).toList(),
         },
-      {
-        'name': 'Layout Elements',
-        'widgets': [
-          {'type': 'Row', 'icon': Icons.view_column},
-          {'type': 'Column', 'icon': Icons.view_agenda},
-          {'type': 'Container', 'icon': Icons.crop_square},
-          {'type': 'ListView', 'icon': Icons.list},
-          {'type': 'GridView', 'icon': Icons.grid_on},
-          {'type': 'ExpansionTile', 'icon': Icons.expand_more},
-          {'type': 'Stack', 'icon': Icons.layers},
-          {'type': 'Card', 'icon': Icons.credit_card},
-          {'type': 'Divider', 'icon': Icons.horizontal_rule},
-          {'type': 'VerticalDivider', 'icon': Icons.vertical_align_center},
-          {'type': 'TabBar', 'icon': Icons.tab},
-          {'type': 'PageView', 'icon': Icons.view_carousel},
-          {'type': 'Carousel', 'icon': Icons.view_carousel},
-          {'type': 'Expandable', 'icon': Icons.expand},
-          {'type': 'Wrap', 'icon': Icons.wrap_text},
-          {'type': 'DataTable', 'icon': Icons.table_chart},
-          {'type': 'Flex', 'icon': Icons.line_weight},
-          {'type': 'SizedBox', 'icon': Icons.space_bar},
-          {'type': 'Padding', 'icon': Icons.padding},
-          {'type': 'Center', 'icon': Icons.center_focus_strong},
-          {'type': 'Align', 'icon': Icons.align_horizontal_center},
-          {'type': 'Spacer', 'icon': Icons.space_dashboard},
-          {'type': 'Expanded', 'icon': Icons.open_in_full},
-          {'type': 'Flexible', 'icon': Icons.fit_screen},
-          {'type': 'SingleChildScrollView', 'icon': Icons.swap_vert},
-          {'type': 'SafeArea', 'icon': Icons.security},
-          {'type': 'Positioned', 'icon': Icons.place},
-          {'type': 'AspectRatio', 'icon': Icons.aspect_ratio},
-          {'type': 'ConstrainedBox', 'icon': Icons.crop_free},
-          {'type': 'IntrinsicHeight', 'icon': Icons.height},
-          {'type': 'IntrinsicWidth', 'icon': Icons.width_full},
-        ],
-      },
-      {
-        'name': 'Base Elements',
-        'widgets': [
-          {'type': 'Text', 'icon': Icons.text_fields},
-          {'type': 'RichText', 'icon': Icons.description},
-          {'type': 'Image', 'icon': Icons.image},
-          {'type': 'CircleImage', 'icon': Icons.account_circle},
-          {'type': 'Icon', 'icon': Icons.settings},
-          {'type': 'Button', 'icon': Icons.smart_button},
-          {'type': 'IconButton', 'icon': Icons.add_circle_outline},
-          {'type': 'ListTile', 'icon': Icons.list_alt},
-          {'type': 'SlidableListTile', 'icon': Icons.swipe},
-          {'type': 'SelectableText', 'icon': Icons.text_snippet},
-          {'type': 'SvgImage', 'icon': Icons.image_search},
-          {'type': 'NetworkImage', 'icon': Icons.cloud_download},
-          {'type': 'Avatar', 'icon': Icons.account_circle},
-          {'type': 'Badge', 'icon': Icons.badge},
-          {'type': 'Chip', 'icon': Icons.label},
-          {'type': 'Tooltip', 'icon': Icons.info},
-        ],
-      },
-      {
-        'name': 'Page Elements',
-        'widgets': [
-          {'type': 'AppBar', 'icon': Icons.space_bar},
-          {'type': 'FAB', 'icon': Icons.add_circle},
-          {'type': 'Drawer', 'icon': Icons.menu},
-          {'type': 'EndDrawer', 'icon': Icons.menu_open},
-          {'type': 'BottomNavigationBar', 'icon': Icons.navigation},
-          {'type': 'NavigationRail', 'icon': Icons.view_sidebar},
-          {'type': 'BottomSheet', 'icon': Icons.keyboard_arrow_up},
-          {'type': 'TabBarView', 'icon': Icons.tab},
-          {'type': 'Scaffold', 'icon': Icons.dashboard},
-        ],
-      },
-      {
-        'name': 'Form Elements',
-        'widgets': [
-          {'type': 'TextField', 'icon': Icons.edit},
-          {'type': 'DropDown', 'icon': Icons.arrow_drop_down_circle},
-          {'type': 'Checkbox', 'icon': Icons.check_box},
-          {'type': 'CheckboxListTile', 'icon': Icons.checklist},
-          {'type': 'Switch', 'icon': Icons.toggle_on},
-          {'type': 'SwitchListTile', 'icon': Icons.toggle_off},
-          {'type': 'RadioButton', 'icon': Icons.radio_button_checked},
-          {'type': 'PinCode', 'icon': Icons.password},
-          {'type': 'Slider', 'icon': Icons.tune},
-          {'type': 'RatingBar', 'icon': Icons.star},
-          {'type': 'CreditCardForm', 'icon': Icons.credit_card},
-          {'type': 'CounterButton', 'icon': Icons.exposure_plus_2},
-          {'type': 'ChoiceChips', 'icon': Icons.check_box_outline_blank},
-          {'type': 'PlacePicker', 'icon': Icons.place},
-          {'type': 'FormValidation', 'icon': Icons.verified_user},
-          {'type': 'CheckboxGroup', 'icon': Icons.checklist_rtl},
-          {'type': 'Signature', 'icon': Icons.edit_attributes},
-          {'type': 'DatePicker', 'icon': Icons.calendar_today},
-          {'type': 'TimePicker', 'icon': Icons.access_time},
-          {'type': 'RangeSlider', 'icon': Icons.tune},
-          {'type': 'SearchField', 'icon': Icons.search},
-          {'type': 'AutoComplete', 'icon': Icons.auto_fix_high},
-          {'type': 'ToggleButtons', 'icon': Icons.toggle_on},
-          {'type': 'SegmentedButton', 'icon': Icons.view_week},
-        ],
-      },
-      {
-        'name': 'Feedback & State',
-        'widgets': [
-          {'type': 'CircularProgressIndicator', 'icon': Icons.refresh},
-          {'type': 'LinearProgressIndicator', 'icon': Icons.trending_flat},
-          {'type': 'SnackBar', 'icon': Icons.message},
-          {'type': 'Dialog', 'icon': Icons.chat},
-          {'type': 'AlertDialog', 'icon': Icons.warning},
-          {'type': 'LoadingOverlay', 'icon': Icons.hourglass_empty},
-        ]
-      },
-      {
-        'name': 'Animation',
-        'widgets': [
-          {'type': 'AnimatedContainer', 'icon': Icons.animation},
-          {'type': 'Hero', 'icon': Icons.flight},
-          {'type': 'AnimatedOpacity', 'icon': Icons.opacity},
-          {'type': 'AnimatedSwitcher', 'icon': Icons.swap_horiz},
-          {'type': 'FadeTransition', 'icon': Icons.blur_on},
-        ]
-      },
+      if (provider.components.isNotEmpty)
+        {
+          'name': 'Components',
+          'widgets': [
+            for (final c in provider.components)
+              {'type': 'Component:${c.id}', 'label': PageLogic.componentName(c.properties) ?? 'Component', 'icon': Icons.extension_outlined},
+          ],
+        },
+      if (provider.logic.customCode.any((c) => c.kind == 'widget'))
+        {
+          'name': 'Custom Code',
+          'widgets': [
+            for (final c in provider.logic.customCode.where((c) => c.kind == 'widget'))
+              {'type': 'CustomWidget:${c.name}', 'label': c.name, 'icon': Icons.code_rounded},
+          ],
+        },
+      ...WidgetSidebar.paletteCategories,
     ];
   }
 
@@ -192,18 +224,7 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
 
   void _addWidget(BuildContext context, String type, {WidgetNode? parent}) {
     final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
-    WidgetNode newNode;
-    
-    if (type.startsWith('ThemedWidget:')) {
-      final themedId = type.split(':')[1];
-      newNode = WidgetNode(
-        type: 'ThemedWidget',
-        properties: {'themedWidgetId': themedId},
-        children: [],
-      );
-    } else {
-      newNode = WidgetTreeEditor.createWidgetNodeWithDefaults(type);
-    }
+    final newNode = WidgetTreeEditor.createFromPaletteType(type);
 
     if (parent != null) {
       provider.addChild(parent, newNode);
@@ -215,12 +236,10 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
       provider.addChild(provider.rootNode!, newNode);
     }
     
-    // Update recently used
     setState(() {
-      recentlyUsed.removeWhere((w) => w['label'] == type);
-      final label = type.startsWith('ThemedWidget:') ? type.split(':')[1] : type;
-      recentlyUsed.insert(0, {'icon': Icons.widgets, 'label': label});
-      if (recentlyUsed.length > 8) recentlyUsed = recentlyUsed.sublist(0, 8);
+      _recent.remove(type);
+      _recent.insert(0, type);
+      if (_recent.length > 6) _recent.removeLast();
     });
   }
 
@@ -339,10 +358,7 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1e293b),
-        border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
-      ),
+      decoration: const BoxDecoration(color: EditorColors.surface),
       child: Column(
         children: [
           SidebarTabBar(
@@ -352,17 +368,14 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
               child: _buildContent(),
             ),
           ),
           // ── Bottom user footer ──────────────────────────────────────
           Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF162032),
-              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: const BoxDecoration(border: Border(top: BorderSide(color: EditorColors.border))),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: user == null
                 ? InkWell(
                     onTap: () {
@@ -376,16 +389,9 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
                       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                       child: Row(
                         children: [
-                          const Icon(Icons.login_rounded, color: Color(0xFF0fadd5), size: 20),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'Login',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          const Icon(Icons.login_rounded, color: EditorColors.accent, size: 18),
+                          const SizedBox(width: 10),
+                          const Text('Sign in to save to the cloud', style: TextStyle(color: EditorColors.textMuted, fontSize: 12.5, fontWeight: FontWeight.w600)),
                           const Spacer(),
                           Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.3), size: 16),
                         ],
@@ -529,32 +535,10 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
 
   Widget _buildContent() {
     if (widget.selectedTab == 0) {
-      final dynamicCategories = _getDynamicCategories(context);
-      return Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: PremiumSearchBar(
-              isCollapsed: false,
-              onChanged: (val) => setState(() => search = val),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: RecentlyUsedSection(recentlyUsed: recentlyUsed),
-          ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: WidgetCategoriesSection(
-              categories: dynamicCategories,
-              selectedCategory: selectedCategory,
-              onCategorySelected: (i) => setState(() => selectedCategory = i),
-              search: search,
-              onWidgetAdd: (type) => _addWidget(context, type),
-            ),
-          ),
-        ],
+      return PaletteBrowser(
+        categories: _getDynamicCategories(context),
+        recent: _recent,
+        onAdd: (type) => _addWidget(context, type),
       );
     } else if (widget.selectedTab == 1) {
       return CollapsibleWidgetTree(
@@ -578,97 +562,103 @@ class _WidgetSidebarState extends State<WidgetSidebar> {
 
   Widget _buildPagesTab() {
     final provider = Provider.of<WidgetTreeProvider>(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Pages',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            IconButton(
-              icon: const Icon(Icons.add, color: Color(0xFF0fadd5), size: 18),
-              onPressed: () {
-                final newPage = WidgetTreeEditor.createWidgetNodeWithDefaults('Scaffold');
-                newPage.properties['pageName'] = 'New Page ${provider.screens.length + 1}';
-                provider.addScreen(newPage);
-              },
-              tooltip: 'Add Page',
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Expanded(
-          child: ListView.builder(
-            itemCount: provider.screens.length,
-            itemBuilder: (context, index) {
-              final screen = provider.screens[index];
-              final isSelected = provider.selectedScreen?.id == screen.id;
-              final pageName = screen.properties['pageName'] as String? ?? 'Unnamed Page';
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF0fadd5).withOpacity(0.15) : Colors.white.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(10),
-                  border: isSelected ? Border.all(color: const Color(0xFF0fadd5).withOpacity(0.3)) : null,
-                ),
-                child: ListTile(
-                  dense: true,
-                  leading: Icon(
-                    Icons.description_outlined,
-                    size: 16,
-                    color: isSelected ? const Color(0xFF0fadd5) : Colors.white38,
-                  ),
-                  title: Text(
-                    pageName,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.white70,
-                      fontSize: 12,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                  onTap: () => provider.selectScreen(screen),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.copy, size: 14, color: Colors.white38),
-                        onPressed: () => provider.duplicateScreen(screen),
-                        constraints: const BoxConstraints(),
-                        padding: EdgeInsets.zero,
-                        tooltip: 'Duplicate',
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined, size: 14, color: Colors.white38),
-                        onPressed: () => _showRenameDialog(context, screen),
-                        constraints: const BoxConstraints(),
-                        padding: EdgeInsets.zero,
-                        tooltip: 'Rename',
-                      ),
-                      if (provider.screens.length > 1) ...[
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline, size: 14, color: Colors.redAccent),
-                          onPressed: () => provider.removeScreen(screen),
-                          constraints: const BoxConstraints(),
-                          padding: EdgeInsets.zero,
-                          tooltip: 'Delete',
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              );
+    Widget header(String title, String tooltip, VoidCallback onAdd) => Padding(
+          padding: const EdgeInsets.only(top: 6, bottom: 6),
+          child: Row(children: [
+            Expanded(child: Text(title.toUpperCase(), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 1.1, color: EditorColors.textFaint))),
+            EditorIconButton(icon: Icons.add_rounded, tooltip: tooltip, size: 17, onPressed: onAdd),
+          ]),
+        );
+
+    Widget row(WidgetNode node, {required bool isComponent}) {
+      final selected = provider.selectedScreen?.id == node.id;
+      final name = isComponent ? (PageLogic.componentName(node.properties) ?? 'Component') : '${node.properties['pageName'] ?? 'Page'}';
+      final badges = <Widget>[
+        if (!isComponent && provider.logic.homePageId == node.id) const Icon(Icons.home_rounded, size: 13, color: EditorColors.accent),
+        if (!isComponent && provider.logic.loginPageId == node.id) const Icon(Icons.lock_outline_rounded, size: 13, color: EditorColors.warning),
+      ];
+      return EditorListTile(
+        icon: isComponent ? Icons.extension_outlined : Icons.web_asset_rounded,
+        iconColor: isComponent ? EditorColors.violet : null,
+        title: name,
+        subtitle: isComponent ? '${PageLogic.pageParams(node.properties).length} parameters' : null,
+        selected: selected,
+        onTap: () => provider.selectScreen(node),
+        trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+          ...badges,
+          PopupMenuButton<String>(
+            tooltip: 'More',
+            icon: const Icon(Icons.more_horiz_rounded, size: 16, color: EditorColors.textFaint),
+            onSelected: (v) {
+              switch (v) {
+                case 'rename':
+                  isComponent ? _renameComponent(context, node) : _showRenameDialog(context, node);
+                  break;
+                case 'duplicate':
+                  provider.duplicateScreen(node);
+                  break;
+                case 'home':
+                  provider.updateLogic((l) => l.homePageId = node.id);
+                  break;
+                case 'delete':
+                  isComponent ? provider.removeComponent(node) : provider.removeScreen(node);
+                  break;
+              }
             },
+            itemBuilder: (_) => [
+              const PopupMenuItem(value: 'rename', height: 36, child: Text('Rename')),
+              if (!isComponent) const PopupMenuItem(value: 'duplicate', height: 36, child: Text('Duplicate')),
+              if (!isComponent) const PopupMenuItem(value: 'home', height: 36, child: Text('Set as home page')),
+              if (isComponent || provider.screens.length > 1)
+                const PopupMenuItem(value: 'delete', height: 36, child: Text('Delete', style: TextStyle(color: EditorColors.danger))),
+            ],
           ),
-        ),
+        ]),
+      );
+    }
+
+    return ListView(
+      children: [
+        header('Pages', 'Add page', () {
+          final newPage = WidgetTreeEditor.createWidgetNodeWithDefaults('Scaffold');
+          newPage.properties['pageName'] = 'Page ${provider.screens.length + 1}';
+          provider.addScreen(newPage);
+        }),
+        for (final screen in provider.screens) row(screen, isComponent: false),
+        const SizedBox(height: 14),
+        header('Components', 'New component', () {
+          final component = provider.addComponent('Component ${provider.components.length + 1}');
+          provider.selectScreen(component);
+        }),
+        if (provider.components.isEmpty)
+          const Padding(
+            padding: EdgeInsets.fromLTRB(4, 0, 4, 8),
+            child: Text('Reusable blocks with parameters, like a ProductCard. Edit once, every instance updates.',
+                style: TextStyle(fontSize: 11.5, height: 1.4, color: EditorColors.textFaint)),
+          ),
+        for (final component in provider.components) row(component, isComponent: true),
       ],
     );
   }
+
+  Future<void> _renameComponent(BuildContext context, WidgetNode component) async {
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+    final controller = TextEditingController(text: PageLogic.componentName(component.properties) ?? '');
+    final name = await showDialog<String>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Rename component'),
+        content: TextField(controller: controller, autofocus: true),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(c, controller.text.trim()), child: const Text('Rename')),
+        ],
+      ),
+    );
+    if (name != null && name.isNotEmpty) provider.setNodeProperty(component, 'componentName', name);
+  }
+
 
   void _showRenameDialog(BuildContext context, WidgetNode screen) {
     final controller = TextEditingController(text: screen.properties['pageName'] as String? ?? 'Page');

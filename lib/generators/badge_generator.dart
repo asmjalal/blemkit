@@ -1,7 +1,6 @@
 import 'base_widget_generator.dart';
 import '../models/widget_node.dart';
 import 'widget_generator_registry.dart';
-import '../utils/property_converters.dart';
 
 class BadgeGenerator extends BaseWidgetGenerator {
   @override
@@ -13,7 +12,7 @@ class BadgeGenerator extends BaseWidgetGenerator {
     
     final label = node.properties['label']?.toString();
     if (label != null) {
-      props.add("label: Text('$label')");
+      props.add("label: Text(${dartString(label)})");
     }
     
     if (node.properties['isLabelVisible'] == false) {

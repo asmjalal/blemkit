@@ -21,6 +21,6 @@ class AlignGenerator extends BaseWidgetGenerator {
       child = '\n$childIndentStr child: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)},';
     }
     
-    return '${indentStr}Align(${props.join(', ')}$child\n$indentStr)';
+    return '${indentStr}Align(${props.join(', ')},$child\n$indentStr)';
   }
 } 

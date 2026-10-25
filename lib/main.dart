@@ -3,13 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
-import 'screens/builder_screen.dart';
+import 'app_config.dart';
+import 'ui/editor_theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'providers/widget_tree_provider.dart';
 import 'package:flutter/foundation.dart';
 // Add this import for web context menu suppression
-import 'dart:html' as html;
+import 'platform/web_bridge.dart';
 import 'widgets/canvas_preview/builders/widget_builder_factory.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -18,7 +19,7 @@ void main() async {
   
   // Suppress browser context menu on Flutter web
   if (kIsWeb) {
-    html.document.onContextMenu.listen((event) => event.preventDefault());
+    WebBridge.suppressContextMenu();
   }
   
   try {
@@ -31,8 +32,8 @@ void main() async {
   
   try {
     await supabase.Supabase.initialize(
-      url: 'https://yqrdwakbgywgzffcrquv.supabase.co',
-      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxcmR3YWtiZ3l3Z3pmZmNycXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzM4NzIsImV4cCI6MjA5NDU0OTg3Mn0.IT1l_iR-8JlV7E7elAZHejKcRHELfQSH6a6IdXlZKPk',
+      url: AppConfig.supabaseUrl,
+      anonKey: AppConfig.supabaseAnonKey,
     );
   } catch (e) {
     debugPrint('Supabase initialization warning: $e');
@@ -52,12 +53,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Synappkit',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-          fontFamily: 'Inter',
-
-        ),
+        theme: EditorTheme.dark(),
         home: StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {

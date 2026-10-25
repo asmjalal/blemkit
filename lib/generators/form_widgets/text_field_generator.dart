@@ -8,7 +8,7 @@ class TextFieldGenerator extends BaseWidgetGenerator {
     final varName = '_controller_${node.id.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')}';
     final initialText = node.properties['text'] ?? '';
     
-    BaseWidgetGenerator.stateVariables.add('late final TextEditingController $varName = TextEditingController(text: \'$initialText\');');
+    BaseWidgetGenerator.stateVariables.add('late final TextEditingController $varName = TextEditingController(text: ${dartString(initialText)});');
     BaseWidgetGenerator.disposeVariables.add('$varName.dispose();');
     
     final props = <String>[];
@@ -18,10 +18,10 @@ class TextFieldGenerator extends BaseWidgetGenerator {
       final decorationProps = <String>[];
       
       if (node.properties['hintText'] != null) {
-        decorationProps.add("hintText: '${node.properties['hintText']}'");
+        decorationProps.add("hintText: ${dartString(node.properties['hintText'])}");
       }
       if (node.properties['labelText'] != null) {
-        decorationProps.add("labelText: '${node.properties['labelText']}'");
+        decorationProps.add("labelText: ${dartString(node.properties['labelText'])}");
       }
       
       props.add('decoration: InputDecoration(${decorationProps.join(', ')})');

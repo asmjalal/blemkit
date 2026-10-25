@@ -1,5 +1,4 @@
 import 'base_widget_generator.dart';
-import 'project_generator.dart';
 import '../models/widget_node.dart';
 import '../utils/property_converters.dart';
 
@@ -30,7 +29,7 @@ class TextGenerator extends BaseWidgetGenerator {
         styleProps.add('fontStyle: FontStyle.italic');
       }
       if (node.properties['fontFamily'] != null) {
-        styleProps.add("fontFamily: '${node.properties['fontFamily']}'");
+        styleProps.add("fontFamily: ${dartString(node.properties['fontFamily'])}");
       }
       if (node.properties['letterSpacing'] != null) {
         styleProps.add('letterSpacing: ${node.properties['letterSpacing']}');
@@ -80,12 +79,9 @@ class TextGenerator extends BaseWidgetGenerator {
     if (node.dataBinding != null && node.dataBinding!.containsKey('text')) {
       final binding = node.dataBinding!['text'] as Map;
       final field = binding['field'];
-      textExpression = ProjectGenerator.isInsideRepeatedList 
-          ? "item['$field']?.toString() ?? ''" 
-          : "data[0]['$field']?.toString() ?? ''";
+      textExpression = queryFieldExpr(field);
     } else {
-      final textContent = escapeString(node.properties['text'] ?? 'Text');
-      textExpression = "'$textContent'";
+      textExpression = dartString(node.properties['text'] ?? 'Text');
     }
     
     return props.isEmpty 

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 
 /// Cycles through status lines while an AI generation request is in flight.
 class AiGenerationStatusText extends StatefulWidget {
@@ -71,7 +72,7 @@ class _AiGenerationStatusTextState extends State<AiGenerationStatusText> {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          color: widget.color ?? const Color(0xFF94A3B8),
+          color: widget.color ?? EditorColors.textMuted,
           fontSize: widget.fontSize,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.2,

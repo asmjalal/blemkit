@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:provider/provider.dart';
 import '../templates/templates.dart';
 import '../providers/widget_tree_provider.dart';
@@ -79,7 +80,7 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
 
   Widget _buildCategoryGrid() {
     return Dialog(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: EditorColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: 1000,
@@ -160,7 +161,7 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
         onTap: () => _selectCategory(template),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
+            color: EditorColors.surfaceRaised,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.white.withOpacity(0.05)),
           ),
@@ -189,8 +190,8 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          const Color(0xFF1E293B).withOpacity(0.8),
-                          const Color(0xFF1E293B),
+                          EditorColors.surfaceRaised.withOpacity(0.8),
+                          EditorColors.surfaceRaised,
                         ],
                       ),
                     ),
@@ -244,7 +245,7 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
         },
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: EditorColors.surface,
             borderRadius: BorderRadius.circular(12),
           ),
           child: CustomPaint(
@@ -255,7 +256,7 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
+                    color: EditorColors.surfaceRaised,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.add, color: Colors.white, size: 24),
@@ -289,7 +290,7 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
     final categoryName = templateMetadata?.name.split(' ').first ?? 'Template';
 
     return Dialog(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: EditorColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: 1100,
@@ -317,7 +318,7 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
+                    color: EditorColors.surfaceRaised,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.5)),
                   ),
@@ -467,9 +468,9 @@ class _TemplateCustomDialogState extends State<TemplateCustomDialog> {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: EditorColors.surfaceRaised,
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFF0F172A), width: 2),
+          border: Border.all(color: EditorColors.surface, width: 2),
           image: url != null ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover) : null,
         ),
         alignment: Alignment.center,

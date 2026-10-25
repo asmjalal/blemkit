@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 
 class SubmitMarketplaceDialog extends StatefulWidget {
   const SubmitMarketplaceDialog({super.key});
@@ -45,7 +46,7 @@ class _SubmitMarketplaceDialogState extends State<SubmitMarketplaceDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: EditorColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: 600,
@@ -81,9 +82,9 @@ class _SubmitMarketplaceDialogState extends State<SubmitMarketplaceDialog> {
                 data: ThemeData.dark().copyWith(
                   inputDecorationTheme: InputDecorationTheme(
                     filled: true,
-                    fillColor: const Color(0xFF1E293B),
+                    fillColor: EditorColors.surfaceRaised,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF38BDF8), width: 1.5)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: EditorColors.accent, width: 1.5)),
                   ),
                 ),
                 child: Expanded(
@@ -124,7 +125,7 @@ class _SubmitMarketplaceDialogState extends State<SubmitMarketplaceDialog> {
                             labelStyle: TextStyle(color: Colors.white70),
                           ),
                           style: const TextStyle(color: Colors.white),
-                          dropdownColor: const Color(0xFF1E293B),
+                          dropdownColor: EditorColors.surfaceRaised,
                           items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                           onChanged: (value) {
                             if (value != null) setState(() => _selectedCategory = value);
@@ -160,7 +161,7 @@ class _SubmitMarketplaceDialogState extends State<SubmitMarketplaceDialog> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(6),
                                   border: Border.all(
-                                    color: _thumbnailUrl == _presets[idx] ? const Color(0xFF38BDF8) : Colors.transparent,
+                                    color: _thumbnailUrl == _presets[idx] ? EditorColors.accent : Colors.transparent,
                                     width: 2,
                                   ),
                                   image: DecorationImage(image: NetworkImage(_presets[idx]), fit: BoxFit.cover),
@@ -176,7 +177,7 @@ class _SubmitMarketplaceDialogState extends State<SubmitMarketplaceDialog> {
                           children: [
                             Checkbox(
                               value: _isPremium,
-                              activeColor: const Color(0xFF38BDF8),
+                              activeColor: EditorColors.accent,
                               onChanged: (value) => setState(() => _isPremium = value ?? false),
                             ),
                             const Text(
@@ -213,7 +214,7 @@ class _SubmitMarketplaceDialogState extends State<SubmitMarketplaceDialog> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF38BDF8),
+                      backgroundColor: EditorColors.accent,
                       foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),

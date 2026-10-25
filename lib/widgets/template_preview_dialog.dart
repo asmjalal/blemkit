@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import '../models/widget_node.dart';
 import 'template_custom_dialog.dart';
 
@@ -60,7 +61,7 @@ class TemplatePreviewDialog extends StatelessWidget {
     final templateName = template['name'] ?? 'Untitled';
 
     return Dialog(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: EditorColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: 1100,
@@ -80,13 +81,13 @@ class TemplatePreviewDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
+                    color: EditorColors.surfaceRaised,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF38BDF8).withOpacity(0.5)),
+                    border: Border.all(color: EditorColors.accent.withOpacity(0.5)),
                   ),
                   child: Text(
                     '${loadedScreens.length} HIGH FIDELITY VIEWS',
-                    style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 10, fontWeight: FontWeight.bold),
+                    style: const TextStyle(color: EditorColors.accent, fontSize: 10, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -126,7 +127,7 @@ class TemplatePreviewDialog extends StatelessWidget {
                     onUse();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF38BDF8),
+                    backgroundColor: EditorColors.accent,
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

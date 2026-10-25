@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_widgets.dart';
+import '../ui/editor_theme.dart';
 import 'package:provider/provider.dart';
 import '../providers/widget_tree_provider.dart';
 
@@ -46,9 +48,9 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: EditorColors.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: EditorColors.surface,
         elevation: 0,
         title: const Text('Theme Settings', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         leading: IconButton(
@@ -57,9 +59,9 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
         ),
         actions: [
           TextButton.icon(
-            onPressed: () {},
+            onPressed: _generatePalette,
             icon: const Icon(Icons.auto_awesome, size: 18, color: Colors.indigoAccent),
-            label: const Text('AI Palette', style: TextStyle(color: Colors.indigoAccent)),
+            label: const Text('Palette from brand color', style: TextStyle(color: Colors.indigoAccent)),
           ),
           const SizedBox(width: 8),
           TextButton.icon(
@@ -133,9 +135,9 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
   Widget _buildEditorView() {
     final widget = _editingWidget!;
     return Scaffold(
-      backgroundColor: const Color(0xFF020617),
+      backgroundColor: EditorColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF020617),
+        backgroundColor: EditorColors.background,
         elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,7 +190,7 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
           Container(
             width: 320,
             decoration: const BoxDecoration(
-              color: Color(0xFF0F172A),
+              color: EditorColors.surface,
               border: Border(left: BorderSide(color: Colors.white10)),
             ),
             child: _buildThemedPropertiesPanel(widget),
@@ -258,7 +260,7 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  backgroundColor: const Color(0xFF1E293B),
+                  backgroundColor: EditorColors.surfaceRaised,
                   title: Text('Edit $label', style: const TextStyle(color: Colors.white)),
                   content: TextField(
                     controller: controller,
@@ -339,6 +341,14 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
           _buildColorSection('Semantic Colors', [
             'successColor', 'errorColor', 'warningColor', 'infoColor'
           ], provider),
+
+          const SizedBox(height: 32),
+          _buildColorSection('Dark Mode', [
+            'dark_primaryColor', 'dark_scaffoldBackgroundColor', 'dark_backgroundColor', 'dark_primaryText', 'dark_secondaryText'
+          ], provider),
+          const SizedBox(height: 10),
+          const Text('Used when the exported app runs in dark mode. Preview it with the sun/moon button above the canvas.',
+              style: TextStyle(color: Colors.white38, fontSize: 12)),
         ],
       ),
     );
@@ -360,15 +370,15 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
   }
 
   Widget _buildColorCard(String key, WidgetTreeProvider provider) {
-    final colorHex = provider.themeProperties[key] as String;
-    final color = Color(int.parse(colorHex));
-    final label = key.replaceAll('Color', '').replaceAllMapped(RegExp(r'([A-Z])'), (m) => ' ${m.group(1)}').trim();
+    final colorHex = '${provider.themeProperties[key] ?? _darkDefaults[key] ?? '0xFF000000'}';
+    final color = Color(int.tryParse(colorHex) ?? 0xFF000000);
+    final label = key.replaceAll('dark_', '').replaceAll('Color', '').replaceAllMapped(RegExp(r'([A-Z])'), (m) => ' ${m.group(1)}').trim();
 
     return Container(
       width: 180,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: EditorColors.surfaceRaised,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white10),
       ),
@@ -416,11 +426,11 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
   void _pickColor(String key, WidgetTreeProvider provider) async {
     // For now, let's just use a simple mock color picker or text input
     // In a real app, you'd use flutter_colorpicker
-    final controller = TextEditingController(text: provider.themeProperties[key].toString().substring(2).toUpperCase());
+    final controller = TextEditingController(text: '${provider.themeProperties[key] ?? _darkDefaults[key] ?? '0xFF000000'}'.substring(2).toUpperCase());
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: EditorColors.surfaceRaised,
         title: Text('Edit ${key}', style: const TextStyle(color: Colors.white)),
         content: TextField(
           controller: controller,
@@ -467,12 +477,32 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
           const Text('Typography & Icons', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 8),
           const Text('Manage your project typography and font scales.', style: TextStyle(color: Colors.white54)),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+          Row(children: [
+            const Text('Font family', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600)),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 260,
+              child: EditorDropdown<String>(
+                value: '${theme['fontFamily'] ?? 'Inter'}',
+                items: {..._googleFonts, '${theme['fontFamily'] ?? 'Inter'}'}.toList(),
+                label: (f) => f,
+                onChanged: (f) {
+                  if (f != null) provider.updateThemeProperties({'fontFamily': f});
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Flexible(
+              child: Text('Loaded with google_fonts in the exported app.', style: TextStyle(color: Colors.white38, fontSize: 12)),
+            ),
+          ]),
+          const SizedBox(height: 24),
           
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
+              color: EditorColors.surfaceRaised,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white10),
             ),
@@ -539,6 +569,17 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
   }
 
   Widget _buildDesignTokensView() {
+    final provider = Provider.of<WidgetTreeProvider>(context);
+    const tokens = [
+      ('spacingXs', 'Spacing XS', 4, Icons.space_bar),
+      ('spacingSm', 'Spacing S', 8, Icons.space_bar),
+      ('spacingMd', 'Spacing M', 16, Icons.space_bar),
+      ('spacingLg', 'Spacing L', 24, Icons.space_bar),
+      ('spacingXl', 'Spacing XL', 32, Icons.space_bar),
+      ('radiusSm', 'Radius S', 8, Icons.rounded_corner),
+      ('radiusMd', 'Radius M', 12, Icons.rounded_corner),
+      ('radiusLg', 'Radius L', 20, Icons.rounded_corner),
+    ];
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
       child: Column(
@@ -546,17 +587,41 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
         children: [
           const Text('Design System Tokens', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 8),
-          const Text('Global tokens for spacing, corner radius, and elevation.', style: TextStyle(color: Colors.white54)),
+          const Text('Spacing and corner radius tokens, exported as AppTheme.spacingMd, AppTheme.radiusLg, …', style: TextStyle(color: Colors.white54)),
           const SizedBox(height: 32),
-          
           Wrap(
-            spacing: 24,
-            runSpacing: 24,
+            spacing: 16,
+            runSpacing: 16,
             children: [
-              _buildTokenCard('Border Radius', '12px', Icons.rounded_corner),
-              _buildTokenCard('Global Spacing', '16px', Icons.space_bar),
-              _buildTokenCard('Elevation', '4dp', Icons.layers),
-              _buildTokenCard('Input Radius', '8px', Icons.input),
+              for (final (key, label, fallback, icon) in tokens)
+                Container(
+                  width: 200,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: EditorColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: EditorColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Icon(icon, color: EditorColors.accent, size: 18),
+                        const SizedBox(width: 8),
+                        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+                      ]),
+                      const SizedBox(height: 12),
+                      EditorTextInput(
+                        value: '${provider.themeProperties[key] ?? fallback}',
+                        keyboardType: TextInputType.number,
+                        onChanged: (v) {
+                          final n = num.tryParse(v);
+                          if (n != null) provider.updateThemeProperties({key: n.toDouble()});
+                        },
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ],
@@ -564,26 +629,60 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
     );
   }
 
-  Widget _buildTokenCard(String label, String value, IconData icon) {
-    return Container(
-      width: 220,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: Colors.indigoAccent, size: 24),
-          const SizedBox(height: 16),
-          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
-          const SizedBox(height: 4),
-          Text(value, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+  static const Map<String, String> _darkDefaults = {
+    'dark_primaryColor': '0xFF38BDF8',
+    'dark_scaffoldBackgroundColor': '0xFF0B1120',
+    'dark_backgroundColor': '0xFF111827',
+    'dark_primaryText': '0xFFF1F5F9',
+    'dark_secondaryText': '0xFF94A3B8',
+  };
+
+  static const List<String> _googleFonts = [
+    'Inter', 'Outfit', 'Roboto', 'Poppins', 'Montserrat', 'Lato', 'Open Sans', 'Nunito', 'Manrope', 'DM Sans',
+    'Plus Jakarta Sans', 'Space Grotesk', 'Figtree', 'Work Sans', 'Rubik', 'Playfair Display', 'Merriweather', 'Lora',
+  ];
+
+  /// Builds a full palette (including dark mode) from one brand color.
+  Future<void> _generatePalette() async {
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+    final controller = TextEditingController(text: '${provider.themeProperties['primaryColor'] ?? '0xFF4F46E5'}'.replaceFirst('0xFF', '#'));
+    final hex = await showDialog<String>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Palette from brand color'),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Secondary, tertiary, neutrals and dark-mode colors are derived from it.'),
+          const SizedBox(height: 14),
+          TextField(controller: controller, autofocus: true, decoration: const InputDecoration(hintText: '#4F46E5')),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(c, controller.text.trim()), child: const Text('Generate')),
         ],
       ),
     );
+    final cleaned = hex?.replaceAll('#', '').replaceAll('0x', '').replaceAll('0X', '');
+    if (cleaned == null || !RegExp(r'^[0-9A-Fa-f]{6}$|^[0-9A-Fa-f]{8}$').hasMatch(cleaned)) return;
+    final base = Color(int.parse(cleaned.length == 6 ? 'FF$cleaned' : cleaned, radix: 16));
+    final hsl = HSLColor.fromColor(base);
+    String c(HSLColor color) => '0x${color.toColor().toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
+    HSLColor shift(double hue, {double? s, double? l}) =>
+        hsl.withHue((hsl.hue + hue) % 360).withSaturation((s ?? hsl.saturation).clamp(0.0, 1.0)).withLightness((l ?? hsl.lightness).clamp(0.0, 1.0));
+    provider.updateThemeProperties({
+      'primaryColor': c(hsl),
+      'secondaryColor': c(shift(150, l: 0.45)),
+      'tertiaryColor': c(shift(40, s: 0.85, l: 0.55)),
+      'alternateColor': c(shift(0, s: 0.15, l: 0.5)),
+      'scaffoldBackgroundColor': c(shift(0, s: 0.3, l: 0.98)),
+      'backgroundColor': '0xFFFFFFFF',
+      'primaryText': c(shift(0, s: 0.4, l: 0.12)),
+      'secondaryText': c(shift(0, s: 0.15, l: 0.45)),
+      'dark_primaryColor': c(shift(0, l: (hsl.lightness + 0.15).clamp(0.55, 0.75))),
+      'dark_scaffoldBackgroundColor': c(shift(0, s: 0.35, l: 0.06)),
+      'dark_backgroundColor': c(shift(0, s: 0.3, l: 0.11)),
+      'dark_primaryText': c(shift(0, s: 0.2, l: 0.95)),
+      'dark_secondaryText': c(shift(0, s: 0.12, l: 0.65)),
+    });
   }
 
   Widget _buildThemeWidgetsView() {
@@ -651,7 +750,7 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
           const SizedBox(height: 40),
           _buildWidgetCategory('Layout Elements', [
             _buildGalleryItem('ListTile', const ListTile(leading: Icon(Icons.person, color: Colors.indigoAccent), title: Text('User Profile', style: TextStyle(color: Colors.white)), subtitle: Text('Online', style: TextStyle(color: Colors.white54)))),
-            _buildGalleryItem('Card', Card(color: const Color(0xFF334155), child: const Padding(padding: EdgeInsets.all(16), child: Text('Surface Container', style: TextStyle(color: Colors.white))))),
+            _buildGalleryItem('Card', Card(color: EditorColors.borderStrong, child: const Padding(padding: EdgeInsets.all(16), child: Text('Surface Container', style: TextStyle(color: Colors.white))))),
           ]),
         ],
       ),
@@ -680,7 +779,7 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
     return Container(
       width: 320,
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: EditorColors.surfaceRaised,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white10),
       ),
@@ -785,7 +884,7 @@ class _CreateThemeWidgetDialogState extends State<_CreateThemeWidgetDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: EditorColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: 500,
@@ -869,7 +968,7 @@ class _CreateThemeWidgetDialogState extends State<_CreateThemeWidgetDialog> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF0fadd5),
+                    backgroundColor: EditorColors.accent,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

@@ -1,6 +1,5 @@
 import 'base_widget_generator.dart';
 import '../models/widget_node.dart';
-import 'widget_generator_registry.dart';
 
 class DrawerGenerator extends BaseWidgetGenerator {
   @override

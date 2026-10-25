@@ -1,10 +1,12 @@
 import 'base_widget_generator.dart';
+import 'logic_codegen.dart';
 import '../models/widget_node.dart';
-import '../utils/property_converters.dart';
 
 class SvgImageGenerator extends BaseWidgetGenerator {
   @override
   String generateCode(WidgetNode node, {int indent = 0}) {
+    LogicCodegen.imports.add('package:flutter_svg/flutter_svg.dart');
+    LogicCodegen.packages.add('flutter_svg');
     final indentStr = getIndentString(indent);
     final childIndentStr = getChildIndentStr(indent);
     
@@ -25,7 +27,7 @@ class SvgImageGenerator extends BaseWidgetGenerator {
     final propsString = props.isNotEmpty ? ',\n$childIndentStr${props.join(',\n$childIndentStr')},' : '';
 
     return '''$indentStr$constructor(
-$childIndentStr'$src'$propsString
+$childIndentStr${dartString(src)}$propsString
 $indentStr)''';
   }
 }

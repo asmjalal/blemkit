@@ -28,12 +28,13 @@ import 'property_editors/dialog_properties/dialog_property_editors.dart';
 import 'property_editors/snackbar_properties/snackbar_property_editors.dart';
 import 'property_editors/tooltip_properties/tooltip_property_editors.dart';
 import 'property_editors/expansion_properties/expansion_property_editors.dart';
-import 'property_editors/padding_properties.dart';
 import 'property_editors/clip_r_rect_properties.dart';
 import 'property_editors/circle_avatar_properties/circle_avatar_property_editors.dart';
 import '../utils/color_utils.dart';
-import 'property_editors/color_picker_field.dart';
 import 'property_editors/action_flow_editor.dart';
+import 'logic/widget_logic_panel.dart';
+import '../ui/editor_theme.dart';
+import '../ui/editor_widgets.dart';
 
 class PropertiesPanel extends StatelessWidget {
    PropertiesPanel({super.key});
@@ -52,115 +53,113 @@ class PropertiesPanel extends StatelessWidget {
           );
         }
 
-        final bool isActionable = ![
-          'Scaffold', 'AppBar', 'Drawer', 'EndDrawer', 'AlertDialog', 'Dialog', 'BottomSheet',
-          'Expanded', 'Flexible', 'Positioned', 'Spacer',
-          'ListView', 'GridView', 'SingleChildScrollView', 'CustomScrollView', 'ReorderableListView'
-        ].contains(selectedNode.type);
+        final isPage = provider.screens.any((s) => s.id == selectedNode.id);
+        final isComponent = provider.isComponentRoot(selectedNode);
+        final actionCount = [
+          'actions', 'onLongPress', 'onDoubleTap', 'onChanged', 'onSubmitted', 'onPageLoad'
+        ].fold<int>(0, (n, k) => n + ((selectedNode.properties[k] as List?)?.length ?? 0));
 
-        final header = Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
-          ),
+        final header = Padding(
+          padding: const EdgeInsets.fromLTRB(14, 14, 10, 10),
           child: Row(
             children: [
-              Text(
-                '${selectedNode.type}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(color: EditorColors.accentSoft, borderRadius: BorderRadius.circular(8)),
+                child: Icon(isComponent ? Icons.extension_outlined : isPage ? Icons.web_asset_rounded : Icons.widgets_outlined, size: 16, color: EditorColors.accent),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isComponent
+                          ? '${selectedNode.properties['componentName'] ?? 'Component'}'
+                          : isPage
+                              ? '${selectedNode.properties['pageName'] ?? 'Page'}'
+                              : selectedNode.type,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: EditorColors.text),
+                    ),
+                    Text(
+                      isComponent ? 'Component · ${selectedNode.type}' : isPage ? 'Page · ${selectedNode.type}' : 'Widget',
+                      style: const TextStyle(fontSize: 11.5, color: EditorColors.textFaint),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Icon(Icons.info_outline, size: 14, color: Colors.white.withOpacity(0.3)),
-              const Spacer(),
-              const Icon(Icons.expand_more, size: 18, color: Colors.white38),
+              EditorIconButton(
+                icon: Icons.close_rounded,
+                tooltip: 'Deselect',
+                size: 16,
+                onPressed: () => provider.selectNode(null),
+              ),
             ],
           ),
         );
 
-        final propertiesList = ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-          children: _buildPropertyEditors(context, selectedNode),
-        );
-
-        if (!isActionable) {
-          return Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                header,
-                const SizedBox(height: 16),
-                Expanded(child: propertiesList),
-              ],
-            ),
-          );
-        }
+        Widget tab(IconData icon, String label, {int count = 0}) => Tab(
+              height: 34,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 14),
+                  const SizedBox(width: 5),
+                  Text(label),
+                  if (count > 0) ...[
+                    const SizedBox(width: 5),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(color: EditorColors.accentSoft, borderRadius: BorderRadius.circular(6)),
+                      child: Text('$count', style: const TextStyle(fontSize: 10.5, color: EditorColors.accent)),
+                    ),
+                  ],
+                ],
+              ),
+            );
 
         return DefaultTabController(
-          length: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                header,
-                const SizedBox(height: 12),
-                Container(
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: TabBar(
-                    indicator: BoxDecoration(
-                      color: const Color(0xFF334155),
-                      borderRadius: BorderRadius.circular(6),
+          key: ValueKey(selectedNode.id),
+          length: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              header,
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: EditorColors.background,
+                  borderRadius: BorderRadius.circular(9),
+                  border: Border.all(color: EditorColors.border),
+                ),
+                child: TabBar(
+                  indicator: BoxDecoration(color: EditorColors.surfaceHover, borderRadius: BorderRadius.circular(7)),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  labelPadding: EdgeInsets.zero,
+                  tabs: [
+                    tab(Icons.tune_rounded, 'Properties'),
+                    tab(Icons.bolt_rounded, 'Actions', count: actionCount),
+                    tab(Icons.account_tree_outlined, 'Logic'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    ListView(
+                      padding: const EdgeInsets.fromLTRB(12, 4, 12, 24),
+                      children: _buildPropertyEditors(context, selectedNode),
                     ),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.white54,
-                    labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                    tabs: const [
-                      Tab(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.diamond_outlined, size: 14),
-                            SizedBox(width: 6),
-                            Text('Properties'),
-                          ],
-                        ),
-                      ),
-                      Tab(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.bolt, size: 16),
-                            SizedBox(width: 4),
-                            Text('Actions'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: ActionFlowEditor(node: selectedNode)),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: WidgetLogicPanel(node: selectedNode)),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      propertiesList,
-                      ActionFlowEditor(node: selectedNode),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -182,32 +181,25 @@ class PropertiesPanel extends StatelessWidget {
         return [
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: TextField(
-              controller: TextEditingController(text: properties['className'] ?? ''),
-              decoration: const InputDecoration(
-                labelText: 'Page Name',
-                border: OutlineInputBorder(),
+            child: EditorField(
+              label: 'Page name',
+              child: EditorTextInput(
+                value: '${properties['pageName'] ?? ''}',
+                hint: 'e.g. Home',
+                onChanged: (value) => provider.renameScreen(node, value),
               ),
-              onChanged: (value) {
-                properties['className'] = value;
-                provider.updateNodeProperties(node, properties);
-              },
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: TextField(
-              controller: TextEditingController(text: properties['description'] ?? ''),
-              decoration: const InputDecoration(
-                labelText: 'Page Description',
-                border: OutlineInputBorder(),
+            child: EditorField(
+              label: 'Description',
+              child: EditorTextInput(
+                value: '${properties['description'] ?? ''}',
+                hint: 'What this page is for',
+                maxLines: 3,
+                onChanged: (value) => provider.setNodeProperty(node, 'description', value),
               ),
-              minLines: 1,
-              maxLines: 3,
-              onChanged: (value) {
-                properties['description'] = value;
-                provider.updateNodeProperties(node, properties);
-              },
             ),
           ),
           Padding(

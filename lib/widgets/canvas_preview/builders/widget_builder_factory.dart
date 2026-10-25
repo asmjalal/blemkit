@@ -7,7 +7,6 @@ import 'base_widget_builder.dart';
 import 'supabase_query_wrapper_builder.dart';
 import '../../../providers/widget_tree_provider.dart';
 import 'package:provider/provider.dart';
-import 'clip_r_rect_builder.dart';
 import 'scaffold_builder.dart' as wb;
 import 'container_builder.dart' as wb;
 import 'text_builder.dart' as wb;
@@ -31,7 +30,6 @@ import 'elevated_button_builder.dart' as wb;
 import 'text_button_builder.dart' as wb;
 import 'outlined_button_builder.dart' as wb;
 import 'material_button_builder.dart' as wb;
-import 'dropdown_button_builder.dart' as wb;
 import 'popup_menu_button_builder.dart' as wb;
 import 'checkbox_builder.dart' as wb;
 import 'radio_builder.dart' as wb;
@@ -102,6 +100,11 @@ import 'segmented_button_builder.dart' as wb;
 import 'navigation_rail_builder.dart' as wb;
 import 'circular_progress_indicator_builder.dart' as wb;
 import 'linear_progress_indicator_builder.dart' as wb;
+import 'synapp_widget_builders.dart' as sw;
+import 'api_query_wrapper.dart';
+import 'component_instance_builder.dart';
+import '../../../runtime/preview_runtime.dart';
+import '../../../runtime/exported/synapp_widgets.dart';
 
 class WidgetBuilderFactory {
   static final WidgetBuilderFactory _instance = WidgetBuilderFactory._internal();
@@ -145,7 +148,6 @@ class WidgetBuilderFactory {
     _builders['TextButton'] = wb.TextButtonBuilder();
     _builders['OutlinedButton'] = wb.OutlinedButtonBuilder();
     _builders['MaterialButton'] = wb.MaterialButtonBuilder();
-    _builders['DropdownButton'] = wb.DropdownButtonBuilder();
     _builders['PopupMenuButton'] = wb.PopupMenuButtonBuilder();
     _builders['Checkbox'] = wb.CheckboxBuilder();
     _builders['Radio'] = wb.RadioBuilder();
@@ -216,7 +218,34 @@ class WidgetBuilderFactory {
     _builders['NavigationRail'] = wb.NavigationRailBuilder();
     _builders['CircularProgressIndicator'] = wb.CircularProgressIndicatorBuilder();
     _builders['LinearProgressIndicator'] = wb.LinearProgressIndicatorBuilder();
+    _builders['DropdownButton'] = sw.DropdownBuilder();
+    _builders['DropDown'] = sw.DropdownBuilder();
+    _builders['EndDrawer'] = wb.DrawerBuilder();
+    _builders['RatingBar'] = sw.RatingBarBuilder();
+    _builders['PinCode'] = sw.PinCodeBuilder();
+    _builders['CounterButton'] = sw.CounterButtonBuilder();
+    _builders['ChoiceChips'] = sw.ChoiceChipsBuilder();
+    _builders['CheckboxGroup'] = sw.CheckboxGroupBuilder();
+    _builders['RadioGroup'] = sw.RadioGroupBuilder();
+    _builders['Signature'] = sw.SignatureBuilder();
+    _builders['DataTable'] = sw.DataTableBuilder();
+    _builders['CreditCardForm'] = sw.CreditCardFormBuilder();
+    _builders['SlidableListTile'] = sw.SlidableListTileBuilder();
+    _builders['LoadingOverlay'] = sw.LoadingOverlayBuilder();
+    _builders['PlacePicker'] = sw.PlacePickerBuilder();
+    _builders['Hero'] = sw.PassThroughBuilder();
+    _builders['AnimatedSwitcher'] = sw.PassThroughBuilder();
+    _builders['AnimatedContainer'] = sw.AnimatedContainerBuilder();
+    _builders['AnimatedOpacity'] = sw.AnimatedOpacityBuilder();
+    _builders['Flex'] = sw.FlexWidgetBuilder();
+    _builders['CustomWidget'] = sw.CustomWidgetBuilder();
+    _builders['ComponentInstance'] = ComponentInstanceBuilder();
     print('WidgetBuilderFactory: Initialization complete. Registered ${_builders.length} builders.');
+  }
+
+  static bool hasBuilder(String type) {
+    if (_builders.isEmpty) initialize();
+    return _builders.containsKey(type);
   }
 
   static Widget buildBaseWidget(BuildContext context, WidgetNode node, WidgetNode? hoveredNode) {
@@ -231,6 +260,15 @@ class WidgetBuilderFactory {
   }
 
   static WidgetNode _resolveBoundProperties(BuildContext context, WidgetNode node) {
+    final bindings = node.properties['bindings'];
+    if (bindings is Map && bindings.isNotEmpty) {
+      node = WidgetNode(
+        id: node.id,
+        type: node.type,
+        children: node.children,
+        properties: PreviewRuntime.applyBindings(context, node, node.properties),
+      );
+    }
     if (node.dataBinding == null || node.dataBinding!.isEmpty) {
       return node;
     }
@@ -324,6 +362,46 @@ class WidgetBuilderFactory {
     if (_builders.isEmpty) initialize();
 
     final resolvedNode = _resolveBoundProperties(context, node);
+
+    if (!PreviewRuntime.isVisible(context, resolvedNode)) {
+      if (CanvasPreviewMode.of(context)) return const SizedBox.shrink();
+      // Keep hidden widgets selectable while editing.
+      return Opacity(opacity: 0.3, child: _buildVisible(context, resolvedNode, hoveredNode));
+    }
+    return _buildVisible(context, resolvedNode, hoveredNode);
+  }
+
+  static Widget _buildVisible(BuildContext context, WidgetNode resolvedNode, WidgetNode? hoveredNode) {
+    final apiQuery = resolvedNode.properties['apiQuery'];
+    if (apiQuery is Map && apiQuery['apiCallId'] != null) {
+      return ApiQueryWrapper(
+        node: resolvedNode,
+        builder: (context, rows) {
+          if (['ListView', 'GridView'].contains(resolvedNode.type) && resolvedNode.children.isNotEmpty) {
+            final template = resolvedNode.children.first;
+            final items = rows
+                .map((row) => SupabaseRowDataContext(
+                      rowData: row,
+                      child: Builder(builder: (c) => buildWidget(c, template, hoveredNode)),
+                    ))
+                .toList();
+            final list = resolvedNode.type == 'ListView'
+                ? ListView(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), children: items)
+                : GridView.count(
+                    crossAxisCount: (resolvedNode.properties['crossAxisCount'] as num?)?.toInt() ?? 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: items,
+                  );
+            return WidgetSelectionWrapper(node: resolvedNode, hoveredNode: hoveredNode, child: list);
+          }
+          return SupabaseRowDataContext(
+            rowData: rows.isNotEmpty ? rows.first : const {},
+            child: _buildInnerWidget(context, resolvedNode, hoveredNode),
+          );
+        },
+      );
+    }
 
     if (resolvedNode.backendQuery != null) {
       return SupabaseQueryWrapper(
@@ -454,50 +532,53 @@ class WidgetBuilderFactory {
       'ListView', 'GridView', 'SingleChildScrollView', 'CustomScrollView', 'ReorderableListView'
     ].contains(node.type);
 
-    if (hasActions && !isNativelyActionable && !isExcludedFromActionWrapping) {
+    final longPress = node.properties['onLongPress'];
+    final doubleTap = node.properties['onDoubleTap'];
+    final hasGestureActions = (longPress is List && longPress.isNotEmpty) || (doubleTap is List && doubleTap.isNotEmpty);
+
+    if ((hasActions && !isNativelyActionable && !isExcludedFromActionWrapping) || (hasGestureActions && !isExcludedFromActionWrapping)) {
+      final runTap = hasActions && !isNativelyActionable;
       widget = GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          if (!CanvasPreviewMode.of(context)) return;
-          final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
-          
-          final rowData = SupabaseRowDataContext.of(context);
-          if (rowData != null) {
-            provider.activeRowData = rowData;
-          }
-
-          final navigateTo = node.properties['navigateTo'];
-          if (navigateTo != null) {
-            try {
-              final target = provider.screens.firstWhere((s) => s.id == navigateTo);
-              provider.selectScreen(target);
-            } catch (_) {}
-            return;
-          }
-
-          final actions = node.properties['actions'];
-          if (actions is List) {
-            for (var action in actions) {
-              if (action is Map<String, dynamic>) {
-                final type = action['type'];
-                if (type == 'navigate') {
-                  final targetScreenId = action['targetScreenId'];
-                  if (targetScreenId == '__back__') {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  } else if (targetScreenId != null) {
-                    try {
-                      final target = provider.screens.firstWhere((s) => s.id == targetScreenId);
-                      provider.selectScreen(target);
-                    } catch (_) {}
-                  }
-                  break;
-                }
+        onTap: runTap
+            ? () {
+                if (!CanvasPreviewMode.of(context)) return;
+                final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+                final rowData = SupabaseRowDataContext.of(context);
+                if (rowData != null) provider.activeRowData = rowData;
+                final actions = [...?(node.properties['actions'] as List?)];
+                final navigateTo = node.properties['navigateTo'];
+                if (actions.isEmpty && navigateTo != null) actions.add({'type': 'navigate', 'targetScreenId': navigateTo});
+                PreviewRuntime.run(context, actions);
               }
-            }
-          }
-        },
+            : null,
+        onLongPress: longPress is List && longPress.isNotEmpty
+            ? () {
+                if (CanvasPreviewMode.of(context)) PreviewRuntime.run(context, longPress);
+              }
+            : null,
+        onDoubleTap: doubleTap is List && doubleTap.isNotEmpty
+            ? () {
+                if (CanvasPreviewMode.of(context)) PreviewRuntime.run(context, doubleTap);
+              }
+            : null,
+        child: widget,
+      );
+    }
+
+    final semantic = node.properties['semanticLabel'];
+    if (semantic is String && semantic.trim().isNotEmpty) {
+      widget = Semantics(label: semantic, child: widget);
+    }
+
+    final animation = node.properties['animation'];
+    if (animation is Map && animation['type'] != null && animation['type'] != 'none') {
+      widget = SynappEntrance(
+        // Replays when the animation settings change.
+        key: ValueKey('${node.id}-${animation['type']}-${animation['durationMs']}-${animation['delayMs']}-${animation['replay']}'),
+        type: animation['type'] as String,
+        durationMs: (animation['durationMs'] as num?)?.toInt() ?? 400,
+        delayMs: (animation['delayMs'] as num?)?.toInt() ?? 0,
         child: widget,
       );
     }

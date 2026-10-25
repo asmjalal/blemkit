@@ -11,7 +11,7 @@ class TooltipGenerator extends BaseWidgetGenerator {
     final props = <String>[];
     
     if (node.properties['message'] != null) {
-      props.add('message: \'${node.properties['message']}\'');
+      props.add('message: ${dartString(node.properties['message'])}');
     }
     
     if (node.properties['height'] != null) {

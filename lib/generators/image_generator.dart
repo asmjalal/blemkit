@@ -1,7 +1,5 @@
-import 'dart:convert';
 
 import 'base_widget_generator.dart';
-import 'project_generator.dart';
 import '../models/widget_node.dart';
 
 class ImageGenerator extends BaseWidgetGenerator {
@@ -23,11 +21,9 @@ class ImageGenerator extends BaseWidgetGenerator {
     if (node.dataBinding != null && node.dataBinding!.containsKey('src')) {
       final binding = node.dataBinding!['src'] as Map;
       final field = binding['field'];
-      urlExpression = ProjectGenerator.isInsideRepeatedList 
-          ? "item['$field']?.toString() ?? ''" 
-          : "data[0]['$field']?.toString() ?? ''";
+      urlExpression = queryFieldExpr(field);
     } else {
-      urlExpression = "'${escapeString(rawUrl)}'";
+      urlExpression = "${dartString(rawUrl)}";
     }
 
     final namedStr = named.isEmpty ? '' : ', ${named.join(', ')}';

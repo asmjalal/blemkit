@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Runtime sources are embedded
+        run: |
+          dart run tool/embed_runtime.dart
+          git diff --exit-code lib/generators/runtime_sources.g.dart
+
+      - name: Analyze
+        run: flutter analyze lib test tool --no-fatal-infos --no-fatal-warnings
+
+      - name: Tests
+        run: flutter test
+
+      # Exports every template, the full widget palette and the logic fixture,
+      # then runs `flutter analyze` on each generated project.
+      - name: Exported projects compile
+        run: tool/check_export.sh
+
+      - name: Web build
+        run: flutter build web --no-web-resources-cdn

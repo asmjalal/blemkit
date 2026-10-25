@@ -43,7 +43,7 @@ class IconButtonGenerator extends BaseWidgetGenerator {
     }
     
     if (node.properties['tooltip'] != null) {
-      props.add('tooltip: \'${node.properties['tooltip']}\'');
+      props.add('tooltip: ${dartString(node.properties['tooltip'])}');
     }
 
     return props.isEmpty 

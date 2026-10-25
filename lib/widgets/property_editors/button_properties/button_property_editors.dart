@@ -1,4 +1,3 @@
-import 'package:designflutterkit/widgets/properties_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';

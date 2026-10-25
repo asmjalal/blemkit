@@ -17,8 +17,8 @@ class SafeAreaGenerator extends BaseWidgetGenerator {
     
     final childCode = node.children.isNotEmpty
         ? '\n$childIndentStr${'child: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1).trim()}'}'
-        : '';
-        
+        : '\n${childIndentStr}child: const SizedBox.shrink()';
+
     final propsString = props.isNotEmpty ? '\n$childIndentStr${props.join(',\n$childIndentStr')},' : '';
 
     return '''${indentStr}SafeArea($propsString$childCode

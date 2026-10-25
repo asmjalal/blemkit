@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:provider/provider.dart';
 import '../providers/widget_tree_provider.dart';
 import '../models/backend_query_model.dart';
@@ -56,7 +57,7 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
   void _showTestResult(BuildContext context, BackendQuery query, WidgetTreeProvider provider) async {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: EditorColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -66,7 +67,7 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
           builder: (context, snapshot) {
             Widget content;
             if (snapshot.connectionState == ConnectionState.waiting) {
-              content = const Center(child: CircularProgressIndicator(color: Color(0xFF0FADD5)));
+              content = const Center(child: CircularProgressIndicator(color: EditorColors.accent));
             } else if (snapshot.hasError) {
               content = Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -158,7 +159,7 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
                       height: 48,
                       errorBuilder: (ctx, err, stack) => const Icon(
                         Icons.storage_outlined,
-                        color: Color(0xFF0FADD5),
+                        color: EditorColors.accent,
                         size: 48,
                       ),
                     ),
@@ -184,7 +185,7 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0FADD5),
+                        backgroundColor: EditorColors.accent,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         shape: RoundedRectangleBorder(
@@ -268,9 +269,9 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                           icon: provider.isFetchingSchema
-                              ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0FADD5)))
-                              : const Icon(Icons.refresh, size: 14, color: Color(0xFF0FADD5)),
-                          label: const Text('Reload Schema', style: TextStyle(color: Color(0xFF0FADD5), fontSize: 11)),
+                              ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: EditorColors.accent))
+                              : const Icon(Icons.refresh, size: 14, color: EditorColors.accent),
+                          label: const Text('Reload Schema', style: TextStyle(color: EditorColors.accent, fontSize: 11)),
                           onPressed: provider.isFetchingSchema ? null : () => provider.fetchActiveSchema(),
                         ),
                       ],
@@ -290,7 +291,7 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0FADD5),
+                      backgroundColor: EditorColors.accent,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       minimumSize: const Size(60, 32),
@@ -346,7 +347,7 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
                         children: [
                           Icon(
                             query.enableRealtime ? Icons.sensors : Icons.dns,
-                            color: query.enableRealtime ? const Color(0xFF10B981) : const Color(0xFF0FADD5),
+                            color: query.enableRealtime ? const Color(0xFF10B981) : EditorColors.accent,
                             size: 20,
                           ),
                           const SizedBox(width: 10),
@@ -428,9 +429,9 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
                   itemBuilder: (context, index) {
                     final table = conn.tables[index];
                     return ExpansionTile(
-                      backgroundColor: const Color(0xFF1E293B),
-                      collapsedBackgroundColor: const Color(0xFF1E293B),
-                      iconColor: const Color(0xFF0FADD5),
+                      backgroundColor: EditorColors.surfaceRaised,
+                      collapsedBackgroundColor: EditorColors.surfaceRaised,
+                      iconColor: EditorColors.accent,
                       collapsedIconColor: Colors.white70,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -478,7 +479,7 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
       style: const TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w800,
-        color: Color(0xFF0FADD5),
+        color: EditorColors.accent,
         letterSpacing: 1.2,
       ),
     );
@@ -488,7 +489,7 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
     return Container(
       padding: padding ?? const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: EditorColors.surfaceRaised,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: borderColor ?? Colors.white.withOpacity(0.08)),
       ),
@@ -515,7 +516,7 @@ class _DataSourcePanelState extends State<DataSourcePanel> {
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.white24),
             filled: true,
-            fillColor: const Color(0xFF181A20),
+            fillColor: EditorColors.background,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(6),
               borderSide: BorderSide.none,

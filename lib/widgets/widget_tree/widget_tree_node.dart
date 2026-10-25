@@ -3,13 +3,12 @@ import 'dart:ui';
 
 import 'package:designflutterkit/widgets/widget_tree/widget_tree_editor.dart';
 import 'package:flutter/material.dart';
+import '../../ui/editor_theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/widget_node.dart';
 import '../../providers/widget_tree_provider.dart';
-import '../custom_overlay_menu/custom_overlay_menu.dart';
 import '../widget_context_menu/widget_context_menu.dart';
-import '../widget_context_menu/widget_command_manager.dart';
 import '../widget_context_menu/widget_context_menu_actions.dart';
 
 class WidgetTreeNode extends StatefulWidget {
@@ -596,7 +595,7 @@ class WidgetTreeNodePlaceholder extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: EditorColors.surfaceRaised,
           title: Text('Add Widget to $slotLabel', style: const TextStyle(color: Colors.white)),
           content: Wrap(
             spacing: 8,

@@ -17,11 +17,11 @@ class TimePickerGenerator extends BaseWidgetGenerator {
            '${childIndent}},\n'
            '${childIndent}child: InputDecorator(\n'
            '${childIndent}  decoration: const InputDecoration(\n'
-           '${childIndent}    labelText: \'$label\',\n'
+           '${childIndent}    labelText: ${dartString(label)},\n'
            '${childIndent}    border: OutlineInputBorder(),\n'
            '${childIndent}    suffixIcon: Icon(Icons.access_time),\n'
            '${childIndent}  ),\n'
-           '${childIndent}  child: const Text(\'$label\'),\n'
+           '${childIndent}  child: const Text(${dartString(label)}),\n'
            '${childIndent}),\n'
            '$indentStr),\n';
   }

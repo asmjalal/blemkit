@@ -1,9 +1,17 @@
 import '../models/widget_node.dart';
 import './widget_generator_registry.dart';
 import './theme_generator.dart';
-import './project_generator.dart';
+import 'logic_codegen.dart';
 
 abstract class BaseWidgetGenerator {
+  /// Properties used by the editor and logic layer, never passed to widgets.
+  static const Set<String> editorOnlyKeys = {
+    'navigateTo', 'actions', 'id', 'children', 'pageName', 'description', 'paddingLinked',
+    'backendQuery', 'dataBinding', 'bindings', 'visibility', 'animation', 'semanticLabel',
+    'onLongPress', 'onDoubleTap', 'onChanged', 'onSubmitted', 'pageState', 'pageParams', 'onPageLoad',
+    'apiQuery', 'comments', 'onPressed',
+  };
+
   static Map<String, String> idToClassName = {};
   static Map<String, String> idToFileName = {};
   static Set<String> screenImports = {};
@@ -25,113 +33,46 @@ abstract class BaseWidgetGenerator {
   }
 
   String generateNavigationCode(String? targetId) {
-    final body = generateNavigationBody(targetId);
-    return '() { $body }';
+    if (targetId == null) return '() {}';
+    return LogicCodegen.closure([
+      {'type': 'navigate', 'targetScreenId': targetId}
+    ]);
   }
 
+  /// Closure running [actions] (see `LogicCodegen`); [fallbackTargetId] is the
+  /// legacy `navigateTo` property.
   String generateActionFlowCode(List<dynamic>? actions, String? fallbackTargetId) {
-    if (actions == null || actions.isEmpty) {
-      if (fallbackTargetId != null) {
-        return generateNavigationCode(fallbackTargetId);
-      }
-      return '() {}';
+    final list = [...?actions];
+    if (list.isEmpty && fallbackTargetId != null) {
+      list.add({'type': 'navigate', 'targetScreenId': fallbackTargetId});
     }
-
-    final codeBlocks = <String>[];
-    for (var action in actions) {
-      if (action is Map<String, dynamic>) {
-        final type = action['type'];
-        if (type == 'navigate') {
-          final targetId = action['targetScreenId'];
-          if (targetId == '__back__') {
-            codeBlocks.add('Navigator.pop(context);');
-          } else {
-            final body = generateNavigationBody(targetId);
-            if (body.isNotEmpty) codeBlocks.add(body);
-          }
-        } else if (type == 'supabase_insert') {
-          final tableName = action['tableName'];
-          final payload = action['payload'] as Map<String, dynamic>? ?? {};
-          final payloadCode = _generatePayloadCode(payload);
-          codeBlocks.add('await SupabaseService.instance.insertInto${_capitalize(tableName)}($payloadCode);');
-        } else if (type == 'supabase_update') {
-          final tableName = action['tableName'];
-          final payload = action['payload'] as Map<String, dynamic>? ?? {};
-          final payloadCode = _generatePayloadCode(payload);
-          final idParamCode = ProjectGenerator.isInsideRepeatedList ? "item['id']?.toString()" : "widget.idParam";
-          codeBlocks.add('await SupabaseService.instance.update${_capitalize(tableName)}($idParamCode, $payloadCode);');
-        } else if (type == 'supabase_delete') {
-          final tableName = action['tableName'];
-          final idParamCode = ProjectGenerator.isInsideRepeatedList ? "item['id']?.toString()" : "widget.idParam";
-          codeBlocks.add('await SupabaseService.instance.deleteFrom${_capitalize(tableName)}($idParamCode);');
-        }
-      }
-    }
-
-    if (codeBlocks.isEmpty) {
-      if (fallbackTargetId != null) {
-        return generateNavigationCode(fallbackTargetId);
-      }
-      return '() {}';
-    }
-
-    return '() async {\n      ${codeBlocks.join('\n      ')}\n    }';
+    if (list.isEmpty) return '() {}';
+    return LogicCodegen.closure(list);
   }
 
-  String _generatePayloadCode(Map<String, dynamic> payload) {
-    final mapEntries = <String>[];
-    payload.forEach((key, valObj) {
-      if (valObj is Map) {
-        final type = valObj['type'];
-        final val = valObj['value']?.toString() ?? '';
-        if (type == 'widget_state') {
-          final varName = '_controller_${val.replaceAll(RegExp(r"[^a-zA-Z0-9]"), "_")}';
-          mapEntries.add("'$key': $varName.text");
-        } else if (type == 'query_data') {
-          final dataVar = ProjectGenerator.isInsideRepeatedList ? "item" : "data[0]";
-          mapEntries.add("'$key': $dataVar['$val']");
-        } else {
-          mapEntries.add("'$key': '${escapeString(val)}'");
-        }
-      }
-    });
-    return '{${mapEntries.join(', ')}}';
+  /// Navigation statement (without a closure) to [targetId], or '' if unknown.
+  String generateNavigationBody(String? targetId) {
+    if (targetId == null || !idToClassName.containsKey(targetId)) return '';
+    if (idToClassName[targetId] == currentGeneratingScreenClass) return '';
+    return LogicCodegen.statements([
+      {'type': 'navigate', 'targetScreenId': targetId}
+    ], indent: '').trim();
   }
 
-  String _capitalize(String s) {
-    if (s.isEmpty) return s;
-    return s[0].toUpperCase() + s.substring(1);
+  /// Expression for a Supabase row [field] in the current query context.
+  String queryFieldExpr(dynamic field) {
+    final expr = LogicCodegen.valueExpr({'source': 'queryField', 'field': field});
+    return expr == 'null' ? "''" : "$expr?.toString() ?? ''";
   }
-
 
   static String currentGeneratingScreenClass = '';
 
-  String generateNavigationBody(String? targetId) {
-    if (targetId == null || !idToClassName.containsKey(targetId)) {
-      return '';
-    }
-    final className = idToClassName[targetId];
-    if (className == currentGeneratingScreenClass) {
-      return ''; // Avoid navigating to the screen we are already on
-    }
-    final fileName = idToFileName[targetId];
-    if (fileName != null) {
-      screenImports.add(fileName);
-    }
-    
-    final idParamCode = ProjectGenerator.isInsideRepeatedList 
-        ? "item['id']?.toString()" 
-        : "null";
-        
-    return 'Navigator.push(context, MaterialPageRoute(builder: (context) => $className(idParam: $idParamCode)));';
-  }
-  
   String generateProperties(Map<String, dynamic> properties, {int indent = 0}) {
     final props = <String>[];
     final currentIndent = getIndentString(indent);
     final nestedChildIndentStr = getChildIndentStr(indent + 1);
     final Map<String, dynamic> filteredProperties = Map.from(properties)..removeWhere((key, value) => 
-      ['navigateTo', 'actions', 'id', 'children', 'pageName', 'description', 'paddingLinked'].contains(key));
+      editorOnlyKeys.contains(key));
     
     filteredProperties.forEach((key, value) {
       if (value != null) {
@@ -235,26 +176,17 @@ abstract class BaseWidgetGenerator {
 
   String formatColor(dynamic value) {
     if (value == null) return 'Colors.transparent';
-    if (value is int) {
-      final hex = '0x${value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
-      return ThemeGenerator.mapColorToToken(hex, themeProps);
-    }
+    if (value is BoundValue) return value.colorCode;
     if (value is String) {
-      if (value.startsWith('Colors.')) return value;
-      if (value.startsWith('0x')) {
-        return ThemeGenerator.mapColorToToken(value, themeProps);
-      }
-      final intValue = int.tryParse(value);
-      if (intValue != null) {
-        final hex = '0x${intValue.toRadixString(16).padLeft(8, '0').toUpperCase()}';
-        return ThemeGenerator.mapColorToToken(hex, themeProps);
-      }
-      final hex = '0x${value.toUpperCase()}';
-      return ThemeGenerator.mapColorToToken(hex, themeProps);
+      if (value.startsWith('Colors.') || value.startsWith('AppTheme.')) return value;
+      final token = ThemeGenerator.tokenForKey(value);
+      if (token != null) return token;
     }
-    return 'Colors.transparent';
+    final argb = ThemeGenerator.parseArgb(value);
+    if (argb == null) return 'Colors.transparent';
+    return ThemeGenerator.mapColorToToken('0x${argb.toRadixString(16).padLeft(8, '0').toUpperCase()}', themeProps);
   }
-  
+
   String generateChildren(List<WidgetNode> children, {int indent = 0}) {
     if (children.isEmpty) return '';
     final childIndent = getChildIndentStr(indent);
@@ -264,8 +196,18 @@ abstract class BaseWidgetGenerator {
   }
 
   String escapeString(String value) {
-    // Escape single quotes, dollar signs, and newlines
-    return value.replaceAll("'", "\\'").replaceAll("\$", "\\\$").replaceAll("\n", "\\n");
+    // Escape backslashes, single quotes, dollar signs, and newlines
+    return value
+        .replaceAll('\\', '\\\\')
+        .replaceAll("'", "\\'")
+        .replaceAll("\$", "\\\$")
+        .replaceAll("\n", "\\n");
+  }
+
+  /// A single-quoted Dart string literal holding [value] verbatim.
+  String dartString(dynamic value) {
+    if (value is BoundValue) return value.stringCode;
+    return "'${escapeString(value?.toString() ?? '')}'";
   }
 
   String parseEdgeInsets(dynamic value) {

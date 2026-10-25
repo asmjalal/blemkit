@@ -14,7 +14,7 @@ class AppBarGenerator extends BaseWidgetGenerator {
     if (node.properties['title'] != null) {
       final title = node.properties['title'];
       if (title is String) {
-        props.add("title: Text('$title')");
+        props.add("title: Text(${dartString(title)})");
       } else if (title is WidgetNode) {
         props.add('title: ${WidgetGeneratorRegistry.generateCode(title, indent: 0)}');
       } else if (title is Map) {

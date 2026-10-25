@@ -1,30 +1,31 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
-import 'package:designflutterkit/main.dart';
+import 'package:designflutterkit/models/widget_node.dart';
+import 'package:designflutterkit/providers/widget_tree_provider.dart';
+import 'package:designflutterkit/widgets/canvas_preview/builders/widget_builder_factory.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  setUpAll(WidgetBuilderFactory.initialize);
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('canvas renders a simple screen', (tester) async {
+    final provider = WidgetTreeProvider();
+    final screen = WidgetNode(type: 'Scaffold', children: [
+      WidgetNode(type: 'Center', children: [
+        WidgetNode(type: 'Text', properties: {'text': 'Hello SynappKit'}),
+      ]),
+    ]);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: provider,
+        child: MaterialApp(
+          home: Builder(builder: (context) => WidgetBuilderFactory.buildWidget(context, screen, null)),
+        ),
+      ),
+    );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Hello SynappKit'), findsOneWidget);
   });
 }

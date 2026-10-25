@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:provider/provider.dart';
 import '../providers/widget_tree_provider.dart';
 import '../utils/color_utils.dart';
@@ -69,7 +70,7 @@ class ThemeEditorPanel extends StatelessWidget {
             SwitchListTile(
               title: const Text('Use Material 3', style: TextStyle(color: Colors.white, fontSize: 14)),
               value: theme['useMaterial3'] ?? true,
-              activeColor: const Color(0xFF0fadd5),
+              activeColor: EditorColors.accent,
               onChanged: (value) {
                 provider.updateThemeProperties({'useMaterial3': value});
               },
@@ -103,13 +104,13 @@ class ThemeEditorPanel extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF181A20),
+            color: EditorColors.background,
             borderRadius: BorderRadius.circular(8),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: fonts.contains(selectedFont) ? selectedFont : 'Roboto',
-              dropdownColor: const Color(0xFF23263a),
+              dropdownColor: EditorColors.surfaceRaised,
               isExpanded: true,
               style: const TextStyle(color: Colors.white),
               items: fonts.map((font) {

@@ -8,24 +8,23 @@ class TabBarGenerator extends BaseWidgetGenerator {
     final childIndentStr = getChildIndentStr(indent);
     
     final props = <String>[];
-    props.add('controller: TabController(length: ${node.children.length}, vsync: this)');
     
     if (node.properties['labelColor'] != null) {
-      props.add('labelColor: Color(${node.properties['labelColor']})');
+      props.add('labelColor: ${formatColor(node.properties['labelColor'])}');
     }
     
     if (node.properties['unselectedLabelColor'] != null) {
-      props.add('unselectedLabelColor: Color(${node.properties['unselectedLabelColor']})');
+      props.add('unselectedLabelColor: ${formatColor(node.properties['unselectedLabelColor'])}');
     }
     
     if (node.properties['indicatorColor'] != null) {
-      props.add('indicatorColor: Color(${node.properties['indicatorColor']})');
+      props.add('indicatorColor: ${formatColor(node.properties['indicatorColor'])}');
     }
     
     final tabs = node.children.map((child) {
       return 'Tab(' +
-        'icon: Icon(Icons.${child.properties['icon'] ?? 'home'}), ' +
-        'text: \'${child.properties['text'] ?? 'Tab'}\'' +
+        (child.properties['icon'] != null ? 'icon: Icon(Icons.${'${child.properties['icon']}'.replaceFirst('Icons.', '')}), ' : '') +
+        'text: ${dartString(child.properties['text'] ?? 'Tab')}' +
         ')';
     }).join(',\n$childIndentStr');
     
@@ -42,10 +41,9 @@ class TabBarViewGenerator extends BaseWidgetGenerator {
     final childIndentStr = getChildIndentStr(indent);
     
     final props = <String>[];
-    props.add('controller: TabController(length: ${node.children.length}, vsync: this)');
     
     final children = generateChildren(node.children, indent: indent);
-    
-    return '${indentStr}TabBarView(${props.join(', ')}$children\n$indentStr)';
+
+    return '${indentStr}TabBarView(${props.isEmpty ? '' : '${props.join(', ')},'}$children\n$indentStr)';
   }
 }

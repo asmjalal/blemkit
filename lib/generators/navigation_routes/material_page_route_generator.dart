@@ -11,7 +11,7 @@ class MaterialPageRouteGenerator extends BaseWidgetGenerator {
     props.add('builder: (context) => ${node.properties['builder'] ?? 'Container()'}');
     
     if (node.properties['settings'] != null) {
-      props.add('settings: RouteSettings(name: \'${node.properties['settings']}\')');
+      props.add('settings: RouteSettings(name: ${dartString(node.properties['settings'])})');
     }
     
     if (node.properties['fullscreenDialog'] != null) {

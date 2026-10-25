@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../ui/editor_theme.dart';
 
 Widget buildDropdownField(
   String label,
@@ -13,13 +14,13 @@ Widget buildDropdownField(
       children: [
         Text(
           label,
-          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.w500),
+          style: const TextStyle(color: EditorColors.textMuted, fontSize: 11, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 4),
         Container(
           height: 36,
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: EditorColors.surface,
             borderRadius: BorderRadius.circular(6),
             border: Border.all(color: Colors.white.withOpacity(0.08)),
           ),
@@ -27,7 +28,7 @@ Widget buildDropdownField(
             child: DropdownButton<String>(
               isExpanded: true,
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              dropdownColor: const Color(0xFF1E293B),
+              dropdownColor: EditorColors.surfaceRaised,
               style: const TextStyle(color: Colors.white, fontSize: 11),
               icon: const Icon(Icons.expand_more, size: 16, color: Colors.white38),
               value: value,

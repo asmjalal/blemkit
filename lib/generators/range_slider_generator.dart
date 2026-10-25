@@ -20,7 +20,7 @@ class RangeSliderGenerator extends BaseWidgetGenerator {
         
     if (divisions != null) {
       code += '${childIndent}divisions: $divisions,\n'
-              '${childIndent}labels: const RangeLabels(\'$startValue\', \'$endValue\'),\n';
+              '${childIndent}labels: const RangeLabels(${dartString(startValue)}, ${dartString(endValue)}),\n';
     }
     
     code += '${childIndent}onChanged: (RangeValues values) {\n'

@@ -48,15 +48,7 @@ class ElevatedButtonBuilder extends BaseWidgetBuilder {
           provider.activeRowData = rowData;
         }
 
-        final navigateTo = props['navigateTo'];
-        if (navigateTo != null) {
-          try {
-            final target = provider.screens.firstWhere((s) => s.id == navigateTo);
-            provider.selectScreen(target);
-          } catch (_) {
-            // Screen might have been deleted
-          }
-        }
+        runTapActions(context, node);
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: fillColor,

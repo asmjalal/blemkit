@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html;
+import '../platform/web_bridge.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../providers/widget_tree_provider.dart';
-import '../models/supabase_connection_model.dart';
-import '../services/supabase_data_service.dart';
 
 class AppSettingsScreen extends StatefulWidget {
   final String? initialTab;
@@ -77,11 +76,11 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
 
     // Load saved PAT from local storage if available
     if (kIsWeb) {
-      final savedPat = html.window.localStorage['supabase_pat'];
+      final savedPat = WebBridge.read('supabase_pat');
       if (savedPat != null && savedPat.isNotEmpty) {
         _patController.text = savedPat;
       }
-      final savedToken = html.window.localStorage['supabase_oauth_token'];
+      final savedToken = WebBridge.read('supabase_oauth_token');
       if (savedToken != null && savedToken.isNotEmpty) {
         _isOAuthSignedIn = true;
         // Session reconstruction is not needed for UI; we just know token exists.
@@ -173,7 +172,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
 
       // Save token locally
       if (kIsWeb) {
-        html.window.localStorage['supabase_pat'] = pat;
+        WebBridge.write('supabase_pat', pat);
       }
 
       setState(() {
@@ -238,9 +237,9 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: EditorColors.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: EditorColors.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -264,7 +263,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                 icon: const Icon(Icons.save_outlined, size: 16),
                 label: const Text('Save Settings', style: TextStyle(fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF38BDF8),
+                  backgroundColor: EditorColors.accent,
                   foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
@@ -300,24 +299,24 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                 _buildSidebarItem(
                   id: 'supabase',
                   label: 'Supabase',
-                  iconPath: 'images/supabase.png',
+                  iconPath: 'assets/images/supabase.png',
                 ),
               ],
             ),
           ),
           
           // Right Content Area
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: MediaQuery.sizeOf(context).height * .85,
-                width: MediaQuery.sizeOf(context).width * .5,
-                color: const Color(0xFF0B0F19),
-                padding: const EdgeInsets.all(40),
-                child: _buildActivePanel(provider),
+          Expanded(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(40, 32, 40, 32),
+                  child: _buildActivePanel(provider),
+                ),
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -350,7 +349,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF1E293B) : Colors.transparent,
+        color: isSelected ? EditorColors.surfaceRaised : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: ListTile(
@@ -373,7 +372,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
               )
             : Icon(
                 icon,
-                color: isSelected ? const Color(0xFF38BDF8) : Colors.white54,
+                color: isSelected ? EditorColors.accent : Colors.white54,
                 size: 18,
               ),
         title: Text(
@@ -516,9 +515,9 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF38BDF8).withOpacity(0.15) : const Color(0xFF1E293B),
+          color: isSelected ? EditorColors.accent.withOpacity(0.15) : EditorColors.surfaceRaised,
           border: Border.all(
-            color: isSelected ? const Color(0xFF38BDF8) : Colors.white10,
+            color: isSelected ? EditorColors.accent : Colors.white10,
           ),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -528,7 +527,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? const Color(0xFF38BDF8) : Colors.white54,
+              color: isSelected ? EditorColors.accent : Colors.white54,
             ),
             const SizedBox(width: 8),
             Text(
@@ -663,7 +662,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   Widget _buildCollapsibleConnectionCard(WidgetTreeProvider provider) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: EditorColors.surfaceRaised,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
@@ -700,14 +699,14 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                     Container(
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0F172A),
+                        color: EditorColors.surface,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: TabBar(
                         indicatorSize: TabBarIndicatorSize.tab,
                         dividerColor: Colors.transparent,
                         indicator: BoxDecoration(
-                          color: const Color(0xFF1E293B),
+                          color: EditorColors.surfaceRaised,
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(color: Colors.white.withOpacity(0.05)),
                         ),
@@ -866,14 +865,14 @@ Widget _buildOAuthUnconnected() {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: EditorColors.surface,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.white10),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _selectedOrgId,
-              dropdownColor: const Color(0xFF1E293B),
+              dropdownColor: EditorColors.surfaceRaised,
               style: const TextStyle(color: Colors.white, fontSize: 13),
               iconEnabledColor: Colors.white54,
               isExpanded: true,
@@ -976,7 +975,7 @@ Widget _buildOAuthUnconnected() {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
+          color: EditorColors.surface,
           border: Border.all(color: Colors.white.withOpacity(0.05)),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -1021,7 +1020,7 @@ Widget _buildOAuthUnconnected() {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: EditorColors.surface,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: const Color(0xFF3ECF8E).withOpacity(0.2)),
           ),
@@ -1194,7 +1193,7 @@ Widget _buildOAuthUnconnected() {
           height: 44,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0FADD5),
+              backgroundColor: EditorColors.accent,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
@@ -1237,7 +1236,7 @@ Widget _buildOAuthUnconnected() {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Connected to Self-Hosted Supabase successfully.'),
-          backgroundColor: Color(0xFF0FADD5),
+          backgroundColor: EditorColors.accent,
         ),
       );
     }
@@ -1247,7 +1246,7 @@ Widget _buildOAuthUnconnected() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: EditorColors.surfaceRaised,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
@@ -1281,7 +1280,7 @@ Widget _buildOAuthUnconnected() {
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.white24),
             filled: true,
-            fillColor: const Color(0xFF0F172A),
+            fillColor: EditorColors.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,

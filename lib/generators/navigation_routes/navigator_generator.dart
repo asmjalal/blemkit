@@ -9,7 +9,7 @@ class NavigatorGenerator extends BaseWidgetGenerator {
     
     final props = <String>[];
     if (node.properties['initialRoute'] != null) {
-      props.add('initialRoute: \'${node.properties['initialRoute']}\'');
+      props.add('initialRoute: ${dartString(node.properties['initialRoute'])}');
     }
     
     if (node.properties['onGenerateRoute'] != null) {

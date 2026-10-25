@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/ai_generation_service.dart';
 import 'dart:ui';
-import '../models/widget_node.dart';
 import 'package:provider/provider.dart';
 import '../providers/widget_tree_provider.dart';
 import 'ai_generation_status_text.dart';
@@ -134,12 +134,12 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
       child: Container(
         width: 600,
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
+          color: EditorColors.surface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFF0fadd5).withOpacity(0.3), width: 2),
+          border: Border.all(color: EditorColors.accent.withOpacity(0.3), width: 2),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0fadd5).withOpacity(0.2),
+              color: EditorColors.accent.withOpacity(0.2),
               blurRadius: 40,
             )
           ],
@@ -154,10 +154,10 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0fadd5).withOpacity(0.1),
+                    color: EditorColors.accent.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.auto_awesome, color: Color(0xFF0fadd5)),
+                  child: const Icon(Icons.auto_awesome, color: EditorColors.accent),
                 ),
                 const SizedBox(width: 16),
                 const Text(
@@ -173,7 +173,7 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
             ),
             const SizedBox(height: 32),
             if (_isFetchingKeys)
-              const Center(child: CircularProgressIndicator(color: Color(0xFF0fadd5)))
+              const Center(child: CircularProgressIndicator(color: EditorColors.accent))
             else ...[
               // AI Selection
               Row(
@@ -181,11 +181,12 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
                   const Text('AI Agent:', style: TextStyle(color: Colors.white70, fontSize: 16)),
                   const SizedBox(width: 16),
                   DropdownButton<AiAgentType>(
-                    dropdownColor: const Color(0xFF1E293B),
+                    dropdownColor: EditorColors.surfaceRaised,
                     value: _selectedAgent,
                     style: const TextStyle(color: Colors.white),
-                    underline: Container(height: 1, color: const Color(0xFF0fadd5)),
+                    underline: Container(height: 1, color: EditorColors.accent),
                     items: const [
+                      DropdownMenuItem(value: AiAgentType.claude, child: Text('Claude Opus 5.5')),
                       DropdownMenuItem(value: AiAgentType.deepseek, child: Text('DeepSeek Chat')),
                       DropdownMenuItem(value: AiAgentType.openai, child: Text('OpenAI GPT-4o')),
                       DropdownMenuItem(value: AiAgentType.kimi, child: Text('Kimi K2')),
@@ -218,7 +219,7 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
                   labelText: 'Your API Key (Saved to Firebase)',
                   labelStyle: const TextStyle(color: Colors.white54),
                   filled: true,
-                  fillColor: const Color(0xFF1E293B),
+                  fillColor: EditorColors.surfaceRaised,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   prefixIcon: const Icon(Icons.vpn_key, color: Colors.white54),
                 ),
@@ -233,7 +234,7 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
                   hintText: 'E.g., Create a modern fitness dashboard with a pink background, tracking steps and calories.',
                   hintStyle: const TextStyle(color: Colors.white38),
                   filled: true,
-                  fillColor: const Color(0xFF1E293B),
+                  fillColor: EditorColors.surfaceRaised,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
               ),
@@ -245,11 +246,11 @@ class _AiPromptDialogState extends State<AiPromptDialog> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _generate,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0fadd5),
+                    backgroundColor: EditorColors.accent,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: _isLoading ? 0 : 8,
-                    shadowColor: const Color(0xFF0fadd5).withOpacity(0.5),
+                    shadowColor: EditorColors.accent.withOpacity(0.5),
                   ),
                   child: _isLoading
                       ? Padding(

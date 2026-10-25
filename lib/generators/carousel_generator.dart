@@ -1,10 +1,13 @@
 import 'base_widget_generator.dart';
+import 'logic_codegen.dart';
 import '../models/widget_node.dart';
 import 'widget_generator_registry.dart';
 
 class CarouselGenerator extends BaseWidgetGenerator {
   @override
   String generateCode(WidgetNode node, {int indent = 0}) {
+    LogicCodegen.imports.add('package:carousel_slider/carousel_slider.dart');
+    LogicCodegen.packages.add('carousel_slider');
     final indentStr = getIndentString(indent);
     final childIndentStr = getChildIndentStr(indent);
     final itemIndentStr = getChildIndentStr(indent + 1);

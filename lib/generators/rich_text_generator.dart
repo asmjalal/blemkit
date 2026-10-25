@@ -20,7 +20,7 @@ class RichTextGenerator extends BaseWidgetGenerator {
       }
       
       final styleStr = style.isNotEmpty ? ', style: TextStyle(${style.join(', ')})' : '';
-      return 'TextSpan(text: \'${child.properties['text'] ?? ''}\'$styleStr)';
+      return 'TextSpan(text: ${dartString(child.properties['text'] ?? '')}$styleStr)';
     }).join(',\n$childIndentStr');
     
     return '${indentStr}RichText(\n$childIndentStr text: TextSpan(\n$childIndentStr $textSpans\n$childIndentStr )\n$indentStr)';

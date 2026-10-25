@@ -9,10 +9,10 @@ class RadioGenerator extends BaseWidgetGenerator {
     final value = node.properties['value'] ?? 'option1';
     
     // Register group value state if not already present (simplified for now)
-    BaseWidgetGenerator.stateVariables.add('dynamic $groupVar = \'$value\';');
+    BaseWidgetGenerator.stateVariables.add('dynamic $groupVar = ${dartString(value)};');
     
     final props = <String>[];
-    props.add('value: \'$value\'');
+    props.add('value: ${dartString(value)}');
     props.add('groupValue: $groupVar');
     props.add('onChanged: (value) => setState(() => $groupVar = value!)');
     

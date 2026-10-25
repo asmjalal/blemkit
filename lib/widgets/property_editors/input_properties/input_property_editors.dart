@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../ui/editor_theme.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
 import '../../../models/widget_node.dart';
@@ -8,7 +9,6 @@ import '../section_header.dart';
 import '../color_picker_field.dart';
 import '../slider_field.dart';
 import '../dropdown_field.dart';
-import '../number_field.dart';
 import '../edge_insets_editor.dart';
 import 'package:designflutterkit/utils/color_utils.dart';
 
@@ -217,7 +217,7 @@ List<Widget> buildTextFieldPropertyEditors(BuildContext context, WidgetNode node
     // Content Padding (EdgeInsets)
     Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Text('Content Padding', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF94A3B8))),
+      child: Text('Content Padding', style: const TextStyle(fontWeight: FontWeight.bold, color: EditorColors.textMuted)),
     ),
     EdgeInsetsEditor(
       label: 'Content Padding',

@@ -10,7 +10,7 @@ class SearchFieldGenerator extends BaseWidgetGenerator {
 
     return '${indentStr}TextField(\n'
            '${childIndent}decoration: InputDecoration(\n'
-           '${childIndent}  hintText: \'$hintText\',\n'
+           '${childIndent}  hintText: ${dartString(hintText)},\n'
            '${childIndent}  prefixIcon: const Icon(Icons.search),\n'
            '${childIndent}  suffixIcon: const Icon(Icons.mic),\n'
            '${childIndent}  border: OutlineInputBorder(\n'

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../models/widget_node.dart';
 import 'base_widget_builder.dart';
-import 'widget_builder_factory.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
 import '../canvas_preview_mode.dart';
@@ -120,15 +119,7 @@ class ListTileBuilder extends BaseWidgetBuilder {
           provider.activeRowData = rowData;
         }
 
-        final navigateTo = node.properties['navigateTo'];
-        if (navigateTo != null) {
-          try {
-            final target = provider.screens.firstWhere((s) => s.id == navigateTo);
-            provider.selectScreen(target);
-          } catch (_) {
-            // Screen might have been deleted
-          }
-        }
+        runTapActions(context, node);
       },
       selected: node.properties['selected'] ?? false,
       tileColor: parseColor(node.properties['tileColor'], context),

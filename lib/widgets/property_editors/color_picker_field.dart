@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../ui/editor_theme.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class ColorPickerField extends StatefulWidget {
@@ -62,7 +63,7 @@ class _ColorPickerFieldState extends State<ColorPickerField> {
       children: [
         Text(
           widget.label,
-          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.w500),
+          style: const TextStyle(color: EditorColors.textMuted, fontSize: 11, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 6),
         Row(
@@ -136,7 +137,7 @@ class _ColorPickerFieldState extends State<ColorPickerField> {
               child: Container(
                 height: 28,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
+                  color: EditorColors.surface,
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(color: Colors.white.withOpacity(0.08)),
                 ),

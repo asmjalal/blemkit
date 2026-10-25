@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../models/widget_node.dart';
 import 'base_widget_builder.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/widget_tree_provider.dart';
+import '../../../runtime/preview_runtime.dart';
+import '../canvas_preview_mode.dart';
 
 class TextFieldBuilder extends BaseWidgetBuilder {
   @override
@@ -29,8 +33,13 @@ class TextFieldBuilder extends BaseWidgetBuilder {
       readOnly: node.properties['readOnly'] ?? false,
       keyboardType: _parseKeyboardType(node.properties['keyboardType']),
       textAlign: parseTextAlign(node.properties['textAlign']) ?? TextAlign.start,
-      onChanged: (value) {},
-      onSubmitted: (value) {},
+      onChanged: (value) {
+        Provider.of<WidgetTreeProvider>(context, listen: false).setWidgetState(node.id, value);
+        if (CanvasPreviewMode.of(context)) PreviewRuntime.run(context, node.properties['onChanged'] as List?);
+      },
+      onSubmitted: (value) {
+        if (CanvasPreviewMode.of(context)) PreviewRuntime.run(context, node.properties['onSubmitted'] as List?);
+      },
     );
   }
 

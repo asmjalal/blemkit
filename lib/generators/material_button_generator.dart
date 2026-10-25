@@ -68,8 +68,8 @@ class MaterialButtonGenerator extends BaseWidgetGenerator {
     if (node.children.isNotEmpty) {
       child = '\n$childIndentStr child: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)},';
     } else if (node.properties['text'] != null) {
-      final textContent = node.properties['text'].toString().replaceAll('\$', '\\\$');
-      child = '\n$childIndentStr child: Text(\'$textContent\'),';
+      final textContent = node.properties['text'].toString();
+      child = '\n$childIndentStr child: Text(${dartString(textContent)}),';
     } else {
       child = '\n$childIndentStr child: const Text(\'Material Button\'),';
     }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'dart:ui';
-import 'dart:math' as math;
 import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -140,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen>
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF040D1A), Color(0xFF071428), Color(0xFF0A1A35)],
+                colors: [EditorColors.background, Color(0xFF071428), Color(0xFF0A1A35)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 stops: [0.0, 0.5, 1.0],
@@ -223,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 left: 0,
                                 top: 8 + (_floatAnimation.value * 0.6),
                                 child: _FeatureBadge(
-                                  color: const Color(0xFF38BDF8),
+                                  color: EditorColors.accent,
                                   label: 'No code required',
                                 ),
                               ),
@@ -269,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen>
                       'without code.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Color(0xFF38BDF8),
+                        color: EditorColors.accent,
                         fontSize: 42,
                         fontWeight: FontWeight.w800,
                         height: 1.15,
@@ -303,10 +303,10 @@ class _LoginScreenState extends State<LoginScreen>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 32, vertical: 28),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0B1D3A).withOpacity(0.85),
+                            color: EditorColors.surfaceHover.withOpacity(0.85),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: const Color(0xFF1E3A6E),
+                              color: EditorColors.border,
                               width: 1.2,
                             ),
                           ),
@@ -329,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen>
                               // Google Sign-In Button
                               _isLoading
                                   ? const CircularProgressIndicator(
-                                      color: Color(0xFF38BDF8),
+                                      color: EditorColors.accent,
                                     )
                                   : SizedBox(
                                       width: double.infinity,
@@ -404,11 +404,11 @@ class _LoginScreenState extends State<LoginScreen>
                                     TextSpan(
                                       text: 'Terms of Service',
                                       style: TextStyle(
-                                        color: const Color(0xFF38BDF8)
+                                        color: EditorColors.accent
                                             .withOpacity(0.85),
                                         decoration: TextDecoration.underline,
                                         decorationColor:
-                                            const Color(0xFF38BDF8)
+                                            EditorColors.accent
                                                 .withOpacity(0.5),
                                       ),
                                     ),
@@ -420,11 +420,11 @@ class _LoginScreenState extends State<LoginScreen>
                                     TextSpan(
                                       text: 'Privacy Policy',
                                       style: TextStyle(
-                                        color: const Color(0xFF38BDF8)
+                                        color: EditorColors.accent
                                             .withOpacity(0.85),
                                         decoration: TextDecoration.underline,
                                         decorationColor:
-                                            const Color(0xFF38BDF8)
+                                            EditorColors.accent
                                                 .withOpacity(0.5),
                                       ),
                                     ),
@@ -493,9 +493,9 @@ class _FeatureBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF0B1D3A).withOpacity(0.9),
+        color: EditorColors.surfaceHover.withOpacity(0.9),
         borderRadius: BorderRadius.circular(40),
-        border: Border.all(color: const Color(0xFF1E3A6E), width: 1),
+        border: Border.all(color: EditorColors.border, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -32,6 +32,11 @@ class WidgetCommandManager {
     }
   }
 
+  void clear() {
+    _undoStack.clear();
+    _redoStack.clear();
+  }
+
   bool get canUndo => _undoStack.isNotEmpty;
   bool get canRedo => _redoStack.isNotEmpty;
 } 

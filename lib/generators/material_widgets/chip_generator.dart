@@ -1,5 +1,4 @@
 import '../base_widget_generator.dart';
-import '../project_generator.dart';
 import '../../models/widget_node.dart';
 import '../widget_generator_registry.dart';
 
@@ -11,26 +10,12 @@ class ChipGenerator extends BaseWidgetGenerator {
     
     final props = <String>[];
     
-    if (node.properties['label'] != null) {
-      props.add('label: Text(\'${node.properties['label']}\')');
-    }
-    
-    if (node.properties['avatar'] != null) {
-      props.add('avatar: ${node.properties['avatar']}');
-    }
-    
+ props.add('label: Text(${dartString(node.properties['label'] ?? 'Chip')})');
+
     if (node.properties['backgroundColor'] != null) {
-      props.add('backgroundColor: Color(${node.properties['backgroundColor']})');
+      props.add('backgroundColor: ${formatColor(node.properties['backgroundColor'])}');
     }
-    
-    if (node.properties['deleteIcon'] != null) {
-      props.add('deleteIcon: ${node.properties['deleteIcon']}');
-    }
-    
-    if (node.properties['onDeleted'] != null) {
-      props.add('onDeleted: ${node.properties['onDeleted']}');
-    }
-    
+
     return '${indentStr}Chip(${props.join(',\n$childIndentStr ')}\n$indentStr)';
   }
 }
@@ -59,11 +44,9 @@ class CircleAvatarGenerator extends BaseWidgetGenerator {
     if (node.dataBinding != null && node.dataBinding!.containsKey('url')) {
       final binding = node.dataBinding!['url'] as Map;
       final field = binding['field'];
-      imgUrlExpression = ProjectGenerator.isInsideRepeatedList 
-          ? "NetworkImage(item['$field']?.toString() ?? '')" 
-          : "NetworkImage(data[0]['$field']?.toString() ?? '')";
+      imgUrlExpression = "NetworkImage(${queryFieldExpr(field)})";
     } else if (node.properties['backgroundImage'] != null && node.properties['backgroundImage'].toString().isNotEmpty) {
-      imgUrlExpression = "NetworkImage('${escapeString(node.properties['backgroundImage'].toString())}')";
+      imgUrlExpression = "NetworkImage(${dartString(node.properties['backgroundImage'].toString())})";
     } else {
       imgUrlExpression = null;
     }

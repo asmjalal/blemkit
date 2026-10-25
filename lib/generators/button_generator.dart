@@ -11,7 +11,7 @@ class ButtonGenerator extends BaseWidgetGenerator {
     if (node.children.isNotEmpty) {
       child = WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1).trim();
     } else {
-      child = "Text('${node.properties['text'] ?? 'Button'}')";
+      child = "Text(${dartString(node.properties['text'] ?? 'Button')})";
     }
     
     final actions = node.properties['actions'] as List<dynamic>?;

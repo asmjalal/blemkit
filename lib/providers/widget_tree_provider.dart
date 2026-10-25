@@ -3,12 +3,13 @@ import '../models/widget_node.dart';
 import '../widgets/widget_context_menu/widget_command_manager.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html;
+import '../platform/web_bridge.dart';
 import '../widgets/widget_tree/widget_tree_editor.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/supabase_connection_model.dart';
 import '../models/backend_query_model.dart';
 import '../services/supabase_data_service.dart';
+import '../models/project_logic.dart';
 
 class WidgetTreeProvider extends ChangeNotifier {
   List<WidgetNode> screens = [];
@@ -35,6 +36,133 @@ class WidgetTreeProvider extends ChangeNotifier {
     _activeRowData = val;
     queryResults.clear();
     notifyListeners();
+  }
+
+  /// Reusable components: widget trees with parameters (`pageParams`) and
+  /// state (`pageState`), edited on the canvas like a page.
+  List<WidgetNode> components = [];
+
+  bool isComponentRoot(WidgetNode? node) => node != null && components.any((c) => c.id == node.id);
+
+  WidgetNode? componentById(String? id) => components.where((c) => c.id == id).firstOrNull;
+
+  WidgetNode addComponent(String name) {
+    final root = WidgetNode(type: 'Container', properties: {
+      'componentName': name,
+      'padding': {'left': 16.0, 'top': 16.0, 'right': 16.0, 'bottom': 16.0},
+      'color': '0xFFFFFFFF',
+      'borderRadius': 16.0,
+      'pageParams': [FieldDef(name: 'title', defaultValue: 'Title').toJson()],
+    }, children: [
+      WidgetNode(type: 'Column', properties: {'crossAxisAlignment': 'CrossAxisAlignment.start'}, children: [
+        WidgetNode(type: 'Text', properties: {
+          'text': 'Title',
+          'fontSize': 16.0,
+          'fontWeight': 'bold',
+          'bindings': {'text': {'source': 'pageParam', 'name': 'title'}},
+        }),
+      ]),
+    ]);
+    components.add(root);
+    hasUnsavedChanges = true;
+    _saveToStorage();
+    notifyListeners();
+    return root;
+  }
+
+  void removeComponent(WidgetNode component) {
+    components.removeWhere((c) => c.id == component.id);
+    if (selectedScreen?.id == component.id) {
+      selectedScreen = screens.isNotEmpty ? screens.first : null;
+      selectedNode = selectedScreen;
+    }
+    hasUnsavedChanges = true;
+    _saveToStorage();
+    notifyListeners();
+  }
+
+  // Project logic: app state, data types, API calls, custom code, settings.
+  ProjectLogic logic = ProjectLogic();
+
+  /// Applies [change] to [logic], then persists and rebuilds.
+  void updateLogic(void Function(ProjectLogic logic) change) {
+    change(logic);
+    hasUnsavedChanges = true;
+    _saveToStorage();
+    saveProjectSettingsToSupabase();
+    resetPreviewState(notify: false);
+    notifyListeners();
+  }
+
+  // --- Preview runtime (test mode) ---
+  // Values the canvas uses when it runs actions and resolves bindings.
+  final Map<String, dynamic> previewAppState = {};
+  final Map<String, Map<String, dynamic>> previewPageState = {};
+  final Map<String, Map<String, dynamic>> previewPageParams = {};
+  final Map<String, dynamic> previewOutputs = {};
+  final List<String> previewLog = [];
+  final List<WidgetNode> previewHistory = [];
+  bool previewDarkMode = false;
+  String? previewLanguage;
+
+  /// Test mode: taps run actions on the canvas instead of selecting widgets.
+  bool testMode = false;
+
+  void setTestMode(bool value) {
+    testMode = value;
+    if (value) {
+      resetPreviewState(notify: false);
+      widgetStates.clear();
+      selectedNode = null;
+    }
+    notifyListeners();
+  }
+
+  /// Canvas device preset id (see `DevicePresets`).
+  String previewDevice = 'iphone15';
+
+  void resetPreviewState({bool notify = true}) {
+    previewAppState.clear();
+    previewPageState.clear();
+    previewPageParams.clear();
+    previewOutputs.clear();
+    previewHistory.clear();
+    previewLog.clear();
+    if (notify) notifyListeners();
+  }
+
+  /// Rebuilds the canvas after preview state changed (does not mark the project dirty).
+  void previewChanged() => notifyListeners();
+
+  void logPreview(String message) {
+    previewLog.insert(0, '${TimeOfDay.now().hour.toString().padLeft(2, '0')}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}  $message');
+    if (previewLog.length > 100) previewLog.removeLast();
+  }
+
+  void setPreviewDevice(String id) {
+    previewDevice = id;
+    notifyListeners();
+  }
+
+  void setPreviewDarkMode(bool value) {
+    previewDarkMode = value;
+    notifyListeners();
+  }
+
+  void setPreviewLanguage(String? code) {
+    previewLanguage = code;
+    notifyListeners();
+  }
+
+  /// Theme tokens the canvas renders with, including dark overrides
+  /// (`dark_<token>`) when the canvas previews dark mode.
+  Map<String, dynamic> get effectiveThemeProperties {
+    if (!previewDarkMode) return _themeProperties;
+    final merged = Map<String, dynamic>.from(_themeProperties);
+    _themeProperties.forEach((key, value) {
+      if (key.startsWith('dark_')) merged[key.substring(5)] = value;
+    });
+    return merged;
   }
 
   WidgetNode? get rootNode => selectedScreen;
@@ -64,6 +192,9 @@ class WidgetTreeProvider extends ChangeNotifier {
     queries = [];
     queryResults.clear();
     activeStreams.clear();
+    logic = ProjectLogic();
+    components = [];
+    resetPreviewState(notify: false);
     notifyListeners();
   }
 
@@ -88,6 +219,17 @@ class WidgetTreeProvider extends ChangeNotifier {
     'errorColor': '0xFFEF4444',
     'warningColor': '0xFFF59E0B',
     'infoColor': '0xFF3B82F6',
+
+    // Dark mode (used by the exported darkTheme and the canvas dark preview)
+    'dark_primaryColor': '0xFF38BDF8',
+    'dark_scaffoldBackgroundColor': '0xFF0B1120',
+    'dark_backgroundColor': '0xFF111827',
+    'dark_primaryText': '0xFFF1F5F9',
+    'dark_secondaryText': '0xFF94A3B8',
+
+    // Spacing & radius tokens
+    'spacingXs': 4.0, 'spacingSm': 8.0, 'spacingMd': 16.0, 'spacingLg': 24.0, 'spacingXl': 32.0,
+    'radiusSm': 8.0, 'radiusMd': 12.0, 'radiusLg': 20.0,
 
     // Typography
     'fontFamily': 'Outfit',
@@ -166,6 +308,15 @@ class WidgetTreeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Gives every page a name so pickers, the storyboard and exported file
+  /// names are readable.
+  void _ensurePageNames() {
+    for (var i = 0; i < screens.length; i++) {
+      final name = screens[i].properties['pageName'];
+      if (name is! String || name.trim().isEmpty) screens[i].properties['pageName'] = i == 0 ? 'Home' : 'Page ${i + 1}';
+    }
+  }
+
   void setRootNode(WidgetNode? node) {
     if (selectedScreen == null && node != null) {
       screens.add(node);
@@ -178,6 +329,7 @@ class WidgetTreeProvider extends ChangeNotifier {
       screens.remove(selectedScreen);
       selectedScreen = screens.isNotEmpty ? screens.first : null;
     }
+    _ensurePageNames();
     hasUnsavedChanges = true;
     _saveToStorage();
     notifyListeners();
@@ -219,6 +371,15 @@ class WidgetTreeProvider extends ChangeNotifier {
         }
       }
       
+      if (settingsNode.properties['components'] is List) {
+        components = (settingsNode.properties['components'] as List)
+            .map((c) => c is WidgetNode ? c : WidgetNode.fromJson(Map<String, dynamic>.from(c as Map)))
+            .toList();
+      }
+      if (settingsNode.properties['logic'] is Map) {
+        logic = ProjectLogic.fromJson(Map<String, dynamic>.from(settingsNode.properties['logic'] as Map));
+      }
+
       // Remove __settings__ from screens list so it doesn't show in the visual UI
       final list = List<WidgetNode>.from(newScreens);
       list.removeAt(settingsIndex);
@@ -228,6 +389,7 @@ class WidgetTreeProvider extends ChangeNotifier {
     }
 
     if (screens.isEmpty) return;
+    _ensurePageNames();
     selectedScreen = screens.first;
     selectedNode = selectedScreen;
     hasUnsavedChanges = true;
@@ -237,6 +399,7 @@ class WidgetTreeProvider extends ChangeNotifier {
 
   void addScreen(WidgetNode node) {
     screens.add(node);
+    _ensurePageNames();
     selectedScreen = node;
     selectedNode = node;
     hasUnsavedChanges = true;
@@ -244,7 +407,7 @@ class WidgetTreeProvider extends ChangeNotifier {
   }
 
   void addNode(String type, {WidgetNode? parent}) {
-    final newNode = WidgetTreeEditor.createWidgetNodeWithDefaults(type);
+    final newNode = WidgetTreeEditor.createFromPaletteType(type);
     if (parent != null) {
       addChild(parent, newNode);
     } else if (rootNode == null) {
@@ -272,7 +435,7 @@ class WidgetTreeProvider extends ChangeNotifier {
   }
 
   WidgetNode? findNodeById(String id) {
-    for (var screen in screens) {
+    for (var screen in [...screens, ...components]) {
       final found = _findNodeInTree(screen, id);
       if (found != null) return found;
     }
@@ -405,6 +568,21 @@ class WidgetTreeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sets (or removes, when [value] is null or empty) one property of [node]
+  /// and persists the change.
+  void setNodeProperty(WidgetNode node, String key, dynamic value) {
+    final target = findNodeById(node.id) ?? node;
+    final empty = value == null || (value is List && value.isEmpty) || (value is Map && value.isEmpty) || (value is String && value.isEmpty);
+    if (empty) {
+      target.properties.remove(key);
+    } else {
+      target.properties[key] = value;
+    }
+    hasUnsavedChanges = true;
+    _saveToStorage();
+    notifyListeners();
+  }
+
   void updateNodeProperties(WidgetNode node, Map<String, dynamic> properties) {
     final originalNode = findNodeById(node.id) ?? node;
     originalNode.properties = properties;
@@ -518,29 +696,31 @@ class WidgetTreeProvider extends ChangeNotifier {
     try {
       if (screens.isNotEmpty) {
         final List<Map<String, dynamic>> screensJson = screens.map((s) => s.toJson()).toList();
-        html.window.localStorage[_storageKey] = jsonEncode(screensJson);
+        WebBridge.write(_storageKey, jsonEncode(screensJson));
         
         if (selectedScreen != null) {
-          html.window.localStorage['${_storageKey}_active'] = selectedScreen!.id;
+          WebBridge.write('${_storageKey}_active', selectedScreen!.id);
         }
       }
       // Save theme
-      html.window.localStorage['${_storageKey}_theme'] = jsonEncode(_themeProperties);
+      WebBridge.write('${_storageKey}_theme', jsonEncode(_themeProperties));
       // Save API
-      html.window.localStorage['${_storageKey}_api'] = jsonEncode(_apiSettings);
+      WebBridge.write('${_storageKey}_api', jsonEncode(_apiSettings));
       // Save Project Settings
-      html.window.localStorage['${_storageKey}_project_info'] = jsonEncode(_projectSettings);
+      WebBridge.write('${_storageKey}_project_info', jsonEncode(_projectSettings));
       // Save Themed Widgets
-      html.window.localStorage['${_storageKey}_themed'] = jsonEncode(_themedWidgets);
+      WebBridge.write('${_storageKey}_themed', jsonEncode(_themedWidgets));
       
       // Save Supabase Connection
       if (activeConnection != null) {
-        html.window.localStorage['${_storageKey}_connection'] = jsonEncode(activeConnection!.toJson());
+        WebBridge.write('${_storageKey}_connection', jsonEncode(activeConnection!.toPersistedJson()));
       } else {
-        html.window.localStorage.remove('${_storageKey}_connection');
+        WebBridge.remove('${_storageKey}_connection');
       }
+      WebBridge.write('${_storageKey}_logic', jsonEncode(logic.toJson()));
+      WebBridge.write('${_storageKey}_components', jsonEncode(components.map((c) => c.toJson()).toList()));
       // Save Supabase Queries
-      html.window.localStorage['${_storageKey}_queries'] = jsonEncode(queries.map((q) => q.toJson()).toList());
+      WebBridge.write('${_storageKey}_queries', jsonEncode(queries.map((q) => q.toJson()).toList()));
     } catch (e) {
       debugPrint('Error saving to storage: $e');
     }
@@ -548,14 +728,14 @@ class WidgetTreeProvider extends ChangeNotifier {
 
   void loadFromStorage() {
     if (!kIsWeb) return;
-    final String? jsonStr = html.window.localStorage[_storageKey];
+    final String? jsonStr = WebBridge.read(_storageKey);
     if (jsonStr != null && jsonStr.isNotEmpty) {
       try {
         final dynamic decoded = jsonDecode(jsonStr);
         if (decoded is List) {
           screens = decoded.map((s) => WidgetNode.fromJson(s as Map<String, dynamic>)).toList();
           
-          final String? activeId = html.window.localStorage['${_storageKey}_active'];
+          final String? activeId = WebBridge.read('${_storageKey}_active');
           if (activeId != null) {
             selectedScreen = screens.firstWhere((s) => s.id == activeId, orElse: () => screens.first);
           } else if (screens.isNotEmpty) {
@@ -574,7 +754,7 @@ class WidgetTreeProvider extends ChangeNotifier {
       }
     }
     // Load theme
-    final String? themeStr = html.window.localStorage['${_storageKey}_theme'];
+    final String? themeStr = WebBridge.read('${_storageKey}_theme');
     if (themeStr != null && themeStr.isNotEmpty) {
       try {
         _themeProperties = jsonDecode(themeStr);
@@ -583,7 +763,7 @@ class WidgetTreeProvider extends ChangeNotifier {
       }
     }
     // Load Themed Widgets
-    final String? themedStr = html.window.localStorage['${_storageKey}_themed'];
+    final String? themedStr = WebBridge.read('${_storageKey}_themed');
     if (themedStr != null && themedStr.isNotEmpty) {
       try {
         _themedWidgets = List<Map<String, dynamic>>.from(jsonDecode(themedStr));
@@ -592,7 +772,7 @@ class WidgetTreeProvider extends ChangeNotifier {
       }
     }
     // Load Project Settings
-    final String? projectStr = html.window.localStorage['${_storageKey}_project_info'];
+    final String? projectStr = WebBridge.read('${_storageKey}_project_info');
     if (projectStr != null && projectStr.isNotEmpty) {
       try {
         _projectSettings = jsonDecode(projectStr);
@@ -601,7 +781,7 @@ class WidgetTreeProvider extends ChangeNotifier {
       }
     }
     // Load Supabase Connection
-    final String? connStr = html.window.localStorage['${_storageKey}_connection'];
+    final String? connStr = WebBridge.read('${_storageKey}_connection');
     if (connStr != null && connStr.isNotEmpty) {
       try {
         activeConnection = SupabaseConnection.fromJson(jsonDecode(connStr));
@@ -609,8 +789,24 @@ class WidgetTreeProvider extends ChangeNotifier {
         debugPrint('Error loading connection from storage: $e');
       }
     }
+    final String? componentsStr = WebBridge.read('${_storageKey}_components');
+    if (componentsStr != null && componentsStr.isNotEmpty) {
+      try {
+        components = (jsonDecode(componentsStr) as List).map((c) => WidgetNode.fromJson(Map<String, dynamic>.from(c as Map))).toList();
+      } catch (e) {
+        debugPrint('Error loading components from storage: $e');
+      }
+    }
+    final String? logicStr = WebBridge.read('${_storageKey}_logic');
+    if (logicStr != null && logicStr.isNotEmpty) {
+      try {
+        logic = ProjectLogic.fromJson(jsonDecode(logicStr) as Map<String, dynamic>);
+      } catch (e) {
+        debugPrint('Error loading project logic from storage: $e');
+      }
+    }
     // Load Supabase Queries
-    final String? queriesStr = html.window.localStorage['${_storageKey}_queries'];
+    final String? queriesStr = WebBridge.read('${_storageKey}_queries');
     if (queriesStr != null && queriesStr.isNotEmpty) {
       try {
         queries = (jsonDecode(queriesStr) as List)
@@ -632,7 +828,9 @@ class WidgetTreeProvider extends ChangeNotifier {
     try {
       final supabase = Supabase.instance.client;
       final settingsJson = {
-        'activeConnection': activeConnection?.toJson(),
+        'activeConnection': activeConnection?.toPersistedJson(),
+        'logic': logic.toJson(),
+        'components': components.map((c) => c.toJson()).toList(),
         'queries': queries.map((q) => q.toJson()).toList(),
       };
       
@@ -665,6 +863,11 @@ class WidgetTreeProvider extends ChangeNotifier {
         } else {
           activeConnection = null;
         }
+
+        logic = ProjectLogic.fromJson(settingsJson['logic'] is Map ? Map<String, dynamic>.from(settingsJson['logic'] as Map) : null);
+        components = (settingsJson['components'] as List? ?? const [])
+            .map((c) => WidgetNode.fromJson(Map<String, dynamic>.from(c as Map)))
+            .toList();
 
         if (settingsJson['queries'] != null) {
           queries = (settingsJson['queries'] as List)
@@ -806,10 +1009,15 @@ class WidgetTreeProvider extends ChangeNotifier {
         'updated_at': DateTime.now().toIso8601String()
       }).eq('id', currentProjectId!);
 
-      // Delete existing screens for this project (except __settings__)
-      await supabase.from('screens').delete().eq('project_id', currentProjectId!).neq('screen_name', '__settings__');
+      // Insert the new rows first and delete the previous ones afterwards, so a
+      // failed insert never leaves the project without screens.
+      final previous = await supabase
+          .from('screens')
+          .select('id')
+          .eq('project_id', currentProjectId!)
+          .neq('screen_name', '__settings__');
+      final previousIds = List<Map<String, dynamic>>.from(previous).map((r) => r['id']).toList();
 
-      // Insert all current screens
       if (screens.isNotEmpty) {
         final screenInserts = screens.asMap().entries.map((entry) {
           final index = entry.key;
@@ -825,6 +1033,11 @@ class WidgetTreeProvider extends ChangeNotifier {
         await supabase.from('screens').insert(screenInserts);
       }
 
+      if (previousIds.isNotEmpty) {
+        await supabase.from('screens').delete().inFilter('id', previousIds);
+      }
+
+      await saveVersionSnapshot();
       await saveProjectSettingsToSupabase();
 
       hasUnsavedChanges = false;
@@ -832,6 +1045,155 @@ class WidgetTreeProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error saving project to Supabase: $e');
     }
+  }
+
+  // --- Version history (table `project_versions`, see supabase/migrations) ---
+
+  Map<String, dynamic> _projectSnapshot() => {
+        'screens': screens.map((s) => s.toJson()).toList(),
+        'theme': _themeProperties,
+        'logic': logic.toJson(),
+        'components': components.map((c) => c.toJson()).toList(),
+        'queries': queries.map((q) => q.toJson()).toList(),
+      };
+
+  /// Stores the current project as a restorable version. Does nothing (and
+  /// never throws) when the table has not been created yet.
+  Future<void> saveVersionSnapshot({String? label}) async {
+    if (currentProjectId == null) return;
+    try {
+      await Supabase.instance.client.from('project_versions').insert({
+        'project_id': currentProjectId,
+        'label': label ?? 'Saved ${DateTime.now().toLocal().toString().substring(0, 16)}',
+        'snapshot': _projectSnapshot(),
+      });
+    } catch (e) {
+      debugPrint('Version snapshot skipped: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> listVersions() async {
+    if (currentProjectId == null) return [];
+    final rows = await Supabase.instance.client
+        .from('project_versions')
+        .select('id, label, created_at')
+        .eq('project_id', currentProjectId!)
+        .order('created_at', ascending: false)
+        .limit(50);
+    return List<Map<String, dynamic>>.from(rows);
+  }
+
+  Future<void> restoreVersion(String versionId) async {
+    final row = await Supabase.instance.client.from('project_versions').select('snapshot').eq('id', versionId).single();
+    final snapshot = Map<String, dynamic>.from(row['snapshot'] as Map);
+    screens = (snapshot['screens'] as List).map((s) => WidgetNode.fromJson(Map<String, dynamic>.from(s as Map))).toList();
+    if (snapshot['theme'] is Map) _themeProperties = Map<String, dynamic>.from(snapshot['theme'] as Map);
+    logic = ProjectLogic.fromJson(snapshot['logic'] is Map ? Map<String, dynamic>.from(snapshot['logic'] as Map) : null);
+    components = (snapshot['components'] as List? ?? const []).map((c) => WidgetNode.fromJson(Map<String, dynamic>.from(c as Map))).toList();
+    if (snapshot['queries'] is List) {
+      queries = (snapshot['queries'] as List).map((q) => BackendQuery.fromJson(Map<String, dynamic>.from(q as Map))).toList();
+    }
+    selectedScreen = screens.isNotEmpty ? screens.first : null;
+    selectedNode = selectedScreen;
+    hasUnsavedChanges = true;
+    commandManager.clear();
+    _saveToStorage();
+    notifyListeners();
+  }
+
+  // --- Comments (table `project_comments`, see supabase/migrations) ---
+
+  Future<List<Map<String, dynamic>>> listComments() async {
+    if (currentProjectId == null) return [];
+    final rows = await Supabase.instance.client
+        .from('project_comments')
+        .select()
+        .eq('project_id', currentProjectId!)
+        .order('created_at', ascending: false);
+    return List<Map<String, dynamic>>.from(rows);
+  }
+
+  Future<void> addComment(String body, {String? authorEmail, String? authorName}) async {
+    if (currentProjectId == null) throw StateError('Save the project to the cloud before commenting.');
+    await Supabase.instance.client.from('project_comments').insert({
+      'project_id': currentProjectId,
+      'screen_id': selectedScreen?.id,
+      'widget_id': selectedNode?.id,
+      'author_email': authorEmail,
+      'author_name': authorName,
+      'body': body,
+    });
+  }
+
+  Future<void> setCommentResolved(String id, bool resolved) async {
+    await Supabase.instance.client.from('project_comments').update({'resolved': resolved}).eq('id', id);
+  }
+
+  /// Replaces the widget [oldId] (anywhere on the selected page) with
+  /// [replacement]. Returns false when it is not found.
+  bool replaceNode(String oldId, WidgetNode replacement) {
+    bool replaceIn(WidgetNode parent) {
+      for (var i = 0; i < parent.children.length; i++) {
+        if (parent.children[i].id == oldId) {
+          parent.children[i] = replacement;
+          return true;
+        }
+        if (replaceIn(parent.children[i])) return true;
+      }
+      for (final entry in parent.properties.entries) {
+        if (entry.value is WidgetNode) {
+          if ((entry.value as WidgetNode).id == oldId) {
+            parent.properties[entry.key] = replacement;
+            return true;
+          }
+          if (replaceIn(entry.value as WidgetNode)) return true;
+        }
+      }
+      return false;
+    }
+
+    final root = selectedScreen;
+    if (root == null || !replaceIn(root)) return false;
+    selectedNode = replacement;
+    hasUnsavedChanges = true;
+    _saveToStorage();
+    notifyListeners();
+    return true;
+  }
+
+  /// Widget clipboard for copy/paste inside the editor.
+  WidgetNode? clipboard;
+
+  /// Pastes [node] into the selected widget when it can hold children, else
+  /// after it. Returns the pasted copy.
+  WidgetNode? pasteNode(WidgetNode node) {
+    final copy = node.cloneWithNewIds();
+    final target = selectedNode ?? selectedScreen;
+    if (target == null) return null;
+    const containers = {'Column', 'Row', 'Stack', 'ListView', 'GridView', 'Wrap', 'Flex', 'Form', 'SingleChildScrollView', 'Container', 'Card', 'Padding', 'Center', 'Scaffold'};
+    final parent = containers.contains(target.type) ? target : _findParent(selectedScreen, target);
+    if (parent == null) return null;
+    if (parent == target) {
+      parent.children.add(copy);
+    } else {
+      final index = parent.children.indexWhere((c) => c.id == target.id);
+      parent.children.insert(index + 1, copy);
+    }
+    selectedNode = copy;
+    hasUnsavedChanges = true;
+    _saveToStorage();
+    notifyListeners();
+    return copy;
+  }
+
+  WidgetNode? _findParent(WidgetNode? root, WidgetNode child) {
+    if (root == null) return null;
+    for (final c in root.children) {
+      if (c.id == child.id) return root;
+      final found = _findParent(c, child);
+      if (found != null) return found;
+    }
+    return null;
   }
 
   Future<void> loadProjectFromSupabase(String projectId) async {

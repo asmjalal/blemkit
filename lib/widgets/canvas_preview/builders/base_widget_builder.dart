@@ -6,14 +6,38 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../models/widget_node.dart';
 import '../../../providers/widget_tree_provider.dart';
 import '../../../utils/color_utils.dart';
+import '../../../runtime/preview_runtime.dart';
+import '../canvas_preview_mode.dart';
 
 abstract class BaseWidgetBuilder {
   Widget build(BuildContext context, WidgetNode node, WidgetNode? hoveredNode);
+
+  /// Current value of an input widget in test mode, falling back to [initial].
+  T inputValue<T>(BuildContext context, WidgetNode node, T initial) {
+    final stored = Provider.of<WidgetTreeProvider>(context, listen: false).getWidgetState(node.id);
+    return stored is T ? stored : initial;
+  }
+
+  /// Stores an input's new value and runs its `onChanged` actions in test mode.
+  void inputChanged(BuildContext context, WidgetNode node, dynamic value) {
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+    provider.setWidgetState(node.id, value);
+    provider.previewChanged();
+    if (CanvasPreviewMode.of(context)) PreviewRuntime.run(context, node.properties['onChanged'] as List?);
+  }
+
+  /// Runs [node]'s tap actions (or the legacy `navigateTo`) in test mode.
+  void runTapActions(BuildContext context, WidgetNode node) {
+    final actions = [...?(node.properties['actions'] as List?)];
+    final navigateTo = node.properties['navigateTo'];
+    if (actions.isEmpty && navigateTo != null) actions.add({'type': 'navigate', 'targetScreenId': navigateTo});
+    PreviewRuntime.run(context, actions);
+  }
   
   // Helper methods for parsing properties from JSON
   Color? parseColor(dynamic value, BuildContext context) {
     if (value == null) return null;
-    final theme = Provider.of<WidgetTreeProvider>(context, listen: false).themeProperties;
+    final theme = Provider.of<WidgetTreeProvider>(context, listen: false).effectiveThemeProperties;
     return ColorUtils.parseColor(value, theme, Colors.transparent);
   }
 

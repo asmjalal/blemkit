@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/widget_node.dart';
 import 'base_widget_builder.dart';
-import 'widget_builder_factory.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
 import '../canvas_preview_mode.dart';

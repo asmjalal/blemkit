@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
 import '../../../models/widget_node.dart';
-import '../../properties_panel.dart';
 import '../slider_field.dart';
 import '../dropdown_field.dart';
 import '../color_picker_field.dart';

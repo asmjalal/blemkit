@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../../ui/editor_theme.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/widget_tree_provider.dart';
 import '../../../models/widget_node.dart';
-import '../../properties_panel.dart';
 import '../slider_field.dart';
 import '../dropdown_field.dart';
 import '../color_picker_field.dart';
 import '../section_header.dart';
 import '../edge_insets_editor.dart';
-import 'dart:math';
 import 'package:designflutterkit/utils/color_utils.dart';
 import '../numeric_property_field.dart';
 
@@ -160,7 +159,7 @@ class _BackgroundStyleEditorState extends State<_BackgroundStyleEditor> {
             DropdownButton<String>(
               value: isGradient ? 'gradient' : 'solid',
               isDense: true,
-              dropdownColor: const Color(0xFF1E293B),
+              dropdownColor: EditorColors.surfaceRaised,
               style: const TextStyle(color: Colors.white, fontSize: 13),
               underline: const SizedBox(),
               items: const [

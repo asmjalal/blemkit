@@ -1,7 +1,6 @@
 import 'base_widget_generator.dart';
 import '../models/widget_node.dart';
 import 'widget_generator_registry.dart';
-import '../utils/property_converters.dart';
 
 class WrapGenerator extends BaseWidgetGenerator {
   @override

@@ -21,15 +21,7 @@ class GestureDetectorBuilder extends BaseWidgetBuilder {
           provider.activeRowData = rowData;
         }
 
-        final navigateTo = node.properties['navigateTo'];
-        if (navigateTo != null) {
-          try {
-            final target = provider.screens.firstWhere((s) => s.id == navigateTo);
-            provider.selectScreen(target);
-          } catch (_) {
-            // Screen might have been deleted
-          }
-        }
+        runTapActions(context, node);
       },
       onDoubleTap: () {},
       onLongPress: () {},

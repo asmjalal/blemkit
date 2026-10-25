@@ -2,7 +2,6 @@ import 'package:designflutterkit/generators/widget_generator_registry.dart';
 
 import '../../models/widget_node.dart';
 import 'base_widget_generator.dart';
-import 'project_generator.dart';
 
 class ListTileGenerator extends BaseWidgetGenerator {
   @override
@@ -16,15 +15,13 @@ class ListTileGenerator extends BaseWidgetGenerator {
     final titleBinding = node.dataBinding?['title'];
     if (titleBinding != null) {
       final field = titleBinding['field'];
-      final textExpression = ProjectGenerator.isInsideRepeatedList 
-          ? "item['$field']?.toString() ?? ''" 
-          : "data[0]['$field']?.toString() ?? ''";
+      final textExpression = queryFieldExpr(field);
       props.add("${childIndent}title: Text($textExpression)");
     } else {
       final title = node.properties['title'];
       if (title != null) {
         if (title is String) {
-          props.add("${childIndent}title: Text('$title')");
+          props.add("${childIndent}title: Text(${dartString(title)})");
         } else if (title is WidgetNode) {
           props.add('${childIndent}title: ${WidgetGeneratorRegistry.generateCode(title, indent: indent + 1)}');
         } else if (title is Map) {
@@ -38,15 +35,13 @@ class ListTileGenerator extends BaseWidgetGenerator {
     final subtitleBinding = node.dataBinding?['subtitle'];
     if (subtitleBinding != null) {
       final field = subtitleBinding['field'];
-      final textExpression = ProjectGenerator.isInsideRepeatedList 
-          ? "item['$field']?.toString() ?? ''" 
-          : "data[0]['$field']?.toString() ?? ''";
+      final textExpression = queryFieldExpr(field);
       props.add("${childIndent}subtitle: Text($textExpression)");
     } else {
       final subtitle = node.properties['subtitle'];
       if (subtitle != null) {
         if (subtitle is String) {
-          props.add("${childIndent}subtitle: Text('$subtitle')");
+          props.add("${childIndent}subtitle: Text(${dartString(subtitle)})");
         } else if (subtitle is WidgetNode) {
           props.add('${childIndent}subtitle: ${WidgetGeneratorRegistry.generateCode(subtitle, indent: indent + 1)}');
         } else if (subtitle is Map) {

@@ -12,7 +12,9 @@ import 'dart:convert';
 import 'dart:io';
 import '../models/widget_node.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html;
+import '../platform/web_bridge.dart';
+import '../services/github_exporter.dart';
+import '../services/export_bundle.dart';
 import 'package:archive/archive.dart';
 import '../widgets/top_nav_bar.dart';
 import '../generators/project_generator.dart';
@@ -26,6 +28,14 @@ import '../widgets/widget_context_menu/widget_context_menu_actions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../widgets/submit_marketplace_dialog.dart';
+import '../ui/editor_theme.dart';
+import '../ui/editor_widgets.dart';
+import '../widgets/editor_overlays.dart';
+import '../widgets/welcome_tour.dart';
+import 'project_logic_screen.dart';
+import '../runtime/preview_runtime.dart';
+import '../models/project_logic.dart';
+import '../widgets/widget_sidebar/widget_side_bar.dart' show WidgetSidebar;
 
 class BuilderScreen extends StatefulWidget {
   const BuilderScreen({super.key});
@@ -34,10 +44,31 @@ class BuilderScreen extends StatefulWidget {
   State<BuilderScreen> createState() => _BuilderScreenState();
 }
 
+class _ExportChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _ExportChip(this.icon, this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(color: EditorColors.background, borderRadius: BorderRadius.circular(6), border: Border.all(color: EditorColors.border)),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 13, color: EditorColors.accent),
+        const SizedBox(width: 5),
+        Text(label, style: const TextStyle(fontSize: 11.5, color: EditorColors.textMuted)),
+      ]),
+    );
+  }
+}
+
 class _BuilderScreenState extends State<BuilderScreen> {
   int _selectedSidebarTab = 0; // 0: Widget Palette, 1: Widget Tree
   double _sidebarWidth = 280.0;
   bool _showAiPanel = false;
+  bool _showComments = false;
 
   final FocusNode _keyboardFocusNode = FocusNode();
 
@@ -45,6 +76,9 @@ class _BuilderScreenState extends State<BuilderScreen> {
   void initState() {
     super.initState();
     _keyboardFocusNode.requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) WelcomeTour.showIfFirstRun(context);
+    });
   }
 
   @override
@@ -53,65 +87,159 @@ class _BuilderScreenState extends State<BuilderScreen> {
     super.dispose();
   }
 
+  bool _isTyping() {
+    final focusContext = FocusManager.instance.primaryFocus?.context;
+    return focusContext != null && focusContext.findAncestorWidgetOfExactType<EditableText>() != null;
+  }
+
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
     final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
-    final isCtrl = HardwareKeyboard.instance.isControlPressed ||
-        HardwareKeyboard.instance.isMetaPressed;
+    final isCtrl = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
+    final isShift = HardwareKeyboard.instance.isShiftPressed;
+    final key = event.logicalKey;
 
-    // Delete / Backspace → delete selected node (but NOT when a text field has focus)
-    if ((event.logicalKey == LogicalKeyboardKey.delete ||
-            event.logicalKey == LogicalKeyboardKey.backspace) &&
-        !isCtrl) {
-      // If a text input is focused, let it handle the key event
-      final primaryFocus = FocusManager.instance.primaryFocus;
-      if (primaryFocus != null) {
-        final focusContext = primaryFocus.context;
-        if (focusContext != null) {
-          // Check if the focused widget is inside an EditableText (TextField/TextFormField)
-          final editableText = focusContext.findAncestorWidgetOfExactType<EditableText>();
-          if (editableText != null) {
-            return KeyEventResult.ignored;
-          }
-        }
-      }
-      final selected = provider.selectedNode;
-      final root = provider.rootNode;
+    if (isCtrl && key == LogicalKeyboardKey.keyK) {
+      _openCommandPalette();
+      return KeyEventResult.handled;
+    }
+    if (isCtrl && key == LogicalKeyboardKey.keyS) {
+      _handleSave();
+      return KeyEventResult.handled;
+    }
+    if (_isTyping()) return KeyEventResult.ignored;
+
+    final selected = provider.selectedNode;
+    final root = provider.rootNode;
+
+    if ((key == LogicalKeyboardKey.delete || key == LogicalKeyboardKey.backspace) && !isCtrl) {
       if (selected != null && root != null && selected.id != root.id) {
-        provider.commandManager.executeAction(
-          DeleteWidgetAction(node: selected, provider: provider, root: root),
-        );
+        provider.commandManager.executeAction(DeleteWidgetAction(node: selected, provider: provider, root: root));
         return KeyEventResult.handled;
       }
     }
-
-    // Ctrl+Z → undo
-    if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyZ &&
-        !HardwareKeyboard.instance.isShiftPressed) {
+    if (isCtrl && key == LogicalKeyboardKey.keyZ && !isShift) {
       provider.commandManager.undo();
+      provider.notify();
       return KeyEventResult.handled;
     }
-
-    // Ctrl+Y or Ctrl+Shift+Z → redo
-    if (isCtrl &&
-        (event.logicalKey == LogicalKeyboardKey.keyY ||
-            (event.logicalKey == LogicalKeyboardKey.keyZ &&
-                HardwareKeyboard.instance.isShiftPressed))) {
+    if (isCtrl && (key == LogicalKeyboardKey.keyY || (key == LogicalKeyboardKey.keyZ && isShift))) {
       provider.commandManager.redo();
+      provider.notify();
       return KeyEventResult.handled;
     }
-
+    if (isCtrl && key == LogicalKeyboardKey.keyC && selected != null && selected.id != root?.id) {
+      provider.clipboard = selected.copy();
+      Clipboard.setData(ClipboardData(text: jsonEncode({'synappkitWidget': selected.toJson()})));
+      _toast('Copied ${selected.type}');
+      return KeyEventResult.handled;
+    }
+    if (isCtrl && key == LogicalKeyboardKey.keyV) {
+      _paste();
+      return KeyEventResult.handled;
+    }
+    if (isCtrl && key == LogicalKeyboardKey.keyD && selected != null && root != null && selected.id != root.id) {
+      provider.commandManager.executeAction(DuplicateWidgetAction(node: selected, provider: provider, root: root));
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.escape) {
+      if (provider.testMode) {
+        provider.setTestMode(false);
+      } else {
+        provider.selectNode(null);
+      }
+      return KeyEventResult.handled;
+    }
+    if (!isCtrl && key == LogicalKeyboardKey.keyT) {
+      _toggleTestMode();
+      return KeyEventResult.handled;
+    }
+    if (event.character == '?') {
+      showShortcutsDialog(context);
+      return KeyEventResult.handled;
+    }
     return KeyEventResult.ignored;
+  }
+
+  void _toast(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), duration: const Duration(seconds: 2)));
+  }
+
+  /// Pastes a widget copied in this or another project (via the system clipboard).
+  Future<void> _paste() async {
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+    WidgetNode? node = provider.clipboard;
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      final decoded = data?.text == null ? null : jsonDecode(data!.text!);
+      if (decoded is Map && decoded['synappkitWidget'] is Map) {
+        node = WidgetNode.fromJson(Map<String, dynamic>.from(decoded['synappkitWidget'] as Map));
+      }
+    } catch (_) {}
+    if (node == null) return;
+    final pasted = provider.pasteNode(node);
+    if (pasted != null && mounted) _toast('Pasted ${pasted.type}');
+  }
+
+  void _toggleTestMode() {
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+    provider.setTestMode(!provider.testMode);
+    if (provider.testMode && provider.selectedScreen != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) PreviewRuntime.run(context, PageLogic.onPageLoad(provider.selectedScreen!.properties));
+      });
+    }
+  }
+
+  void _openLogic([String section = 'appState']) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => ProjectLogicScreen(initialSection: section)));
+  }
+
+  void _openCommandPalette() {
+    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+    void push(Widget screen) => Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    showCommandPalette(context, [
+      EditorCommand('Save project', Icons.cloud_upload_outlined, 'Project', _handleSave, shortcut: '⌘S'),
+      EditorCommand('Export Flutter code', Icons.download_rounded, 'Project', _handleExport),
+      EditorCommand(provider.testMode ? 'Stop Test mode' : 'Start Test mode', Icons.play_arrow_rounded, 'Canvas', _toggleTestMode, shortcut: 'T'),
+      EditorCommand('Toggle dark mode preview', Icons.dark_mode_outlined, 'Canvas', () => provider.setPreviewDarkMode(!provider.previewDarkMode)),
+      EditorCommand('Storyboard', Icons.view_quilt_outlined, 'Canvas', () => showStoryboard(context)),
+      EditorCommand('Version history', Icons.history_rounded, 'Project', () => showVersionHistory(context)),
+      EditorCommand('Comments', Icons.mode_comment_outlined, 'Project', () => setState(() => _showComments = true)),
+      EditorCommand('AI builder', Icons.auto_awesome_rounded, 'Build', () => setState(() => _showAiPanel = true)),
+      EditorCommand('Theme & dark mode', Icons.palette_outlined, 'Settings', () => push(const ThemeSettingsScreen())),
+      EditorCommand('App settings', Icons.settings_outlined, 'Settings', () => push(const AppSettingsScreen())),
+      for (final (id, label, icon) in const [
+        ('appState', 'App state', Icons.public_rounded),
+        ('api', 'API calls', Icons.api_rounded),
+        ('dataTypes', 'Data types', Icons.data_object_rounded),
+        ('code', 'Custom code', Icons.code_rounded),
+        ('auth', 'Authentication', Icons.lock_outline_rounded),
+        ('i18n', 'Languages', Icons.translate_rounded),
+        ('env', 'Environments', Icons.dns_outlined),
+      ])
+        EditorCommand(label, icon, 'Logic', () => _openLogic(id)),
+      EditorCommand('Keyboard shortcuts', Icons.keyboard_outlined, 'Help', () => showShortcutsDialog(context), shortcut: '?'),
+      EditorCommand('Welcome tour', Icons.school_outlined, 'Help', () => WelcomeTour.show(context)),
+      for (final screen in provider.screens)
+        EditorCommand('Go to ${screen.properties['pageName'] ?? 'page'}', Icons.web_asset_rounded, 'Pages', () => provider.selectScreen(screen)),
+      for (final type in WidgetSidebar.paletteTypes)
+        EditorCommand('Add $type', Icons.add_box_outlined, 'Widgets', () => _handleAddWidget(context, type)),
+    ]);
   }
 
   Future<void> _handleSave() async {
     final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
     if (provider.rootNode == null) return;
-    
+    if (provider.currentProjectId == null) {
+      _toast('This draft is saved in your browser. Create a project on the dashboard to save it to the cloud.');
+      return;
+    }
+
     showDialog(
       context: context, 
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator(color: Color(0xFF38BDF8))),
+      builder: (_) => const Center(child: CircularProgressIndicator(color: EditorColors.accent)),
     );
     
     await provider.saveProjectToSupabase();
@@ -119,7 +247,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
     if (mounted) {
       Navigator.pop(context); // remove loading
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Project saved successfully to the cloud!')),
+        const SnackBar(content: Text('Saved to the cloud · version created')),
       );
     }
   }
@@ -138,7 +266,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator(color: Color(0xFF38BDF8))),
+        builder: (_) => const Center(child: CircularProgressIndicator(color: EditorColors.accent)),
       );
 
       try {
@@ -194,105 +322,58 @@ class _BuilderScreenState extends State<BuilderScreen> {
   void _handleExport() {
     final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
     if (provider.screens.isEmpty) return;
-    
-    String appName = 'My App';
-    String bundleName = 'com.example.myapp';
-    
+
+    var appName = '${provider.projectSettings['projectName'] ?? 'My App'}';
+    var bundleName = '${provider.projectSettings['bundleId'] ?? 'com.example.myapp'}';
+
     showDialog(
       context: context,
       builder: (context) {
-        return Dialog(
-          backgroundColor: const Color(0xFF0F172A),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Container(
-            width: 500,
-            padding: const EdgeInsets.all(32),
+        return AlertDialog(
+          title: const Text('Export Flutter project'),
+          content: SizedBox(
+            width: 460,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Export Project Settings',
-                      style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white54),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Configure the native application settings before downloading.',
-                  style: TextStyle(color: Colors.white54, fontSize: 14),
-                ),
-                const SizedBox(height: 32),
-                Theme(
-                  data: ThemeData.dark().copyWith(
-                    textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Inter'),
-                    inputDecorationTheme: InputDecorationTheme(
-                      filled: true,
-                      fillColor: const Color(0xFF1E293B),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF38BDF8))),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      TextField(
-                        decoration: const InputDecoration(labelText: 'App Name', labelStyle: TextStyle(color: Colors.white54)),
-                        style: const TextStyle(color: Colors.white),
-                        onChanged: (val) => appName = val,
-                        controller: TextEditingController(text: appName),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        decoration: const InputDecoration(labelText: 'Bundle ID (e.g. com.example.app)', labelStyle: TextStyle(color: Colors.white54)),
-                        style: const TextStyle(color: Colors.white),
-                        onChanged: (val) => bundleName = val,
-                        controller: TextEditingController(text: bundleName),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
-                    ),
-                    const SizedBox(width: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        final projectFiles = ProjectGenerator.generateFullProject(
-                          provider.screens, 
-                          provider.themeProperties, 
-                          provider.themedWidgets,
-                          appName: appName,
-                          connection: provider.activeConnection,
-                          queries: provider.queries,
-                        );
-                        _showProjectExportDialog(context, projectFiles, appName, bundleName);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF38BDF8),
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      child: const Text('Generate Export'),
-                    ),
-                  ],
-                ),
+                const Text('You get a complete Flutter project (Android, iOS, web) as a .zip. Settings are pre-filled from App Settings.'),
+                const SizedBox(height: 20),
+                EditorField(label: 'App name', child: EditorTextInput(value: appName, onChanged: (v) => appName = v)),
+                EditorField(label: 'Bundle ID', help: 'Reverse domain, e.g. com.company.app', child: EditorTextInput(value: bundleName, onChanged: (v) => bundleName = v)),
+                const SizedBox(height: 4),
+                Wrap(spacing: 6, runSpacing: 6, children: [
+                  _ExportChip(Icons.web_asset_rounded, '${provider.screens.length} pages'),
+                  if (provider.logic.appState.isNotEmpty) _ExportChip(Icons.public_rounded, '${provider.logic.appState.length} app state'),
+                  if (provider.logic.apiCalls.isNotEmpty) _ExportChip(Icons.api_rounded, '${provider.logic.apiCalls.length} API calls'),
+                  if (provider.activeConnection != null) const _ExportChip(Icons.bolt_rounded, 'Supabase'),
+                  if (provider.logic.usesAuth) const _ExportChip(Icons.lock_outline_rounded, 'Auth'),
+                  if (provider.logic.customCode.isNotEmpty) _ExportChip(Icons.code_rounded, '${provider.logic.customCode.length} custom code'),
+                ]),
               ],
             ),
           ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            FilledButton.icon(
+              icon: const Icon(Icons.auto_awesome_motion_rounded, size: 17),
+              label: const Text('Generate'),
+              onPressed: () {
+                Navigator.pop(context);
+                final projectFiles = ProjectGenerator.generateFullProject(
+                  provider.screens,
+                  provider.themeProperties,
+                  provider.themedWidgets,
+                  appName: appName,
+                  connection: provider.activeConnection,
+                  queries: provider.queries,
+                  logic: provider.logic,
+                  components: provider.components,
+                );
+                _showProjectExportDialog(this.context, projectFiles, appName, bundleName);
+              },
+            ),
+          ],
         );
       },
     );
@@ -305,7 +386,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => Dialog(
-          backgroundColor: const Color(0xFF0F172A),
+          backgroundColor: EditorColors.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
             width: 1000,
@@ -346,7 +427,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
                       Container(
                         width: 240,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B),
+                          color: EditorColors.surfaceRaised,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: ListView.builder(
@@ -374,7 +455,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E293B),
+                            color: EditorColors.surfaceRaised,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -436,6 +517,12 @@ class _BuilderScreenState extends State<BuilderScreen> {
                       ),
                     ],
                     const SizedBox(width: 16),
+                    OutlinedButton.icon(
+                      onPressed: () => _pushToGitHub(files, appName, bundleName),
+                      icon: const Icon(Icons.commit_rounded, size: 18),
+                      label: const Text('Push to GitHub'),
+                    ),
+                    const SizedBox(width: 16),
                     ElevatedButton.icon(
                       onPressed: () => _downloadProjectAsZip(files, appName, bundleName),
                       icon: const Icon(Icons.folder_zip, size: 18),
@@ -457,69 +544,95 @@ class _BuilderScreenState extends State<BuilderScreen> {
     );
   }
 
+  /// Commits the full export to a GitHub branch with a personal access token.
+  Future<void> _pushToGitHub(Map<String, String> files, String appName, String bundleName) async {
+    final saved = WebBridge.read('synappkit_github') ?? '';
+    final parts = saved.split('|');
+    var repoText = parts.isNotEmpty && parts.first.isNotEmpty ? parts.first : 'owner/repository';
+    var branch = parts.length > 1 ? parts[1] : 'synappkit';
+    var token = '';
+    var remember = parts.length > 2 && parts[2] == '1';
+    if (remember) token = WebBridge.read('synappkit_github_token') ?? '';
+
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (c) => StatefulBuilder(
+        builder: (c, setLocal) => AlertDialog(
+          title: const Text('Push to GitHub'),
+          content: SizedBox(
+            width: 440,
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              const Text('Commits the complete Flutter project to a branch. Use a fine-grained token with “Contents: Read and write” on that repository.'),
+              const SizedBox(height: 16),
+              EditorField(label: 'Repository (owner/name)', child: EditorTextInput(value: repoText, onChanged: (v) => repoText = v.trim())),
+              EditorField(label: 'Branch', help: 'Created from the default branch if it does not exist.', child: EditorTextInput(value: branch, onChanged: (v) => branch = v.trim())),
+              EditorField(label: 'Personal access token', child: EditorTextInput(value: token, obscure: true, onChanged: (v) => token = v.trim())),
+              Row(children: [
+                Checkbox(value: remember, onChanged: (v) => setLocal(() => remember = v ?? false)),
+                const Expanded(child: Text('Remember the token in this browser', style: TextStyle(fontSize: 12.5))),
+              ]),
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
+            FilledButton.icon(onPressed: () => Navigator.pop(c, true), icon: const Icon(Icons.commit_rounded, size: 17), label: const Text('Push')),
+          ],
+        ),
+      ),
+    );
+    if (go != true || !mounted) return;
+    final ownerRepo = repoText.split('/');
+    if (ownerRepo.length != 2 || token.isEmpty || branch.isEmpty) {
+      _toast('Enter owner/name, a branch and a token.');
+      return;
+    }
+    WebBridge.write('synappkit_github', '$repoText|$branch|${remember ? 1 : 0}');
+    remember ? WebBridge.write('synappkit_github_token', token) : WebBridge.remove('synappkit_github_token');
+
+    final status = ValueNotifier<String>('Preparing files…');
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        content: Row(children: [
+          const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5)),
+          const SizedBox(width: 16),
+          Expanded(child: ValueListenableBuilder<String>(valueListenable: status, builder: (_, v, __) => Text(v))),
+        ]),
+      ),
+    );
+    try {
+      final bundle = await ExportBundle.build(files, appName, bundleName);
+      final url = await GitHubExporter(token: token, owner: ownerRepo[0], repo: ownerRepo[1]).push(
+        bundle,
+        branch: branch,
+        message: 'Update from SynappKit (${DateTime.now().toLocal().toString().substring(0, 16)})',
+        onProgress: (m) => status.value = m,
+      );
+      if (mounted) Navigator.pop(context);
+      if (mounted) {
+        await showDialog<void>(
+          context: context,
+          builder: (c) => AlertDialog(
+            title: const Text('Pushed to GitHub'),
+            content: SelectableText(url),
+            actions: [TextButton(onPressed: () => Navigator.pop(c), child: const Text('Done'))],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) Navigator.pop(context);
+      if (mounted) _toast('$e');
+    }
+  }
+
   Future<void> _downloadProjectAsZip(Map<String, String> files, String appName, String bundleName) async {
     try {
-      final baseBytes = await rootBundle.load('assets/base_template.zip');
-      final baseArchive = ZipDecoder().decodeBytes(baseBytes.buffer.asUint8List());
-
-      final archive = Archive();
-      final safeAppName = appName.toLowerCase().replaceAll(' ', '_');
-
-      // Copy all base template files, EXCEPT strictly generated paths
-      for (final file in baseArchive) {
-        if (file.isFile) {
-          if (!file.name.startsWith('lib/') && 
-              file.name != 'pubspec.yaml' && 
-              !file.name.startsWith('test/') && 
-              file.name != 'README.md' &&
-              file.name != 'analysis_options.yaml' &&
-              file.name != '.gitignore') {
-            
-            String contentPath = file.name
-                .replaceAll('com/example/base_template', bundleName.replaceAll('.', '/'))
-                .replaceAll('base_template', safeAppName);
-            
-            final ext = file.name.split('.').last;
-            final isText = ['xml', 'kt', 'java', 'gradle', 'kts', 'swift', 'pbxproj', 'plist', 'h', 'm', 'sh', 'xcconfig', 'json', 'md', 'yaml'].contains(ext);
-            
-            List<int> outBytes = file.content as List<int>;
-            if (isText) {
-                try {
-                    String contentStr = utf8.decode(outBytes);
-                    contentStr = contentStr.replaceAll('com.example.base_template', bundleName);
-                    contentStr = contentStr.replaceAll('base_template', safeAppName);
-                    // User-facing name fixes:
-                    contentStr = contentStr.replaceAll('android:label="\$safeAppName"', 'android:label="\$appName"');
-                    contentStr = contentStr.replaceAll('<string>\$safeAppName</string>', '<string>\$appName</string>');
-                    
-                    outBytes = utf8.encode(contentStr);
-                } catch(e) {
-                   // Ignore non-utf8 un-decodable files
-                }
-            }
-            
-            archive.addFile(ArchiveFile(contentPath, outBytes.length, outBytes));
-          }
-        }
-      }
-
-      // Add our dynamically generated flutter project code
-      files.forEach((filePath, content) {
-        final bytes = utf8.encode(content);
-        archive.addFile(ArchiveFile(filePath, bytes.length, bytes));
-      });
-
-      final encoder = ZipEncoder();
-      final zipData = encoder.encode(archive);
+      final zipData = ExportBundle.zip(await ExportBundle.build(files, appName, bundleName));
 
       if (zipData != null) {
         if (kIsWeb) {
-          final blob = html.Blob([zipData]);
-          final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor = html.AnchorElement(href: url)
-            ..setAttribute('download', 'flutter_project.zip')
-            ..click();
-          html.Url.revokeObjectUrl(url);
+          WebBridge.downloadBytes(zipData, 'flutter_project.zip');
         } else {
           String? outputFile = await FilePicker.platform.saveFile(
             dialogTitle: 'Save Project Zip',
@@ -546,12 +659,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
   void _downloadFile(String fileName, String content) {
     if (kIsWeb) {
       final bytes = utf8.encode(content);
-      final blob = html.Blob([bytes]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement(href: url)
-        ..setAttribute('download', fileName)
-        ..click();
-      html.Url.revokeObjectUrl(url);
+      WebBridge.downloadBytes(bytes, fileName);
     }
   }
 
@@ -586,7 +694,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Unsaved Changes', style: TextStyle(color: Colors.white)),
-            backgroundColor: const Color(0xFF0B1D3A),
+            backgroundColor: EditorColors.surfaceHover,
             content: const Text(
               'You have unsaved changes. Do you want to save before leaving?',
               style: TextStyle(color: Colors.white70),
@@ -608,7 +716,7 @@ class _BuilderScreenState extends State<BuilderScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF38BDF8),
+                  backgroundColor: EditorColors.accent,
                   foregroundColor: Colors.black,
                 ),
                 child: const Text('Save & Exit'),
@@ -623,238 +731,141 @@ class _BuilderScreenState extends State<BuilderScreen> {
         autofocus: true,
         onKeyEvent: _handleKeyEvent,
         child: Scaffold(
+        backgroundColor: EditorColors.background,
         appBar: TopNavBar(
-        onSave: _handleSave,
-        onExport: _handleExport,
-        onSubmitMarketplace: _handleSubmitMarketplace,
-        onAiBuilder: () {
-          final willShow = !_showAiPanel;
-          setState(() {
-            _showAiPanel = willShow;
-          });
-          if (willShow) {
-            Provider.of<WidgetTreeProvider>(context, listen: false).selectNode(null);
-          }
-        },
-        onPreview: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ProjectPreviewScreen()),
-          );
-        },
-        onNew: () => _showNewDesignDialog(context),
-        onLoad: _handleLoad,
-        onUndo: () => Provider.of<WidgetTreeProvider>(context, listen: false).commandManager.undo(),
-        onRedo: () => Provider.of<WidgetTreeProvider>(context, listen: false).commandManager.redo(),
-        onTemplate: () => _showTemplateSelector(context),
-        onTheme: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ThemeSettingsScreen()),
-          );
-        },
-        onSettings: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AppSettingsScreen()),
-          );
-        },
-      ),
-      body: Row(
-        children: [
-          // Sidebar
-          Theme(
-            data: ThemeData.dark().copyWith(
-              canvasColor: const Color(0xFF0F172A),
-              cardColor: const Color(0xFF1E293B),
-            ),
-            child: SizedBox(
+          onSave: _handleSave,
+          onExport: _handleExport,
+          onSubmitMarketplace: _handleSubmitMarketplace,
+          aiActive: _showAiPanel,
+          commentsActive: _showComments,
+          onAiBuilder: () {
+            final willShow = !_showAiPanel;
+            setState(() => _showAiPanel = willShow);
+            if (willShow) Provider.of<WidgetTreeProvider>(context, listen: false).selectNode(null);
+          },
+          onPreview: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProjectPreviewScreen())),
+          onNew: () => _showNewDesignDialog(context),
+          onLoad: _handleLoad,
+          onUndo: () {
+            final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+            provider.commandManager.undo();
+            provider.notify();
+          },
+          onRedo: () {
+            final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+            provider.commandManager.redo();
+            provider.notify();
+          },
+          onTemplate: () => _showTemplateSelector(context),
+          onTheme: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ThemeSettingsScreen())),
+          onSettings: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AppSettingsScreen())),
+          onLogic: () => _openLogic(),
+          onCommandPalette: _openCommandPalette,
+          onVersionHistory: () => showVersionHistory(context),
+          onComments: () => setState(() => _showComments = !_showComments),
+          onStoryboard: () => showStoryboard(context),
+          onShortcuts: () => showShortcutsDialog(context),
+        ),
+        body: Row(
+          children: [
+            SizedBox(
               width: _sidebarWidth,
               child: WidgetSidebar(
                 selectedTab: _selectedSidebarTab,
-                onTabSelected: (index) {
-                  setState(() {
-                    _selectedSidebarTab = index;
-                  });
-                },
+                onTabSelected: (index) => setState(() => _selectedSidebarTab = index),
               ),
             ),
-          ),
-          // Resize Divider
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onHorizontalDragUpdate: (details) {
-              setState(() {
-                _sidebarWidth += details.delta.dx;
-                if (_sidebarWidth < 200) _sidebarWidth = 200;
-                if (_sidebarWidth > 500) _sidebarWidth = 500;
-              });
-            },
-            child: MouseRegion(
-              cursor: SystemMouseCursors.resizeLeftRight,
-              child: Container(
-                width: 4,
-                color: Colors.transparent,
-                child: Center(
-                  child: Container(
-                    width: 1,
-                    color: Colors.white.withValues(alpha: 0.1),
-                  ),
-                ),
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onHorizontalDragUpdate: (details) {
+                setState(() => _sidebarWidth = (_sidebarWidth + details.delta.dx).clamp(240.0, 480.0));
+              },
+              child: const MouseRegion(
+                cursor: SystemMouseCursors.resizeLeftRight,
+                child: SizedBox(width: 5, child: Center(child: VerticalDivider(width: 1))),
               ),
             ),
-          ),
-          // Canvas Preview (Center)
-          Expanded(
-            child: Consumer<WidgetTreeProvider>(
-              builder: (context, provider, child) {
-                if (provider.rootNode == null) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    provider.setRootNode(
-                      WidgetNode(
-                        type: 'Scaffold',
-                        properties: {
-                          'appBar': WidgetNode(
-                            type: 'AppBar',
-                            properties: {
-                              'title': WidgetNode(
-                                type: 'Text',
-                                properties: {'text': 'App Bar'},
-                              ),
-                              'backgroundColor': Colors.blue.value.toString(),
-                            },
-                          ),
-                          'backgroundColor': Colors.white.value.toString(),
-                        },
-                        children: [
-                          WidgetNode(
-                            type: 'SingleChildScrollView',
-                            children: [
-                              WidgetNode(
-                                type: 'Column',
+            Expanded(
+              child: Consumer<WidgetTreeProvider>(
+                builder: (context, provider, child) {
+                  if (provider.rootNode == null) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      provider.setRootNode(
+                        WidgetNode(
+                          type: 'Scaffold',
+                          properties: {
+                            'pageName': 'Home',
+                            'appBar': WidgetNode(type: 'AppBar', properties: {
+                              'title': WidgetNode(type: 'Text', properties: {'text': 'Home'}),
+                            }),
+                          },
+                          children: [
+                            WidgetNode(type: 'SingleChildScrollView', children: [
+                              WidgetNode(type: 'Column', children: [
+                                WidgetNode(type: 'Text', properties: {'text': 'Hello, World!'}),
+                              ]),
+                            ]),
+                          ],
+                        ),
+                      );
+                    });
+                    return const SizedBox.shrink();
+                  }
+                  return Stack(
+                    children: [
+                      const CanvasPreview(),
+                      if (provider.isAiGenerating)
+                        Positioned.fill(
+                          child: Container(
+                            color: EditorColors.background.withValues(alpha: 0.82),
+                            child: const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  WidgetNode(type: 'Text', properties: {'text': 'Hello, World!'}),
+                                  SizedBox(width: 44, height: 44, child: CircularProgressIndicator(color: EditorColors.violet, strokeWidth: 3)),
+                                  SizedBox(height: 24),
+                                  Text('AI is building your UI…', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                                  SizedBox(height: 6),
+                                  Text('This usually takes 10–30 seconds.', style: TextStyle(fontSize: 13, color: EditorColors.textMuted)),
                                 ],
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  });
-                  return const SizedBox.shrink();
-                }
-                return Stack(
-                  children: [
-                    const CanvasPreview(),
-                    if (provider.isAiGenerating)
-                      Positioned.fill(
-                        child: Container(
-                          color: const Color(0xFF0F172A).withValues(alpha: 0.8),
-                          child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Glow effect around the loader
-                                Container(
-                                  padding: const EdgeInsets.all(24),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF1E293B).withValues(alpha: 0.8),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFF38BDF8).withValues(alpha: 0.3),
-                                        blurRadius: 40,
-                                        spreadRadius: 10,
-                                      ),
-                                    ],
-                                  ),
-                                  child: const CircularProgressIndicator(
-                                    color: Color(0xFF38BDF8),
-                                    strokeWidth: 3,
-                                  ),
-                                ),
-                                const SizedBox(height: 32),
-                                const Text(
-                                  'AI is generating your UI...',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'This may take 10-30 seconds depending on complexity.',
-                                  style: TextStyle(
-                                    color: Colors.white54,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  );
+                },
+              ),
+            ),
+            Consumer<WidgetTreeProvider>(
+              builder: (context, provider, child) {
+                if (provider.selectedNode == null || provider.testMode) return const SizedBox.shrink();
+                return Container(
+                  width: 330,
+                  decoration: const BoxDecoration(
+                    color: EditorColors.surface,
+                    border: Border(left: BorderSide(color: EditorColors.border)),
+                  ),
+                  child: PropertiesPanel(),
                 );
               },
             ),
-          ),
-          // Properties Panel (Right Panel) - Only show when a widget is selected
-          Consumer<WidgetTreeProvider>(
-            builder: (context, provider, child) {
-              if (provider.selectedNode == null) {
-                return const SizedBox.shrink();
-              }
-              return Theme(
-                data: ThemeData.dark().copyWith(
-                  textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Inter'),
-                  canvasColor: const Color(0xFF0F172A),
-                  cardColor: const Color(0xFF1E293B),
-                ),
-                child: Container(
-                  width: 300,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A), // Match sidebar
-                    border: Border(left: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
-                  ),
-                  child: PropertiesPanel(),
-                ),
-              );
-            },
-          ),
-          // AI Panel (Far Right)
-          if (_showAiPanel)
-            AiPanel(
-              onClose: () {
-                setState(() {
-                  _showAiPanel = false;
-                });
-              },
-            ),
-        ],
+            if (_showComments) CommentsPanel(onClose: () => setState(() => _showComments = false)),
+            if (_showAiPanel)
+              AiPanel(
+                onClose: () => setState(() => _showAiPanel = false),
+              ),
+          ],
+        ),
       ),
-    ),  // closes Scaffold
-      ));  // closes Focus & WillPopScope
+      ));
   }
 
 
   void _handleAddWidget(BuildContext context, String type) {
     final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
-    
-    WidgetNode newNode;
-    if (type.startsWith('ThemedWidget:')) {
-      final themedId = type.substring('ThemedWidget:'.length);
-      newNode = WidgetNode(
-        type: 'ThemedWidget',
-        properties: {'themedWidgetId': themedId},
-      );
-    } else {
-      newNode = WidgetTreeEditor.createWidgetNodeWithDefaults(type);
-    }
-    
+    final newNode = WidgetTreeEditor.createFromPaletteType(type);
+
     if (provider.selectedNode != null) {
       provider.addChild(provider.selectedNode!, newNode);
     } else if (provider.rootNode == null) {
@@ -940,7 +951,7 @@ class MyGeneratedWidget extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B), // Slate 800
+                    color: EditorColors.surfaceRaised, // Slate 800
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: SingleChildScrollView(
@@ -973,12 +984,7 @@ class MyGeneratedWidget extends StatelessWidget {
             TextButton.icon(
               onPressed: () {
                 final bytes = utf8.encode(code);
-                final blob = html.Blob([bytes]);
-                final url = html.Url.createObjectUrlFromBlob(blob);
-                final anchor = html.AnchorElement(href: url)
-                  ..setAttribute('download', 'main.dart')
-                  ..click();
-                html.Url.revokeObjectUrl(url);
+                WebBridge.downloadBytes(bytes, 'main.dart');
               },
               icon: const Icon(Icons.download, size: 18),
               label: const Text('Download .dart'),
@@ -1012,9 +1018,9 @@ class MyGeneratedWidget extends StatelessWidget {
             width: 700,
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
+              color: EditorColors.surface,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF1E293B), width: 2),
+              border: Border.all(color: EditorColors.surfaceRaised, width: 2),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.5),
@@ -1125,7 +1131,7 @@ class MyGeneratedWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: EditorColors.surfaceRaised,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color.withOpacity(0.3), width: 1.5),
         ),

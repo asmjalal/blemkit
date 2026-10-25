@@ -1,502 +1,552 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../logic/logic_values.dart';
+import '../../models/project_logic.dart';
 import '../../models/widget_node.dart';
 import '../../providers/widget_tree_provider.dart';
-import '../../models/supabase_connection_model.dart';
+import '../../ui/editor_theme.dart';
+import '../../ui/editor_widgets.dart';
+import '../logic/value_picker.dart';
 
+/// Edits the action lists attached to a widget (tap, long press, double tap,
+/// change, submit) or to a page (on page load).
 class ActionFlowEditor extends StatefulWidget {
   final WidgetNode node;
 
   const ActionFlowEditor({super.key, required this.node});
+
+  /// Triggers available for [node].
+  static List<String> triggersFor(WidgetNode node, {required bool isPageRoot}) {
+    if (isPageRoot) return const ['onPageLoad'];
+    const inputs = {'TextField', 'Checkbox', 'Switch', 'Slider', 'DropdownButton', 'DropDown', 'RatingBar', 'PinCode', 'CounterButton', 'ChoiceChips', 'CheckboxGroup', 'RadioGroup', 'PlacePicker'};
+    return [
+      if (inputs.contains(node.type)) 'onChanged',
+      if (node.type == 'TextField') 'onSubmitted',
+      if (!inputs.contains(node.type) || node.type == 'Checkbox' || node.type == 'Switch') ...ActionCatalog.triggers,
+    ];
+  }
 
   @override
   State<ActionFlowEditor> createState() => _ActionFlowEditorState();
 }
 
 class _ActionFlowEditorState extends State<ActionFlowEditor> {
-  late List<Map<String, dynamic>> _actions;
+  String? _trigger;
 
   @override
-  void initState() {
-    super.initState();
-    _loadActions();
-  }
+  Widget build(BuildContext context) {
+    final provider = Provider.of<WidgetTreeProvider>(context);
+    final isPageRoot = provider.screens.any((s) => s.id == widget.node.id);
+    final triggers = ActionFlowEditor.triggersFor(widget.node, isPageRoot: isPageRoot);
+    final trigger = triggers.contains(_trigger) ? _trigger! : triggers.first;
+    final actions = (widget.node.properties[trigger] as List? ?? const [])
+        .whereType<Map>()
+        .map((a) => Map<String, dynamic>.from(a))
+        .toList();
 
-  @override
-  void didUpdateWidget(covariant ActionFlowEditor oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.node != widget.node) {
-      _loadActions();
-    }
-  }
-
-  void _loadActions() {
-    final actionsProp = widget.node.properties['actions'];
-    if (actionsProp is List) {
-      _actions = List<Map<String, dynamic>>.from(actionsProp.map((e) => Map<String, dynamic>.from(e)));
-    } else {
-      _actions = [];
-    }
-  }
-
-  void _saveActions() {
-    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
-    if (_actions.isEmpty) {
-      widget.node.properties.remove('actions');
-    } else {
-      widget.node.properties['actions'] = _actions;
-    }
-    provider.notify();
-  }
-
-  void _addNewAction() {
-    setState(() {
-      _actions.add({
-        'type': 'navigate', // default type
-      });
-    });
-    _saveActions();
-    _editAction(_actions.length - 1);
-  }
-
-  void _deleteAction(int index) {
-    setState(() {
-      _actions.removeAt(index);
-    });
-    _saveActions();
-  }
-
-  void _editAction(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => ActionConfigDialog(
-        action: _actions[index],
-        onSave: (updatedAction) {
-          setState(() {
-            _actions[index] = updatedAction;
-          });
-          _saveActions();
-        },
-      ),
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(4, 4, 4, 24),
+      children: [
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: triggers.map((t) {
+            final count = (widget.node.properties[t] as List?)?.length ?? 0;
+            return EditorPill(
+              label: '${ActionCatalog.triggerLabels[t] ?? t}${count > 0 ? '  $count' : ''}',
+              selected: t == trigger,
+              onTap: () => setState(() => _trigger = t),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 12),
+        if (actions.isEmpty)
+          EditorEmptyState(
+            icon: Icons.bolt_rounded,
+            title: 'No actions yet',
+            message: isPageRoot
+                ? 'Run actions when this page opens: load data, set state, redirect…'
+                : 'Add what should happen ${ActionCatalog.triggerLabels[trigger]?.toLowerCase() ?? ''}. Try them in Test mode.',
+          ),
+        ActionListEditor(
+          actions: actions,
+          onChanged: (next) => provider.setNodeProperty(widget.node, trigger, next),
+        ),
+      ],
     );
   }
+}
+
+/// An ordered list of actions; recursive for branches.
+class ActionListEditor extends StatelessWidget {
+  final List<Map<String, dynamic>> actions;
+  final ValueChanged<List<Map<String, dynamic>>> onChanged;
+  final int depth;
+
+  const ActionListEditor({super.key, required this.actions, required this.onChanged, this.depth = 0});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: ReorderableListView.builder(
-            itemCount: _actions.length,
-            onReorder: (oldIndex, newIndex) {
-              setState(() {
-                if (newIndex > oldIndex) {
-                  newIndex -= 1;
-                }
-                final item = _actions.removeAt(oldIndex);
-                _actions.insert(newIndex, item);
-              });
-              _saveActions();
-            },
-            itemBuilder: (context, index) {
-              final action = _actions[index];
-              return Card(
-                key: ValueKey(action.hashCode.toString() + index.toString()),
-                color: const Color(0xFF1E293B),
-                margin: const EdgeInsets.only(bottom: 8),
-                child: ListTile(
-                  dense: true,
-                  leading: CircleAvatar(
-                    radius: 12,
-                    backgroundColor: Colors.indigo.shade400,
-                    child: Text('${index + 1}', style: const TextStyle(fontSize: 12, color: Colors.white)),
-                  ),
-                  title: Text(
-                    _getActionTitle(action),
-                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    _getActionSubtitle(action),
-                    style: const TextStyle(color: Colors.white54, fontSize: 11),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, size: 16, color: Colors.white70),
-                        onPressed: () => _editAction(index),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, size: 16, color: Colors.redAccent),
-                        onPressed: () => _deleteAction(index),
-                      ),
-                      const Icon(Icons.drag_handle, size: 16, color: Colors.white30),
-                    ],
-                  ),
-                ),
-              );
-            },
+        for (var i = 0; i < actions.length; i++)
+          _ActionCard(
+            key: ValueKey('$depth-$i-${actions[i]['type']}'),
+            index: i,
+            action: actions[i],
+            depth: depth,
+            onChanged: (a) => onChanged([...actions]..[i] = a),
+            onDelete: () => onChanged([...actions]..removeAt(i)),
+            onMoveUp: i == 0 ? null : () => onChanged([...actions]..removeAt(i)..insert(i - 1, actions[i])),
+            onMoveDown: i == actions.length - 1 ? null : () => onChanged([...actions]..removeAt(i)..insert(i + 1, actions[i])),
           ),
-        ),
-        const SizedBox(height: 12),
-        ElevatedButton.icon(
-          onPressed: _addNewAction,
-          icon: const Icon(Icons.add, size: 18),
-          label: const Text('Add Action'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.indigo.shade600,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            icon: const Icon(Icons.add_circle_outline_rounded, size: 16),
+            label: Text(depth == 0 ? 'Add action' : 'Add'),
+            onPressed: () async {
+              final type = await showActionPicker(context);
+              if (type != null) onChanged([...actions, _newAction(type)]);
+            },
           ),
         ),
       ],
     );
   }
 
-  String _getActionTitle(Map<String, dynamic> action) {
-    switch (action['type']) {
-      case 'navigate': return 'Navigation';
-      case 'supabase_insert': return 'Supabase: Insert Row';
-      case 'supabase_update': return 'Supabase: Update Row';
-      case 'supabase_delete': return 'Supabase: Delete Row';
-      default: return 'Unknown Action';
+  static Map<String, dynamic> _newAction(String type) {
+    switch (type) {
+      case 'updateAppState':
+      case 'updatePageState':
+        return {'type': type, 'op': 'set'};
+      case 'showSnackbar':
+        return {'type': type, 'message': LogicValues.literal('Saved!')};
+      case 'showDialog':
+      case 'confirmDialog':
+        return {'type': type, 'title': LogicValues.literal('Are you sure?'), 'message': LogicValues.literal('')};
+      case 'haptic':
+        return {'type': type, 'style': 'light'};
+      case 'wait':
+        return {'type': type, 'ms': 500};
+      case 'conditional':
+        return {'type': type, 'condition': {'op': '=='}, 'then': [], 'else': []};
     }
-  }
-
-  String _getActionSubtitle(Map<String, dynamic> action) {
-    switch (action['type']) {
-      case 'navigate': 
-        if (action['targetScreenId'] == '__back__') return 'Go Back (Pop)';
-        return 'To: ${action['targetScreenName'] ?? 'Unspecified'}';
-      case 'supabase_insert':
-      case 'supabase_update':
-      case 'supabase_delete':
-        return 'Table: ${action['tableName'] ?? 'Unspecified'}';
-      default: return '';
-    }
+    return {'type': type};
   }
 }
 
-class ActionConfigDialog extends StatefulWidget {
-  final Map<String, dynamic> action;
-  final Function(Map<String, dynamic>) onSave;
+const Map<String, IconData> _categoryIcons = {
+  'Navigation': Icons.alt_route_rounded,
+  'State': Icons.data_object_rounded,
+  'Feedback': Icons.chat_bubble_outline_rounded,
+  'Logic': Icons.account_tree_outlined,
+  'Utilities': Icons.handyman_outlined,
+  'Backend': Icons.cloud_outlined,
+  'Authentication': Icons.lock_outline_rounded,
+};
 
-  const ActionConfigDialog({super.key, required this.action, required this.onSave});
-
-  @override
-  State<ActionConfigDialog> createState() => _ActionConfigDialogState();
+IconData actionIcon(String? type) {
+  switch (type) {
+    case 'navigate':
+      return Icons.arrow_forward_rounded;
+    case 'navigateBack':
+      return Icons.arrow_back_rounded;
+    case 'openDrawer':
+      return Icons.menu_open_rounded;
+    case 'conditional':
+      return Icons.call_split_rounded;
+    case 'wait':
+      return Icons.timer_outlined;
+    case 'terminate':
+      return Icons.stop_circle_outlined;
+    case 'apiCall':
+      return Icons.api_rounded;
+    case 'launchUrl':
+      return Icons.open_in_new_rounded;
+    case 'copyToClipboard':
+      return Icons.copy_rounded;
+    case 'share':
+      return Icons.ios_share_rounded;
+    case 'haptic':
+      return Icons.vibration_rounded;
+    case 'toggleThemeMode':
+      return Icons.dark_mode_outlined;
+    case 'setLanguage':
+      return Icons.translate_rounded;
+    case 'customAction':
+      return Icons.code_rounded;
+  }
+  final category = ActionCatalog.spec(type)?.category;
+  return _categoryIcons[category] ?? Icons.bolt_rounded;
 }
 
-class _ActionConfigDialogState extends State<ActionConfigDialog> {
-  late Map<String, dynamic> _currentAction;
-  List<SupabaseTable> _availableTables = [];
-  List<WidgetNode> _availableScreens = [];
+/// Searchable list of action types; returns the chosen type.
+Future<String?> showActionPicker(BuildContext context) {
+  return showDialog<String>(
+    context: context,
+    builder: (context) => const _ActionPickerDialog(),
+  );
+}
+
+class _ActionPickerDialog extends StatefulWidget {
+  const _ActionPickerDialog();
 
   @override
-  void initState() {
-    super.initState();
-    _currentAction = Map<String, dynamic>.from(widget.action);
-    if (_currentAction['payload'] == null) {
-      _currentAction['payload'] = <String, dynamic>{};
-    }
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
-      setState(() {
-        _availableScreens = provider.screens;
-        if (provider.activeConnection != null) {
-          _availableTables = provider.activeConnection!.tables;
-        }
-      });
-    });
-  }
+  State<_ActionPickerDialog> createState() => _ActionPickerDialogState();
+}
+
+class _ActionPickerDialogState extends State<_ActionPickerDialog> {
+  String _query = '';
 
   @override
   Widget build(BuildContext context) {
+    final matches = ActionCatalog.all.where((a) => _query.isEmpty || a.label.toLowerCase().contains(_query.toLowerCase())).toList();
     return Dialog(
-      backgroundColor: const Color(0xFF1E293B),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        width: 500,
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520, maxHeight: 600),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Configure Action', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 20),
-              
-              DropdownButtonFormField<String>(
-                value: _currentAction['type'],
-                dropdownColor: const Color(0xFF0F172A),
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: const InputDecoration(
-                  labelText: 'Action Type',
-                  labelStyle: TextStyle(color: Colors.white54),
-                  filled: true,
-                  fillColor: Color(0xFF0F172A),
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'navigate', child: Text('Navigation')),
-                  DropdownMenuItem(value: 'supabase_insert', child: Text('Supabase: Insert Row')),
-                  DropdownMenuItem(value: 'supabase_update', child: Text('Supabase: Update Row')),
-                  DropdownMenuItem(value: 'supabase_delete', child: Text('Supabase: Delete Row')),
-                ],
-                onChanged: (val) {
-                  setState(() {
-                    _currentAction['type'] = val;
-                  });
-                },
+              const Text('Add action', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 12),
+              TextField(
+                autofocus: true,
+                decoration: const InputDecoration(hintText: 'Search actions', prefixIcon: Icon(Icons.search_rounded, size: 18)),
+                onChanged: (v) => setState(() => _query = v),
               ),
-              const SizedBox(height: 20),
-              
-              _buildTypeSpecificConfig(),
-              
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: () {
-                      widget.onSave(_currentAction);
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo.shade500),
-                    child: const Text('Save Action', style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-              )
+              const SizedBox(height: 12),
+              Expanded(
+                child: ListView(
+                  children: [
+                    for (final category in ActionCatalog.categories)
+                      if (matches.any((a) => a.category == category)) ...[
+                        EditorLabel(category),
+                        for (final spec in matches.where((a) => a.category == category))
+                          EditorListTile(
+                            icon: actionIcon(spec.type),
+                            title: spec.label,
+                            onTap: () => Navigator.pop(context, spec.type),
+                          ),
+                        const SizedBox(height: 6),
+                      ],
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  List<WidgetNode> _findInputNodes(WidgetNode root) {
-    final nodes = <WidgetNode>[];
-    if (root.type == 'TextField' || root.type == 'TextFormField') {
-      nodes.add(root);
-    }
-    for (final child in root.children) {
-      nodes.addAll(_findInputNodes(child));
-    }
-    return nodes;
+class _ActionCard extends StatefulWidget {
+  final int index;
+  final Map<String, dynamic> action;
+  final int depth;
+  final ValueChanged<Map<String, dynamic>> onChanged;
+  final VoidCallback onDelete;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
+
+  const _ActionCard({
+    super.key,
+    required this.index,
+    required this.action,
+    required this.depth,
+    required this.onChanged,
+    required this.onDelete,
+    this.onMoveUp,
+    this.onMoveDown,
+  });
+
+  @override
+  State<_ActionCard> createState() => _ActionCardState();
+}
+
+class _ActionCardState extends State<_ActionCard> {
+  bool _expanded = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<WidgetTreeProvider>(context);
+    final action = widget.action;
+    final spec = ActionCatalog.spec(action['type'] as String?);
+    final summary = _summary(provider, action);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: EditorColors.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _expanded ? EditorColors.borderStrong : EditorColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 4, 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(color: EditorColors.accentSoft, borderRadius: BorderRadius.circular(7)),
+                    child: Icon(actionIcon(action['type'] as String?), size: 15, color: EditorColors.accent),
+                  ),
+                  const SizedBox(width: 9),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(spec?.label ?? '${action['type']}', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
+                        if (summary.isNotEmpty)
+                          Text(summary, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11.5, color: EditorColors.textFaint)),
+                      ],
+                    ),
+                  ),
+                  EditorIconButton(icon: Icons.arrow_upward_rounded, tooltip: 'Move up', size: 14, onPressed: widget.onMoveUp),
+                  EditorIconButton(icon: Icons.arrow_downward_rounded, tooltip: 'Move down', size: 14, onPressed: widget.onMoveDown),
+                  EditorIconButton(icon: Icons.delete_outline_rounded, tooltip: 'Delete action', size: 15, onPressed: widget.onDelete),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded && spec != null && (spec.params.isNotEmpty || action['type'] == 'navigate'))
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [for (final param in spec.params) ..._paramEditor(context, provider, param)],
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
-  Widget _buildTypeSpecificConfig() {
-    final type = _currentAction['type'];
-    
-    if (type == 'navigate') {
-      return DropdownButtonFormField<String>(
-        value: _currentAction['targetScreenId'],
-        dropdownColor: const Color(0xFF0F172A),
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        decoration: const InputDecoration(
-          labelText: 'Target Screen',
-          labelStyle: TextStyle(color: Colors.white54),
-          filled: true,
-          fillColor: Color(0xFF0F172A),
-          border: OutlineInputBorder(),
-        ),
-        items: [
-          const DropdownMenuItem<String>(
-            value: '__back__',
-            child: Text('← Go Back (Pop)', style: TextStyle(color: Colors.orangeAccent)),
+  void _set(String key, dynamic value) => widget.onChanged({...widget.action, key: value});
+
+  List<Widget> _paramEditor(BuildContext context, WidgetTreeProvider provider, ActionParamSpec param) {
+    final a = widget.action;
+    switch (param.kind) {
+      case ActionParamKind.value:
+        return [EditorField(label: param.label, child: ValuePicker(value: a[param.key], onChanged: (v) => _set(param.key, v)))];
+      case ActionParamKind.text:
+        if (a['type'] == 'callParameterAction') {
+          final callbacks = PageLogic.pageParams(provider.selectedScreen?.properties ?? const {}).where((p) => p.type == VarTypes.action).map((p) => p.name).toList();
+          return [_namePicker(param, callbacks, 'Add an Action parameter to this component first (Logic tab of the component).')];
+        }
+        return [EditorField(label: param.label, child: EditorTextInput(value: '${a[param.key] ?? ''}', onChanged: (v) => _set(param.key, v)))];
+      case ActionParamKind.number:
+        return [
+          EditorField(
+            label: param.label,
+            child: EditorTextInput(value: '${a[param.key] ?? ''}', keyboardType: TextInputType.number, onChanged: (v) => _set(param.key, int.tryParse(v))),
+          )
+        ];
+      case ActionParamKind.choice:
+        return [
+          EditorField(
+            label: param.label,
+            child: Wrap(spacing: 6, runSpacing: 6, children: [
+              for (final c in param.choices) EditorPill(label: c, selected: (a[param.key] ?? param.choices.first) == c, onTap: () => _set(param.key, c)),
+            ]),
+          )
+        ];
+      case ActionParamKind.stateOp:
+        return [
+          EditorField(
+            label: param.label,
+            child: Wrap(spacing: 6, runSpacing: 6, children: [
+              for (final op in ActionCatalog.stateOps) EditorPill(label: op, selected: (a['op'] ?? 'set') == op, onTap: () => _set('op', op)),
+            ]),
+          )
+        ];
+      case ActionParamKind.appStateVar:
+        return [_namePicker(param, provider.logic.appState.map((f) => f.name).toList(), 'Define app state in Logic › App State.')];
+      case ActionParamKind.pageStateVar:
+        return [
+          _namePicker(param, PageLogic.pageState(provider.selectedScreen?.properties ?? const {}).map((f) => f.name).toList(),
+              'Select the page and add page state in its Logic tab.')
+        ];
+      case ActionParamKind.page:
+        final target = provider.screens.where((s) => s.id == a['targetScreenId']).firstOrNull;
+        final params = target == null ? <FieldDef>[] : PageLogic.pageParams(target.properties);
+        final given = Map<String, dynamic>.from(a['params'] as Map? ?? {});
+        return [
+          EditorField(
+            label: param.label,
+            child: EditorDropdown<String>(
+              value: a['targetScreenId'] as String?,
+              items: provider.screens.map((s) => s.id).toList(),
+              hint: 'Choose a page',
+              label: (id) => '${provider.screens.firstWhere((s) => s.id == id).properties['pageName'] ?? 'Page'}',
+              onChanged: (id) => widget.onChanged({...a, 'targetScreenId': id, 'params': {}}),
+            ),
           ),
-          ..._availableScreens.map((s) => DropdownMenuItem(
-            value: s.id,
-            child: Text(s.properties['pageName'] ?? s.type),
-          )),
-        ],
-        onChanged: (val) {
-          setState(() {
-            _currentAction['targetScreenId'] = val;
-            if (val == '__back__') {
-              _currentAction['targetScreenName'] = 'Back';
-            } else {
-              _currentAction['targetScreenName'] = _availableScreens.firstWhere((s) => s.id == val).properties['pageName'];
-            }
-          });
-        },
-      );
-    }
-    
-    if (type.toString().startsWith('supabase_')) {
-      if (_availableTables.isEmpty) {
-        return const Text('No Supabase connection active. Please connect to Supabase first in the Data Sources tab.', style: TextStyle(color: Colors.redAccent));
-      }
-      
-      final tableDropdown = DropdownButtonFormField<String>(
-        value: _currentAction['tableName'],
-        dropdownColor: const Color(0xFF0F172A),
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        decoration: const InputDecoration(
-          labelText: 'Table Name',
-          labelStyle: TextStyle(color: Colors.white54),
-          filled: true,
-          fillColor: Color(0xFF0F172A),
-          border: OutlineInputBorder(),
-        ),
-        items: _availableTables.map((t) => DropdownMenuItem(
-          value: t.name,
-          child: Text(t.name),
-        )).toList(),
-        onChanged: (val) {
-          setState(() {
-            _currentAction['tableName'] = val;
-            _currentAction['payload'] = <String, dynamic>{}; // Reset payload when table changes
-          });
-        },
-      );
-      
-      if (type == 'supabase_delete') {
-         return Column(
-           crossAxisAlignment: CrossAxisAlignment.start,
-           children: [
-             tableDropdown,
-             const SizedBox(height: 16),
-             const Text('Note: Delete will act on the active row data passed from a list or query.', style: TextStyle(color: Colors.white54, fontSize: 12)),
-           ]
-         );
-      }
-      
-      // For Insert / Update, build the dynamic payload editor
-      final currentTable = _availableTables.cast<SupabaseTable?>().firstWhere((t) => t?.name == _currentAction['tableName'], orElse: () => null);
-      
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          tableDropdown,
-          const SizedBox(height: 20),
-          if (currentTable != null) ...[
-            const Text('Set Fields (Payload)', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            ...currentTable.columns.map((col) {
-              if (col.name == 'id' || col.name == 'created_at') return const SizedBox(); // Usually auto-generated
-              
-              final payloadData = _currentAction['payload'] as Map<String, dynamic>;
-              final valueObj = payloadData[col.name] as Map<String, dynamic>? ?? {'type': 'static', 'value': ''};
-              
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white12),
+          for (final p in params)
+            EditorField(
+              label: 'Parameter: ${p.name}${p.required ? ' *' : ''}',
+              child: ValuePicker(value: given[p.name], onChanged: (v) => _set('params', {...given, p.name: v})),
+            ),
+        ];
+      case ActionParamKind.apiCall:
+        final call = provider.logic.apiCallById(a['apiCallId'] as String?);
+        final vars = Map<String, dynamic>.from(a['variables'] as Map? ?? {});
+        return [
+          EditorField(
+            label: param.label,
+            help: provider.logic.apiCalls.isEmpty ? 'Create API calls in Logic › API Calls.' : null,
+            child: EditorDropdown<String>(
+              value: a['apiCallId'] as String?,
+              items: provider.logic.apiCalls.map((c) => c.id).toList(),
+              hint: 'Choose an API call',
+              label: (id) => provider.logic.apiCallById(id)?.name ?? id,
+              onChanged: (id) => widget.onChanged({...a, 'apiCallId': id, 'variables': {}}),
+            ),
+          ),
+          if (call != null)
+            for (final v in call.variables)
+              EditorField(label: 'Variable: ${v.name}', child: ValuePicker(value: vars[v.name], onChanged: (val) => _set('variables', {...vars, v.name: val}))),
+        ];
+      case ActionParamKind.customAction:
+        final actions = provider.logic.customCode.where((c) => c.kind == 'action').toList();
+        final fn = actions.where((c) => c.name == a['name']).firstOrNull;
+        final args = Map<String, dynamic>.from(a['args'] as Map? ?? {});
+        return [
+          EditorField(
+            label: param.label,
+            help: actions.isEmpty ? 'Write custom actions in Logic › Custom Code.' : null,
+            child: EditorDropdown<String>(
+              value: a['name'] as String?,
+              items: actions.map((c) => c.name).toList(),
+              hint: 'Choose a custom action',
+              label: (n) => n,
+              onChanged: (n) => widget.onChanged({...a, 'name': n, 'args': {}}),
+            ),
+          ),
+          if (fn != null)
+            for (final arg in fn.args)
+              EditorField(label: 'Argument: ${arg.name}', child: ValuePicker(value: args[arg.name], onChanged: (v) => _set('args', {...args, arg.name: v}))),
+        ];
+      case ActionParamKind.table:
+        final tables = provider.activeConnection?.tables ?? const [];
+        final table = tables.where((t) => t.name == a['tableName']).firstOrNull;
+        final payload = Map<String, dynamic>.from(a['payload'] as Map? ?? {});
+        return [
+          EditorField(
+            label: param.label,
+            help: tables.isEmpty ? 'Connect Supabase in the Data tab to pick a table.' : null,
+            child: tables.isEmpty
+                ? EditorTextInput(value: '${a['tableName'] ?? ''}', hint: 'table_name', onChanged: (v) => _set('tableName', v))
+                : EditorDropdown<String>(
+                    value: a['tableName'] as String?,
+                    items: tables.map((t) => t.name).toList(),
+                    hint: 'Choose a table',
+                    label: (t) => t,
+                    onChanged: (t) => widget.onChanged({...a, 'tableName': t, 'payload': {}}),
+                  ),
+          ),
+          if (table != null && a['type'] != 'supabase_delete') ...[
+            const EditorLabel('Row values'),
+            for (final column in table.columns.where((c) => c.name != 'id' && c.name != 'created_at'))
+              EditorField(
+                label: '${column.name} · ${column.dataType}',
+                child: ValuePicker(
+                  value: _payloadAsValue(payload[column.name]),
+                  onChanged: (v) => _set('payload', {...payload, column.name: v}),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(col.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: DropdownButtonFormField<String>(
-                            value: valueObj['type'],
-                            dropdownColor: const Color(0xFF1E293B),
-                            style: const TextStyle(color: Colors.white, fontSize: 12),
-                            decoration: const InputDecoration(
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                              border: OutlineInputBorder(),
-                            ),
-                            items: const [
-                              DropdownMenuItem(value: 'static', child: Text('Static Value')),
-                              DropdownMenuItem(value: 'widget_state', child: Text('Widget State')),
-                            ],
-                            onChanged: (val) {
-                              setState(() {
-                                payloadData[col.name] = {'type': val, 'value': ''};
-                                _currentAction['payload'] = payloadData;
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          flex: 2,
-                          child: valueObj['type'] == 'widget_state' ? Builder(
-                            builder: (context) {
-                              final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
-                              final screen = provider.selectedScreen;
-                              final inputs = screen != null ? _findInputNodes(screen) : <WidgetNode>[];
-                              
-                              if (inputs.isEmpty) {
-                                return const Text('No inputs on screen', style: TextStyle(color: Colors.white54, fontSize: 12));
-                              }
-                              
-                              // Check if current value exists in inputs, if not default to null
-                              final valObjValue = valueObj['value']?.toString();
-                              final bool valueExists = inputs.any((n) => n.id == valObjValue);
-                              
-                              return DropdownButtonFormField<String>(
-                                value: valueExists ? valObjValue : null,
-                                dropdownColor: const Color(0xFF1E293B),
-                                style: const TextStyle(color: Colors.white, fontSize: 13),
-                                decoration: const InputDecoration(
-                                  isDense: true,
-                                  hintText: 'Select Input',
-                                  hintStyle: TextStyle(color: Colors.white30),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                  border: OutlineInputBorder(),
-                                ),
-                                items: inputs.map((node) {
-                                  final label = node.properties['hintText'] ?? node.properties['labelText'] ?? 'TextField';
-                                  return DropdownMenuItem<String>(
-                                    value: node.id,
-                                    child: Text('$label (${node.id.substring(0, 4)})', overflow: TextOverflow.ellipsis),
-                                  );
-                                }).toList(),
-                                onChanged: (val) {
-                                  if (val != null) {
-                                    setState(() {
-                                      payloadData[col.name] = {'type': valueObj['type'], 'value': val};
-                                      _currentAction['payload'] = payloadData;
-                                    });
-                                  }
-                                },
-                              );
-                            }
-                          ) : TextField(
-                            controller: TextEditingController(text: valueObj['value'].toString()),
-                            style: const TextStyle(color: Colors.white, fontSize: 13),
-                            decoration: InputDecoration(
-                              isDense: true,
-                              hintText: 'Enter static value...',
-                              hintStyle: const TextStyle(color: Colors.white30),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                              border: const OutlineInputBorder(),
-                            ),
-                            onChanged: (val) {
-                              payloadData[col.name] = {'type': valueObj['type'], 'value': val};
-                              _currentAction['payload'] = payloadData;
-                            },
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              );
-            }).toList(),
-          ]
-        ],
-      );
+              ),
+          ],
+          if (a['type'] != 'supabase_insert')
+            const Text('Targets the row in the current list item, or the page’s idParam.', style: TextStyle(fontSize: 11, color: EditorColors.textFaint)),
+        ];
+      case ActionParamKind.condition:
+        return [
+          const EditorLabel('Condition'),
+          ConditionEditor(condition: a['condition'], onChanged: (c) => _set('condition', c)),
+          const SizedBox(height: 8),
+        ];
+      case ActionParamKind.actions:
+        final branch = (a[param.key] as List? ?? const []).whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+        return [
+          Container(
+            margin: const EdgeInsets.only(top: 4, bottom: 6),
+            padding: const EdgeInsets.fromLTRB(10, 6, 6, 4),
+            decoration: const BoxDecoration(border: Border(left: BorderSide(color: EditorColors.accent, width: 2))),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(param.label, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: EditorColors.accent)),
+                const SizedBox(height: 6),
+                ActionListEditor(actions: branch, depth: widget.depth + 1, onChanged: (list) => _set(param.key, list)),
+              ],
+            ),
+          ),
+        ];
     }
-    
-    return const SizedBox();
+  }
+
+  /// Converts the legacy payload format to a value map.
+  dynamic _payloadAsValue(dynamic entry) {
+    if (LogicValues.isValue(entry) || entry is! Map) return entry;
+    switch (entry['type']) {
+      case 'widget_state':
+        return {'source': 'widgetState', 'widgetId': entry['value'], 'widgetType': 'TextField'};
+      case 'query_data':
+        return {'source': 'queryField', 'field': entry['value']};
+    }
+    return LogicValues.literal(entry['value'] ?? '');
+  }
+
+  Widget _namePicker(ActionParamSpec param, List<String> names, String help) {
+    return EditorField(
+      label: param.label,
+      help: names.isEmpty ? help : null,
+      child: EditorDropdown<String>(
+        value: widget.action[param.key] as String?,
+        items: names,
+        hint: 'Choose…',
+        label: (n) => n,
+        onChanged: (n) => _set(param.key, n),
+      ),
+    );
+  }
+
+  String _summary(WidgetTreeProvider provider, Map<String, dynamic> a) {
+    switch (a['type']) {
+      case 'navigate':
+        final target = provider.screens.where((s) => s.id == a['targetScreenId']).firstOrNull;
+        return target == null ? 'Choose a page' : '→ ${target.properties['pageName'] ?? 'Page'}';
+      case 'updateAppState':
+      case 'updatePageState':
+        return a['name'] == null ? 'Choose a variable' : '${a['name']} · ${a['op'] ?? 'set'}${a['value'] != null ? ' ${LogicValues.describe(a['value'])}' : ''}';
+      case 'showSnackbar':
+        return LogicValues.describe(a['message']);
+      case 'conditional':
+        return 'If ${LogicValues.describeCondition(a['condition'])}';
+      case 'apiCall':
+        return provider.logic.apiCallById(a['apiCallId'] as String?)?.name ?? 'Choose an API call';
+      case 'wait':
+        return '${a['ms'] ?? 500} ms';
+      case 'launchUrl':
+        return LogicValues.describe(a['url']);
+      case 'supabase_insert':
+      case 'supabase_update':
+      case 'supabase_delete':
+        return '${a['tableName'] ?? 'Choose a table'}';
+      case 'customAction':
+        return '${a['name'] ?? 'Choose an action'}';
+    }
+    return '';
   }
 }

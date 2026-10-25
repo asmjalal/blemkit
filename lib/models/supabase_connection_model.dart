@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 class SupabaseConnection {
   final String id;
@@ -53,6 +52,10 @@ class SupabaseConnection {
       'tables': tables.map((t) => t.toJson()).toList(),
     };
   }
+
+  /// JSON safe to store in localStorage or the project row: never includes
+  /// the service-role key, which grants full access to the user's database.
+  Map<String, dynamic> toPersistedJson() => toJson()..remove('serviceRoleKey');
 
   SupabaseConnection copyWith({
     String? id,

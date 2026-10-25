@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
@@ -55,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: EditorColors.surfaceRaised,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
@@ -105,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         (_userData?['selectedAi'] as String? ?? 'deepseek').toUpperCase();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF040D1A),
+      backgroundColor: EditorColors.background,
       body: Stack(
         children: [
           // ── Background glows ──────────────────────────────────────────
@@ -133,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(colors: [
-                  const Color(0xFF0fadd5).withOpacity(0.15),
+                  EditorColors.accent.withOpacity(0.15),
                   Colors.transparent,
                 ]),
               ),
@@ -191,12 +192,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: const Color(0xFF0fadd5),
+                                          color: EditorColors.accent,
                                           width: 2.5,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: const Color(0xFF0fadd5)
+                                            color: EditorColors.accent
                                                 .withOpacity(0.3),
                                             blurRadius: 20,
                                           )
@@ -209,7 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                                 ? NetworkImage(user!.photoURL!)
                                                 : null,
                                         backgroundColor:
-                                            const Color(0xFF0fadd5),
+                                            EditorColors.accent,
                                         child: user?.photoURL == null
                                             ? Text(
                                                 (user?.displayName
@@ -235,7 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                         shape: BoxShape.circle,
                                         color: const Color(0xFF22C55E),
                                         border: Border.all(
-                                            color: const Color(0xFF040D1A),
+                                            color: EditorColors.background,
                                             width: 2),
                                       ),
                                     ),
@@ -345,14 +346,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 _loadingData
                                     ? const Center(
                                         child: CircularProgressIndicator(
-                                            color: Color(0xFF0fadd5),
+                                            color: EditorColors.accent,
                                             strokeWidth: 2))
                                     : _InfoRow(
                                         icon: Icons.auto_awesome,
                                         label: 'Active AI',
                                         value: selectedAi,
                                         valueColor:
-                                            const Color(0xFF0fadd5)),
+                                            EditorColors.accent),
                               ],
                             ),
                           ),
@@ -417,9 +418,9 @@ class _GlassCard extends StatelessWidget {
           width: double.infinity,
           padding: padding ?? const EdgeInsets.all(22),
           decoration: BoxDecoration(
-            color: const Color(0xFF0B1D3A).withOpacity(0.75),
+            color: EditorColors.surfaceHover.withOpacity(0.75),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFF1E3A6E), width: 1),
+            border: Border.all(color: EditorColors.border, width: 1),
           ),
           child: child,
         ),
@@ -438,7 +439,7 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: const TextStyle(
-        color: Color(0xFF38BDF8),
+        color: EditorColors.accent,
         fontSize: 11,
         fontWeight: FontWeight.w700,
         letterSpacing: 1.4,

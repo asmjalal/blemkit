@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../ui/editor_theme.dart';
+import 'canvas_preview_mode.dart';
 import 'package:provider/provider.dart';
 import 'package:dotted_border/dotted_border.dart';
 import '../../providers/widget_tree_provider.dart';
@@ -26,12 +28,13 @@ class SelectionPreferredSizeWrapper extends StatelessWidget implements Preferred
 
   @override
   Widget build(BuildContext context) {
+    if (CanvasPreviewMode.of(context)) return child;
     return Consumer<WidgetTreeProvider>(
       builder: (context, provider, _) {
         final isHovered = node.id == provider.hoveredNode?.id;
         final isSelected = provider.selectedNode?.id == node.id;
         final showBorder = isSelected || isHovered;
-        final borderColor = isSelected ? Colors.deepPurple : Colors.deepPurpleAccent;
+        final borderColor = isSelected ? EditorColors.selection : EditorColors.hover;
         final dashPattern = isSelected ? [6.0, 3.0] : [3.0, 3.0];
 
         Widget bordered = showBorder

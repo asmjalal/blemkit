@@ -32,9 +32,8 @@ class ElevatedButtonGenerator extends BaseWidgetGenerator {
     if (node.children.isNotEmpty) {
       child = '\n$childIndentStr child: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)},';
     } else if (node.properties['text'] != null) {
-      // Escape dollar signs in text
-      final textContent = node.properties['text'].toString().replaceAll('\$', '\\\$');
-      child = '\n$childIndentStr child: Text(\'$textContent\'),';
+      final textContent = node.properties['text'].toString();
+      child = '\n$childIndentStr child: Text(${dartString(textContent)}),';
     }
     
     return '${indentStr}ElevatedButton(${props.isNotEmpty ? '${props.join(', ')}${child.isNotEmpty ? ',' : ''}' : ''}$child\n$indentStr)';

@@ -23,7 +23,7 @@ class WidgetNode {
     // Manually handle the mapping to ensure nested widgets in properties 
     // are converted to WidgetNode objects, not left as raw Maps.
     final String id = json['id'] ?? UniqueKey().toString();
-    final String type = json['type'] ?? 'Unknown';
+    final String type = _legacyTypes[json['type']] ?? json['type'] ?? 'Unknown';
     
     final List<WidgetNode> children = [];
     if (json['children'] != null) {
@@ -49,6 +49,16 @@ class WidgetNode {
       properties: properties,
     );
   }
+
+  /// Palette names saved by older versions that never had a widget of their
+  /// own; they load as the widget that implements them now.
+  static const Map<String, String> _legacyTypes = {
+    'RadioButton': 'RadioGroup',
+    'CircleImage': 'Avatar',
+    'NetworkImage': 'Image',
+    'Dialog': 'AlertDialog',
+    'FAB': 'FloatingActionButton',
+  };
 
   static dynamic _normalizeProperty(dynamic value) {
     if (value is Map) {
@@ -85,6 +95,24 @@ class WidgetNode {
 
   WidgetNode copy() {
     return WidgetNode.fromJson(toJson());
+  }
+
+  /// Deep copy where this node and every nested node get fresh ids
+  /// (for paste and duplicate).
+  WidgetNode cloneWithNewIds() {
+    var counter = 0;
+    final stamp = DateTime.now().microsecondsSinceEpoch;
+    dynamic rewrite(dynamic value) {
+      if (value is Map) {
+        final map = value.map((k, v) => MapEntry(k.toString(), rewrite(v)));
+        if (map['type'] is String && map.containsKey('children')) map['id'] = 'w${stamp}_${counter++}';
+        return map;
+      }
+      if (value is List) return value.map(rewrite).toList();
+      return value;
+    }
+
+    return WidgetNode.fromJson(Map<String, dynamic>.from(rewrite(toJson()) as Map));
   }
 
   Map<String, dynamic>? get backendQuery {

@@ -9,7 +9,7 @@ class FormFieldGenerator extends BaseWidgetGenerator {
     final childIndentStr = getChildIndentStr(indent);
     
     final props = <String>[];
-    props.add('initialValue: \'${node.properties['initialValue'] ?? ''}\'');
+    props.add('initialValue: ${dartString(node.properties['initialValue'] ?? '')}');
     props.add('validator: (value) => null');
     props.add('onSaved: (value) {}');
     

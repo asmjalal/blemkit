@@ -1,6 +1,5 @@
 import 'base_widget_generator.dart';
 import '../models/widget_node.dart';
-import '../utils/property_converters.dart';
 
 class VerticalDividerGenerator extends BaseWidgetGenerator {
   @override

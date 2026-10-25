@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../ui/editor_theme.dart';
 
 Widget buildNumericPropertyField({
   required String label,
@@ -16,7 +17,7 @@ Widget buildNumericPropertyField({
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF94A3B8),
+              color: EditorColors.textMuted,
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -39,7 +40,7 @@ Widget buildNumericPropertyField({
                 child: Text(
                   unit,
                   style: const TextStyle(
-                    color: Color(0xFF94A3B8),
+                    color: EditorColors.textMuted,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -52,7 +53,7 @@ Widget buildNumericPropertyField({
       Container(
         height: 36,
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
+          color: EditorColors.surface,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),

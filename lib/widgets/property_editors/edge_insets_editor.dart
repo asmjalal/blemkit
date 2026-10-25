@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../ui/editor_theme.dart';
 
 class EdgeInsetsEditor extends StatelessWidget {
   final String label;
@@ -37,7 +38,7 @@ class EdgeInsetsEditor extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF94A3B8))),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: EditorColors.textMuted)),
         const SizedBox(height: 4),
         Center(
           child: Column(
@@ -242,7 +243,7 @@ class _VisualEdgeInsetsEditorState extends State<VisualEdgeInsetsEditor> {
     final boxSize = 100.0;
     final inputSize = 28.0;
     final borderRadius = 12.0;
-    final bgColor = const Color(0xFF1E293B); // Muted Tailwind slate color
+    final bgColor = EditorColors.surfaceRaised; // Muted Tailwind slate color
     final fgColor = Colors.white;
     final borderColor = Colors.grey.shade700;
     final inactiveColor = Colors.grey.shade500;

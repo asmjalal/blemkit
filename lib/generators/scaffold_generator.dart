@@ -90,6 +90,35 @@ class ScaffoldGenerator extends BaseWidgetGenerator {
       }
     }
     
-    return '${indentStr}Scaffold($backgroundColor$appBar$body$fab$drawer$endDrawer$bottomNavBar\n$indentStr)';
+    final isRoot = node.id == ProjectGenerator.currentScreenRootId;
+    final key = isRoot ? '\n$childIndentStr key: _scaffoldKey,' : '';
+    final scaffold = '${indentStr}Scaffold($key$backgroundColor$appBar$body$fab$drawer$endDrawer$bottomNavBar\n$indentStr)';
+    final tabCount = isRoot ? _tabCount(node) : null;
+    if (tabCount == null) return scaffold;
+    // TabBar/TabBarView on this page share one controller.
+    return '${indentStr}DefaultTabController(\n$childIndentStr length: $tabCount,\n$childIndentStr child: ${scaffold.trimLeft()},\n$indentStr)';
+  }
+
+  /// Number of tabs of the first TabBar (or TabBarView) on the page, if any.
+  int? _tabCount(WidgetNode root) {
+    int? found;
+    void visit(dynamic value) {
+      if (found != null) return;
+      if (value is WidgetNode) {
+        if (value.type == 'TabBar' || value.type == 'TabBarView') {
+          found = value.children.length;
+          return;
+        }
+        value.properties.values.forEach(visit);
+        value.children.forEach(visit);
+      } else if (value is Map && value['type'] is String) {
+        visit(WidgetNode.fromJson(Map<String, dynamic>.from(value)));
+      } else if (value is List) {
+        value.forEach(visit);
+      }
+    }
+
+    visit(root);
+    return found;
   }
 }

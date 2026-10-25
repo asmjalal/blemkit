@@ -22,11 +22,11 @@ class PaddingGenerator extends BaseWidgetGenerator {
       }
     }
     
-    String child = '';
-    if (node.children.isNotEmpty) {
-      child = '\n$childIndentStr child: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)},';
-    }
-    
-    return '${indentStr}Padding(\n$childIndentStr ${props.join(', ')},\n$childIndentStr $child\n$indentStr)';
+    if (props.isEmpty) props.add('padding: EdgeInsets.zero');
+    final child = node.children.isNotEmpty
+        ? WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1).trimLeft()
+        : 'const SizedBox.shrink()';
+
+    return '${indentStr}Padding(\n$childIndentStr ${props.join(', ')},\n$childIndentStr child: $child,\n$indentStr)';
   }
 } 

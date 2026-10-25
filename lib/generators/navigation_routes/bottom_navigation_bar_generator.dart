@@ -89,7 +89,7 @@ class BottomNavigationBarGenerator extends BaseWidgetGenerator {
             label = itemMap['label'].toString();
           }
           
-          itemsList.add('BottomNavigationBarItem(icon: $iconCode, label: \'$label\')');
+          itemsList.add('BottomNavigationBarItem(icon: $iconCode, label: ${dartString(label)})');
         }
       }
     }
@@ -99,7 +99,7 @@ class BottomNavigationBarGenerator extends BaseWidgetGenerator {
       itemsList = node.children.map((child) {
         return 'BottomNavigationBarItem('
           'icon: Icon(Icons.${child.properties['icon'] ?? 'home'}), '
-          'label: \'${child.properties['label'] ?? 'Item'}\''
+          'label: ${dartString(child.properties['label'] ?? 'Item')}'
           ')';
       }).toList();
     }

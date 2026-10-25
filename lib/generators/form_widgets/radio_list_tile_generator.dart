@@ -8,13 +8,13 @@ class RadioListTileGenerator extends BaseWidgetGenerator {
     final childIndentStr = getChildIndentStr(indent);
     
     final props = <String>[];
-    props.add('title: Text(\'${node.properties['title'] ?? 'Radio List Tile'}\')');
-    props.add('value: \'${node.properties['value'] ?? 'option1'}\'');
+    props.add('title: Text(${dartString(node.properties['title'] ?? 'Radio List Tile')})');
+    props.add('value: ${dartString(node.properties['value'] ?? 'option1')}');
     props.add('groupValue: \'option1\'');
     props.add('onChanged: (value) {}');
     
     if (node.properties['subtitle'] != null) {
-      props.add('subtitle: Text(\'${node.properties['subtitle']}\')');
+      props.add('subtitle: Text(${dartString(node.properties['subtitle'])})');
     }
     
     if (node.properties['activeColor'] != null) {

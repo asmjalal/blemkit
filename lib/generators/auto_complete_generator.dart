@@ -25,7 +25,7 @@ class AutoCompleteGenerator extends BaseWidgetGenerator {
            '${childIndent}    controller: controller,\n'
            '${childIndent}    focusNode: focusNode,\n'
            '${childIndent}    decoration: InputDecoration(\n'
-           '${childIndent}      hintText: \'$hintText\',\n'
+           '${childIndent}      hintText: ${dartString(hintText)},\n'
            '${childIndent}      suffixIcon: const Icon(Icons.arrow_drop_down),\n'
            '${childIndent}      border: const OutlineInputBorder(),\n'
            '${childIndent}    ),\n'

@@ -11,11 +11,11 @@ class AlertDialogGenerator extends BaseWidgetGenerator {
     final props = <String>[];
     
     if (node.properties['title'] != null) {
-      props.add('title: Text(\'${node.properties['title']}\')');
+      props.add('title: Text(${dartString(node.properties['title'])})');
     }
     
     if (node.properties['content'] != null) {
-      props.add('content: Text(\'${node.properties['content']}\')');
+      props.add('content: Text(${dartString(node.properties['content'])})');
     } else if (node.children.isNotEmpty) {
       props.add('content: ${WidgetGeneratorRegistry.generateCode(node.children.first, indent: indent + 1)}');
     }

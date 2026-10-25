@@ -10,7 +10,7 @@ class SnackBarGenerator extends BaseWidgetGenerator {
     final props = <String>[];
     
     if (node.properties['content'] != null) {
-      props.add('content: Text(\'${node.properties['content']}\')');
+      props.add('content: Text(${dartString(node.properties['content'])})');
     }
     
     if (node.properties['backgroundColor'] != null) {

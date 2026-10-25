@@ -20,7 +20,7 @@ void main() {
         home: ChangeNotifierProvider.value(
           value: provider,
           child: Scaffold(
-            body: WidgetBuilderFactory.buildWidget(null as dynamic, node, null),
+            body: Builder(builder: (context) => WidgetBuilderFactory.buildWidget(context, node, null)),
           ),
         ),
       ),
@@ -44,7 +44,7 @@ void main() {
           child: Scaffold(
             body: Column(
               children: [
-                WidgetBuilderFactory.buildWidget(null as dynamic, node, null),
+                Builder(builder: (context) => WidgetBuilderFactory.buildWidget(context, node, null)),
               ],
             ),
           ),

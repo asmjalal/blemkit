@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui/editor_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/widget_tree_provider.dart';
@@ -26,8 +27,11 @@ class _ProjectPreviewScreenState extends State<ProjectPreviewScreen> {
         provider.screens,
         provider.themeProperties,
         provider.themedWidgets,
+        appName: '${provider.projectSettings['projectName'] ?? 'GeneratedProject'}',
         connection: provider.activeConnection,
         queries: provider.queries,
+        logic: provider.logic,
+        components: provider.components,
       );
 
       // Auto-initialize selected file if null
@@ -39,8 +43,7 @@ class _ProjectPreviewScreenState extends State<ProjectPreviewScreen> {
       final activeScreen = provider.selectedScreen;
       if (activeScreen != null && activeScreen.id != _lastSelectedScreenId) {
         _lastSelectedScreenId = activeScreen.id;
-        final base = (activeScreen.properties['pageName'] ?? activeScreen.id).toString().toLowerCase();
-        final expectedFileName = 'lib/' + (base.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_') + '_screen.dart');
+        final expectedFileName = ProjectGenerator.screenFilePath(provider.screens, activeScreen);
         if (_projectFiles.containsKey(expectedFileName)) {
           _selectedFile = expectedFileName;
         }
@@ -48,9 +51,9 @@ class _ProjectPreviewScreenState extends State<ProjectPreviewScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: EditorColors.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: EditorColors.surface,
         title: const Text('Project Preview & Code', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -92,7 +95,7 @@ class _ProjectPreviewScreenState extends State<ProjectPreviewScreen> {
     return Container(
       width: 220,
       decoration: const BoxDecoration(
-        color: Color(0xFF0F172A),
+        color: EditorColors.surface,
         border: Border(right: BorderSide(color: Colors.white12)),
       ),
       child: Column(
@@ -156,13 +159,13 @@ class _ProjectPreviewScreenState extends State<ProjectPreviewScreen> {
     if (_selectedFile == null) return const Center(child: Text('Select a file to view code', style: TextStyle(color: Colors.white30)));
     
     return Container(
-      color: const Color(0xFF1E293B),
+      color: EditorColors.surfaceRaised,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: const Color(0xFF1E293B),
+            color: EditorColors.surfaceRaised,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -202,7 +205,7 @@ class _ProjectPreviewScreenState extends State<ProjectPreviewScreen> {
   Widget _buildLivePreview() {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF0F172A),
+        color: EditorColors.surface,
         border: Border(left: BorderSide(color: Colors.white12)),
       ),
       child: Column(

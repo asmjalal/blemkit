@@ -1,5 +1,6 @@
 import 'base_widget_generator.dart';
 import '../models/widget_node.dart';
+import '../utils/property_converters.dart';
 
 class StackGenerator extends BaseWidgetGenerator {
   @override
@@ -9,7 +10,7 @@ class StackGenerator extends BaseWidgetGenerator {
     
     final props = <String>[];
     if (node.properties['alignment'] != null) {
-      props.add('alignment: ${node.properties['alignment']}');
+      props.add('alignment: ${PropertyConverters.dartAlignment(node.properties['alignment'])}');
     }
     if (node.properties['fit'] != null) {
       props.add('fit: StackFit.${node.properties['fit']}');
@@ -17,6 +18,6 @@ class StackGenerator extends BaseWidgetGenerator {
     
     final children = generateChildren(node.children, indent: indent);
     
-    return '${indentStr}Stack(${props.join(', ')}$children\n$indentStr)';
+    return '${indentStr}Stack(${props.isEmpty ? '' : '${props.join(', ')},'}$children\n$indentStr)';
   }
 } 

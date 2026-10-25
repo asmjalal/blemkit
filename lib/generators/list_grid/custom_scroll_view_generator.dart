@@ -21,7 +21,7 @@ class CustomScrollViewGenerator extends BaseWidgetGenerator {
       String sliverCode;
       switch (child.type) {
         case 'SliverAppBar':
-          sliverCode = 'SliverAppBar(title: Text(\'${child.properties['title'] ?? 'App Bar'}\'))';
+          sliverCode = 'SliverAppBar(title: Text(${dartString(child.properties['title'] ?? 'App Bar')}))';
           break;
         case 'SliverList':
           sliverCode = 'SliverList(delegate: SliverChildListDelegate([Container()]))';

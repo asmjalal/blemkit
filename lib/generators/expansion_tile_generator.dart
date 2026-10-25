@@ -8,7 +8,7 @@ class ExpansionTileGenerator extends BaseWidgetGenerator {
     final childIndentStr = getChildIndentStr(indent);
     
     final props = <String>[];
-    props.add('title: Text(\'${node.properties['title'] ?? 'Expansion Tile'}\')');
+    props.add('title: Text(${dartString(node.properties['title'] ?? 'Expansion Tile')})');
     
     final children = generateChildren(node.children, indent: indent);
     

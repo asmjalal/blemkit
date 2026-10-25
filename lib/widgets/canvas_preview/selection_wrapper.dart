@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../ui/editor_theme.dart';
+import 'canvas_preview_mode.dart';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import '../../providers/widget_tree_provider.dart';
@@ -22,14 +24,15 @@ class WidgetSelectionWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<WidgetTreeProvider>(context, listen: false);
+    // In Test mode taps belong to the app, not to selection.
+    if (CanvasPreviewMode.of(context)) return child;
     
     return Consumer<WidgetTreeProvider>(
       builder: (context, provider, _) {
         final isHovered = node.id == provider.hoveredNode?.id;
         final isSelected = provider.selectedNode?.id == node.id;
         final showBorder = isSelected || isHovered;
-        final borderColor = isSelected ? Colors.deepPurple : Colors.deepPurpleAccent;
+        final borderColor = isSelected ? EditorColors.selection : EditorColors.hover;
         final borderWidth = isSelected ? 2.0 : 1.0;
 
         Widget bordered = showBorder
